@@ -2,7 +2,7 @@
 #include <math.h>
 #include "geometry.h"
 
-void initMatrix(float * matrix)
+void init(float * matrix)
 {
 	matrix[0] = 1.0f;
 	matrix[1] = 0.0f;
@@ -25,7 +25,50 @@ void initMatrix(float * matrix)
 	matrix[15] = 1.0f;
 }
 
-void matProd(float * a, float * b, float * c)
+void prod(float * a, float * b)
+{
+	float c0 = a[0] * b[0] +  a[1] * b[4] +  a[2] * b[8] +  a[3] * b[12];
+	float c1 = a[0] * b[1] +  a[1] * b[5] +  a[2] * b[9] +  a[3] * b[13];
+	float c2 = a[0] * b[2] +  a[1] * b[6] +  a[2] * b[10] +  a[3] * b[14];
+	float c3 = a[0] * b[3] +  a[1] * b[7] +  a[2] * b[11] +  a[3] * b[15];
+
+	float c4 = a[4] * b[0] +  a[5] * b[4] +  a[6] * b[8] +  a[7] * b[12];
+	float c5 = a[4] * b[1] +  a[5] * b[5] +  a[6] * b[9] +  a[7] * b[13];
+	float c6 = a[4] * b[2] +  a[5] * b[6] +  a[6] * b[10] +  a[7] * b[14];
+	float c7 = a[4] * b[3] +  a[5] * b[7] +  a[6] * b[11] +  a[7] * b[15];
+
+	float c8 = a[8] * b[0] +  a[9] * b[4] +  a[10] * b[8] +  a[11] * b[12];
+	float c9 = a[8] * b[1] +  a[9] * b[5] +  a[10] * b[9] +  a[11] * b[13];
+	float c10 = a[8] * b[2] +  a[9] * b[6] +  a[10] * b[10] +  a[11] * b[14];
+	float c11 = a[8] * b[3] +  a[9] * b[7] +  a[10] * b[11] +  a[11] * b[15];
+
+	float c12 = a[12] * b[0] +  a[13] * b[4] +  a[14] * b[8] +  a[15] * b[12];
+	float c13 = a[12] * b[1] +  a[13] * b[5] +  a[14] * b[9] +  a[15] * b[13];
+	float c14 = a[12] * b[2] +  a[13] * b[6] +  a[14] * b[10] +  a[15] * b[14];
+	float c15 = a[12] * b[3] +  a[13] * b[7] +  a[14] * b[11] +  a[15] * b[15];
+
+	a[0] = c0;
+	a[1] = c1;
+	a[2] = c2;
+	a[3] = c3;
+
+	a[4] = c4;
+	a[5] = c5;
+	a[6] = c6;
+	a[7] = c7;
+
+	a[8] = c8;
+	a[9] = c9;
+	a[10] = c10;
+	a[11] = c11;
+
+	a[12] = c12;
+	a[13] = c13;
+	a[14] = c14;
+	a[15] = c15;
+}
+
+void prod(float * a, float * b, float * c)
 {
 	c[0] = a[0] * b[0] +  a[1] * b[4] +  a[2] * b[8] +  a[3] * b[12];
 	c[1] = a[0] * b[1] +  a[1] * b[5] +  a[2] * b[9] +  a[3] * b[13];
@@ -56,12 +99,7 @@ void rotX(float * mat, float a)
 		0.0f, sinf(a), cosf(a), 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
 	};
-	float mat2[16];
-	matProd(mat, mat1, mat2);
-	for (int i = 0; i < 16; i++)
-	{
-		mat[i] = mat2[i];
-	}
+	prod(mat, mat1);
 }
 
 void rotY(float * mat, float a)
@@ -72,12 +110,7 @@ void rotY(float * mat, float a)
 		-sinf(a), 0.0f, cosf(a), 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
 	};
-	float mat2[16];
-	matProd(mat, mat1, mat2);
-	for (int i = 0; i < 16; i++)
-	{
-		mat[i] = mat2[i];
-	}
+	prod(mat, mat1);
 }
 
 void rotZ(float * mat, float a)
@@ -88,12 +121,7 @@ void rotZ(float * mat, float a)
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
 	};
-	float mat2[16];
-	matProd(mat, mat1, mat2);
-	for (int i = 0; i < 16; i++)
-	{
-		mat[i] = mat2[i];
-	}
+	prod(mat, mat1);
 }
 
 void move(float * mat, float x, float y, float z)
@@ -104,12 +132,7 @@ void move(float * mat, float x, float y, float z)
 		0.0f, 0.0f, 1.0f, 0.0f,
 		x, y, z, 1.0f,
 	};
-	float mat2[16];
-	matProd(mat, mat1, mat2);
-	for (int i = 0; i < 16; i++)
-	{
-		mat[i] = mat2[i];
-	}
+	prod(mat, mat1);
 }
 
 void proj(float * mat, float width, float height, float depth)
@@ -120,23 +143,17 @@ void proj(float * mat, float width, float height, float depth)
 		0.0f, 0.0f, 1.0f / depth, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f,
 	};
-	float mat2[16];
-	matProd(mat, mat1, mat2);
-	float mat3[16] = {
+	prod(mat, mat1);
+	float mat2[16] = {
 		1.0f, 0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f, 0.0f,
 		0.0f, 0.0f, 1.0f, 1.0f,
 		0.0f, 0.0f, -1.0f, 1.0f,
 	};
-	float mat4[16];
-	matProd(mat2, mat3, mat4);
-	for (int i = 0; i < 16; i++)
-	{
-		mat[i] = mat4[i];
-	}
+	prod(mat, mat2);
 }
 
-void xyz2abc(float * xyz, float * abc, int offset)
+void norm(float * xyz, float * abc, int offset)
 {
 	float dx1 = xyz[offset + 3] - xyz[offset + 0];
 	float dx2 = xyz[offset + 6] - xyz[offset + 0];

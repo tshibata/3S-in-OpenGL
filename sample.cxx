@@ -366,11 +366,11 @@ GLboolean initiate()
 
 	for (int i = 0; i < 10; i ++)
 	{
-		xyz2abc(starXYZ, starABC, 9 * i);
+		norm(starXYZ, starABC, 9 * i);
 	}
 	for (int i = 0; i < 2; i ++)
 	{
-		xyz2abc(earthXYZ, earthABC, 9 * i);
+		norm(earthXYZ, earthABC, 9 * i);
 	}
 
 	glGenVertexArrays(1, & vao);
@@ -487,10 +487,10 @@ GLboolean update()
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
 
 	GLfloat lightingMatrix[16];
-	initMatrix(lightingMatrix);
+	init(lightingMatrix);
 
 	GLfloat framingMatrix[16];
-	initMatrix(framingMatrix);
+	init(framingMatrix);
 
 	GLfloat objectLightingMatrix[16];
 	GLfloat objectFramingMatrix[16];
@@ -519,11 +519,11 @@ GLboolean update()
 	// draw the stars
 	for (int i = 0; i < 2; i++)
 	{
-		initMatrix(objectMatrix);
+		init(objectMatrix);
 		rotY(objectMatrix, i - angle1);
 		move(objectMatrix, cosf(i - angle2) * 2.0, 0.0f, 3.0f + sinf(i - angle2) * 2.0);
 
-		matProd(objectMatrix, lightingMatrix, objectLightingMatrix);
+		prod(objectMatrix, lightingMatrix, objectLightingMatrix);
 
 		glBindAttribLocation(shadowProgram, 0, "xyz0");
 
@@ -577,12 +577,12 @@ GLboolean update()
 	// draw the stars
 	for (int i = 0; i < 2; i++)
 	{
-		initMatrix(objectMatrix);
+		init(objectMatrix);
 		rotY(objectMatrix, i - angle1);
 		move(objectMatrix, cosf(i - angle2) * 2.0, 0.0f, 3.0f + sinf(i - angle2) * 2.0);
 
-		matProd(objectMatrix, lightingMatrix, objectLightingMatrix);
-		matProd(objectMatrix, framingMatrix, objectFramingMatrix);
+		prod(objectMatrix, lightingMatrix, objectLightingMatrix);
+		prod(objectMatrix, framingMatrix, objectFramingMatrix);
 
 		glUniformMatrix4fv(glGetUniformLocation(solidProgram, "fmat"), 1, GL_FALSE, objectFramingMatrix);
 		glUniformMatrix4fv(glGetUniformLocation(solidProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
@@ -624,12 +624,12 @@ GLboolean update()
 	// draw the stars
 	for (int i = 2; i < 4; i++)
 	{
-		initMatrix(objectMatrix);
+		init(objectMatrix);
 		rotY(objectMatrix, i - angle1);
 		move(objectMatrix, cosf(i - angle2) * 2.0, 0.0f, 3.0f + sinf(i - angle2) * 2.0);
 
-		matProd(objectMatrix, lightingMatrix, objectLightingMatrix);
-		matProd(objectMatrix, framingMatrix, objectFramingMatrix);
+		prod(objectMatrix, lightingMatrix, objectLightingMatrix);
+		prod(objectMatrix, framingMatrix, objectFramingMatrix);
 
 		glUniformMatrix4fv(glGetUniformLocation(screenProgram, "fmat"), 1, GL_FALSE, objectFramingMatrix);
 		glUniformMatrix4fv(glGetUniformLocation(screenProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
