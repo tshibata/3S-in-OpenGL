@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include <png.h>
+#include <vector>
 #include <platform.h>
 #include "common.h"
 #include "geometry.h"
@@ -241,50 +243,6 @@ static GLfloat starUV2[] = {
   0.0f + 0.125f, 0.125f,
 };
 
-static unsigned char textureData1[] = {
-	0, 200, 0, 255,
-	0, 200, 200, 255,
-	0, 0, 200, 255,
-	200, 0, 200, 255,
-
-	200, 0, 0, 255,
-	200, 200, 200, 255,
-	200, 200, 200, 255,
-	200, 200, 200, 255,
-
-	0, 0, 0, 255,
-	200, 200, 200, 255,
-	250, 250, 250, 255,
-	200, 200, 200, 255,
-
-	0, 0, 0, 255,
-	200, 200, 200, 255,
-	200, 200, 200, 255,
-	200, 200, 200, 255,
-};
-
-static unsigned char textureData2[] = {
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-
-	200, 200, 100, 255,
-	250, 250, 200, 255,
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-	200, 200, 100, 255,
-};
-
 static GLboolean initShader(GLuint shader, const GLchar * * source)
 {
 	int status;
@@ -348,6 +306,63 @@ GLuint initProgram(const GLchar * * vertSource, const GLchar * * fragSource)
 	glDeleteShader(fragShader);
 
 	return program;
+}
+
+void readPNG(const char * path)
+{
+	png_byte sig[8];
+	png_structp png;
+	png_infop info;
+	FILE * fp = fopen(path, "rb");
+	if (! fp)
+	{
+		exit(1); // failed to open
+	}
+	if (fread(sig, sizeof(png_byte), sizeof(sig), fp) != sizeof(sig))
+	{
+		exit(2); // no signature
+	}
+	if (png_sig_cmp(sig, 0, sizeof(sig)) != 0)
+	{
+		exit(3); // wrong signature
+	}
+	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+	if (png == nullptr) {
+		exit(4); // failed because of memory or whatever
+	}
+	info = png_create_info_struct(png);
+	if (info == nullptr) {
+		exit(5); // failed because of memory or whatever
+	}
+	png_init_io(png, fp);
+	png_set_sig_bytes(png, sizeof(sig));
+	int xform = PNG_TRANSFORM_PACKING | PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_EXPAND;
+	png_read_png(png, info, xform, nullptr);
+	int width = png_get_image_width(png, info);
+	int height = png_get_image_height(png, info);
+	png_bytepp rows = png_get_rows(png, info);
+	int rowbytes = png_get_rowbytes(png, info);
+	std::vector<unsigned char> buf;
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < rowbytes; j++)
+		{
+			buf.push_back(rows[i][j]);
+		}
+	}
+	switch (png_get_color_type(png, info))
+	{
+	case PNG_COLOR_TYPE_RGB:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, buf.data());
+	break;
+	case PNG_COLOR_TYPE_RGB_ALPHA:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf.data());
+	break;
+	default:
+		exit(6); // unsupported format
+	}
+	png_destroy_read_struct(& png, & info, nullptr);
+	fclose(fp);
 }
 
 static GLuint vao;
@@ -414,13 +429,13 @@ GLboolean initiate()
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex[1]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData1);
+	readPNG("../flat.png");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, tex[2]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 4, 4, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData2);
+	readPNG("../bump.png");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
