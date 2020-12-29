@@ -1,8 +1,17 @@
 
 CFLAGS = -I. -lstdc++ -lstdc++fs -lpng -lGL -lGLEW -lglfw
 
-run: sample.exe
+run: sample.exe ../earth.u-a.txt ../solid.u-a.txt ../screen.u-a.txt
 	./sample.exe
+
+../earth.u-a.txt: ../earth.u-z.txt
+	ruby ../norm.rb ../earth.u-z.txt ../earth.u-a.txt
+
+../solid.u-a.txt: ../solid.u-z.txt
+	ruby ../norm.rb ../solid.u-z.txt ../solid.u-a.txt
+
+../screen.u-a.txt: ../screen.u-z.txt
+	ruby ../norm.rb ../screen.u-z.txt ../screen.u-a.txt
 
 sample.exe: platform.c ../sample.cxx ../geometry.cxx
 	g++ -o sample.exe platform.c ../sample.cxx ../geometry.cxx ${CFLAGS}

@@ -2,7 +2,11 @@
 #include <math.h>
 #include <time.h>
 #include <png.h>
+#include <string>
 #include <vector>
+#include <regex>
+#include <iostream>
+#include <fstream>
 #include <platform.h>
 #include "common.h"
 #include "geometry.h"
@@ -86,162 +90,6 @@ void main() {
 	a = 1.0 / (a + 1.0);
 	gl_FragColor = vec4(texture(tex1, uv1).rgb * a, 1.0);
 })";
-
-static GLfloat earthABC[18];
-static GLfloat earthXYZ[18] = {
-	-9.9f, -1.0567f, -1.9f,
-	-9.9f, -1.0567f, 9.9f,
-	9.9f, -1.0567f, -1.9f,
-
-	9.9f, -1.0567f, 9.9f,
-	9.9f, -1.0567f, -1.9f,
-	-9.9f, -1.0567f, 9.9f,
-};
-static GLfloat earthUV[] = {
-  0.25f, 0.25f,
-  0.25f, 1.0f,
-  1.0f, 0.25f,
-
-  1.0f, 1.0f,
-  1.0f, 0.25f,
-  0.25f, 1.0f,
-};
-
-static GLfloat starABC[90];
-/*
-sin 72 = 0.951
-cos 72 = 0.309
-sin 36 = 0.588
-cos 36 = 0.809
-*/
-static GLfloat starXYZ[90] = {
-  0.0f,  0.0f, 0.3f,
-  0.0f,  1.0f, 0.0f,
-  -0.588f, -0.809f, 0.0f,
-
-  0.0f,  0.0f, 0.3f,
-  -0.588f, -0.809f, 0.0f,
-  0.951f,  0.309f, 0.0f,
-
-  0.0f,  0.0f, 0.3f,
-  0.951f,  0.309f, 0.0f,
-  -0.951f,  0.309f, 0.0f,
-
-  0.0f,  0.0f, 0.3f,
-  -0.951f,  0.309f, 0.0f,
-  0.588f, -0.809f, 0.0f,
-
-  0.0f,  0.0f, 0.3f,
-  0.588f, -0.809f, 0.0f,
-  0.0f,  1.0f, 0.0f,
-
-
-  0.0f,  0.0f, -0.3f,
-  -0.588f, -0.809f, 0.0f,
-  0.0f,  1.0f, 0.0f,
-
-  0.0f,  0.0f, -0.3f,
-  0.951f,  0.309f, 0.0f,
-  -0.588f, -0.809f, 0.0f,
-
-  0.0f,  0.0f, -0.3f,
-  -0.951f,  0.309f, 0.0f,
-  0.951f,  0.309f, 0.0f,
-
-  0.0f,  0.0f, -0.3f,
-  0.588f, -0.809f, 0.0f,
-  -0.951f,  0.309f, 0.0f,
-
-  0.0f,  0.0f, -0.3f,
-  0.0f,  1.0f, 0.0f,
-  0.588f, -0.809f, 0.0f,
-};
-
-static GLfloat starUV1[] = {
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-
-  10.0f, 10.0f,
-  10.0f, 0.0f,
-  0.0f, 10.0f,
-};
-
-static GLfloat starUV2[] = {
-  0.0f + 0.125f, 0.125f,
-  0.0f + 0.125f, 0.125f,
-  0.0f + 0.125f, 0.125f,
-
-  0.25f + 0.125f, 0.125f,
-  0.25f + 0.125f, 0.125f,
-  0.25f + 0.125f, 0.125f,
-
-  0.5f + 0.125f, 0.125f,
-  0.5f + 0.125f, 0.125f,
-  0.5f + 0.125f, 0.125f,
-
-  0.75f + 0.125, 0.125f,
-  0.75f + 0.125, 0.125f,
-  0.75f + 0.125, 0.125f,
-
-  0.0f + 0.125f, 0.25f + 0.125f,
-  0.0f + 0.125f, 0.25f + 0.125f,
-  0.0f + 0.125f, 0.25f + 0.125f,
-
-
-  0.25f + 0.125f, 0.125f,
-  0.25f + 0.125f, 0.125f,
-  0.25f + 0.125f, 0.125f,
-
-  0.5f + 0.125f, 0.125f,
-  0.5f + 0.125f, 0.125f,
-  0.5f + 0.125f, 0.125f,
-
-  0.75f + 0.125, 0.125f,
-  0.75f + 0.125, 0.125f,
-  0.75f + 0.125, 0.125f,
-
-  0.0f + 0.125f, 0.25f + 0.125f,
-  0.0f + 0.125f, 0.25f + 0.125f,
-  0.0f + 0.125f, 0.25f + 0.125f,
-
-  0.0f + 0.125f, 0.125f,
-  0.0f + 0.125f, 0.125f,
-  0.0f + 0.125f, 0.125f,
-};
 
 static GLboolean initShader(GLuint shader, const GLchar * * source)
 {
@@ -365,8 +213,51 @@ void readPNG(const char * path)
 	fclose(fp);
 }
 
+void readTxt(std::string name, GLuint vboIndex)
+{
+	static std::regex empty("^\\W*$");
+	static std::regex point("^\\W*u:(.*)\\W+v:(.*)\\W+x:(.*)\\W+y:(.*)\\W+z:(.*)\\W+a:(.*)\\W+b:(.*)\\W+c:(.*)\\W*$");
+
+	std::vector<float> vec;
+
+	std::fstream f;
+	f.open(name, std::ios_base::in);
+
+	std::string line;
+	std::smatch match;
+	while (std::getline(f, line, '\n'))
+	{
+		if (regex_match(line, match, empty))
+		{
+			// nothing to do
+		}
+		else if (regex_match(line, match, point))
+		{
+			vec.push_back(std::stof(match[1]));
+			vec.push_back(std::stof(match[2]));
+
+			vec.push_back(std::stof(match[3]));
+			vec.push_back(std::stof(match[4]));
+			vec.push_back(std::stof(match[5]));
+
+			vec.push_back(std::stof(match[6]));
+			vec.push_back(std::stof(match[7]));
+			vec.push_back(std::stof(match[8]));
+		}
+		else
+		{
+			exit(1);
+		}
+	}
+
+	f.close();
+
+	glBindBuffer(GL_ARRAY_BUFFER, vboIndex);
+	glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(float), vec.data(), GL_STATIC_DRAW);
+}
+
 static GLuint vao;
-static GLuint vbo[7]; // xyz, abc, uv, uv, xyz, abc, uv
+static GLuint vbo[3]; // earth, solid and screen
 static GLuint tex[3]; // shadow and 2 surfaces
 static GLuint shadowProgram;
 static GLuint solidProgram;
@@ -379,37 +270,15 @@ GLboolean initiate()
 {
 	GLboolean result;
 
-	for (int i = 0; i < 10; i ++)
-	{
-		norm(starXYZ, starABC, 9 * i);
-	}
-	for (int i = 0; i < 2; i ++)
-	{
-		norm(earthXYZ, earthABC, 9 * i);
-	}
-
 	glGenVertexArrays(1, & vao);
 
-	glGenBuffers(7, vbo);
+	glGenBuffers(3, vbo);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(starXYZ), starXYZ, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(starABC), starABC, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(starUV1), starUV1, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(starUV2), starUV2, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(earthXYZ), earthXYZ, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(earthABC), earthABC, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(earthUV), earthUV, GL_STATIC_DRAW);
+	readTxt("../solid.u-a.txt", vbo[0]);
+	readTxt("../screen.u-a.txt", vbo[1]);
+	readTxt("../earth.u-a.txt", vbo[2]);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 
 	glGenTextures(3, tex);
 
@@ -459,7 +328,7 @@ GLboolean initiate()
 
 void terminate()
 {
-	glDeleteBuffers(7, vbo);
+	glDeleteBuffers(3, vbo);
 	glDeleteVertexArrays(1, & vao);
 	if (shadowProgram != 0)
 	{
@@ -545,7 +414,7 @@ GLboolean update()
 		glUniformMatrix4fv(glGetUniformLocation(shadowProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
 
 		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
 	}
@@ -576,16 +445,16 @@ GLboolean update()
 	glUniform1i(glGetUniformLocation(solidProgram, "tex1"), 1); // TBD better rename?
 
 	glBindAttribLocation(solidProgram, 0, "xyz0");
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[4]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
 
 	glBindAttribLocation(solidProgram, 1, "norm");
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
 
 	glBindAttribLocation(solidProgram, 2, "uv0");
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 3 * 2);
 
@@ -607,15 +476,15 @@ GLboolean update()
 
 		glBindAttribLocation(solidProgram, 0, "xyz0");
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
 
 		glBindAttribLocation(solidProgram, 1, "norm");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
 
 		glBindAttribLocation(solidProgram, 2, "uv0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
 	}
@@ -652,16 +521,16 @@ GLboolean update()
 		glUniform1i(glGetUniformLocation(screenProgram, "tex1"), 1);
 
 		glBindAttribLocation(screenProgram, 0, "xyz0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
 
 		glBindAttribLocation(screenProgram, 1, "norm");
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
 
 		glBindAttribLocation(screenProgram, 2, "uv0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
 		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
 	}

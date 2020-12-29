@@ -153,16 +153,4 @@ void proj(float * mat, float width, float height, float depth)
 	prod(mat, mat2);
 }
 
-void norm(float * xyz, float * abc, int offset)
-{
-	float dx1 = xyz[offset + 3] - xyz[offset + 0];
-	float dx2 = xyz[offset + 6] - xyz[offset + 0];
-	float dy1 = xyz[offset + 4] - xyz[offset + 1];
-	float dy2 = xyz[offset + 7] - xyz[offset + 1];
-	float dz1 = xyz[offset + 5] - xyz[offset + 2];
-	float dz2 = xyz[offset + 8] - xyz[offset + 2];
-	abc[offset + 0] = abc[offset + 3] = abc[offset + 6] = -(dy1 * dz2 - dz1 * dy2);
-	abc[offset + 1] = abc[offset + 4] = abc[offset + 7] = -(dz1 * dx2 - dx1 * dz2);
-	abc[offset + 2] = abc[offset + 5] = abc[offset + 8] = -(dx1 * dy2 - dy1 * dx2);	
-}
 
