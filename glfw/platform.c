@@ -9,6 +9,55 @@ void errorHandler(int code, const char * description)
     fprintf(stderr, "Error %d: %s\n", code, description);
 }
 
+void scroll(GLFWwindow * window, double dx, double dy)
+{
+	double x, y;
+	glfwGetCursorPos(window, & x, & y);
+	wheelMoved(dy, x, y);
+}
+
+void click(GLFWwindow * window, int button, int action, int modifier)
+{
+	double x, y;
+	glfwGetCursorPos(window, & x, & y);
+	switch (button)
+	{
+		case GLFW_MOUSE_BUTTON_1:
+		switch (action)
+		{
+			case GLFW_PRESS:
+				buttonPressed(-1, x, y);
+				break;
+			case GLFW_RELEASE:
+				buttonReleased(-1, x, y);
+				break;
+		}
+		break;
+		case GLFW_MOUSE_BUTTON_2:
+		switch (action)
+		{
+			case GLFW_PRESS:
+				buttonPressed(1, x, y);
+				break;
+			case GLFW_RELEASE:
+				buttonReleased(1, x, y);
+				break;
+		}
+		break;
+		case GLFW_MOUSE_BUTTON_3:
+		switch (action)
+		{
+			case GLFW_PRESS:
+				buttonPressed(0, x, y);
+				break;
+			case GLFW_RELEASE:
+				buttonReleased(0, x, y);
+				break;
+		}
+		break;
+	}
+}
+
 int main(int argc, char * * argv)
 {
 	if (glfwInit() == GL_FALSE) {
@@ -32,8 +81,14 @@ int main(int argc, char * * argv)
 	{
 		return 4;
 	}
+
+	glfwSetScrollCallback(window, scroll);
+	glfwSetMouseButtonCallback(window, click);
+
 	while (glfwWindowShouldClose(window) == GL_FALSE) {
-		if (! update())
+		double x, y;
+		glfwGetCursorPos(window, & x, & y);
+		if (! update(x, y))
 		{
 			break;
 		}

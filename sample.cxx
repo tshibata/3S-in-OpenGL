@@ -347,8 +347,26 @@ void terminate()
 static int frame = 0;
 static float angle1 = 0.0;
 static float angle2 = 0.0;
+static float prevX = -1.0;
+static float prevY = -1.0;
+static double speed = 0.0;
 
-GLboolean update()
+void buttonPressed(int pos, float x, float y)
+{
+	printf("buttonPressed %d\n", pos);
+}
+
+void buttonReleased(int pos, float x, float y)
+{
+	printf("buttonReleased %d\n", pos);
+}
+
+void wheelMoved(float d, float x, float y)
+{
+	printf("wheelMoved %f\n", d);
+}
+
+GLboolean update(float x, float y)
 {
 	struct timespec t1;
 	clock_gettime(CLOCK_MONOTONIC, & t1);
@@ -360,6 +378,27 @@ GLboolean update()
 	double dt = t1.tv_sec - t0.tv_sec + (t1.tv_nsec - t0.tv_nsec) * 0.000000001L;
 	t0 = t1;
 	frame++;
+
+	if (0 <= prevX && prevX < 512 && 0 <= x && x < 512
+	 && 0 <= prevY && prevY < 512 && 0 <= y && y < 512
+	 && speed < prevX - x)
+	{ // when mouse pointer moved inside the area, faster than stars
+		speed = (prevX - x) / dt;
+		if (1000 < speed)
+		{
+			speed = 1000; // speed limit
+		}
+	}
+	else
+	{
+		speed = speed - dt * 500;
+		if (speed < 0)
+		{
+			speed = 0; // no rewind
+		}
+	}
+	prevX = x;
+	prevY = y;
 
 	GLint target;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, & target);
@@ -388,10 +427,8 @@ GLboolean update()
 
 	GLfloat objectMatrix[16];
 
-
-	angle1 += 1.3 * dt / 1;
-	angle2 += 0.2 * dt / 1;
-
+	angle1 += 0.029 * speed * dt;
+	angle2 += 0.005 * speed * dt;
 
 	// shadow
 

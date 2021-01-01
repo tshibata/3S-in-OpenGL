@@ -27,6 +27,18 @@ static void unrealize(GtkWidget * widget)
 	terminate();
 }
 
+static void get_pointer_position(GtkGLArea * area, gint * x, gint * y)
+{
+	GdkDisplay * display = gtk_widget_get_display((GtkWidget *) area);
+	GdkSeat * seat = gdk_display_get_default_seat(display);
+	GdkDevice * device = gdk_seat_get_pointer(seat);
+	gint x0, y0, x1, y1;
+	gdk_window_get_origin(gtk_widget_get_window(GTK_WIDGET(area)), & x0, & y0);
+	gdk_device_get_position(device, NULL, & x1, & y1);
+	* x = x1 - x0;
+	* y = y1 - y0;
+}
+
 static gboolean render(GtkGLArea * area, GdkGLContext * context)
 {
 	if (gtk_gl_area_get_error(area) != NULL)
@@ -34,7 +46,10 @@ static gboolean render(GtkGLArea * area, GdkGLContext * context)
 		return FALSE;
 	}
 
-	if (! update())
+	gint x, y;
+	get_pointer_position(area, & x, & y);
+
+	if (! update(x, y))
 	{
 		return FALSE;
 	}
@@ -42,6 +57,52 @@ static gboolean render(GtkGLArea * area, GdkGLContext * context)
 	gtk_widget_queue_draw(GTK_WIDGET(area));
 
 	return TRUE;
+}
+
+static void press(GtkGLArea * area, GdkEventButton * event, void * data)
+{
+	gint x, y;
+	get_pointer_position(area, & x, & y);
+	switch (event->button)
+	{
+	case 1:
+		buttonPressed(- 1, 0, 0);
+		break;
+	case 2:
+		buttonPressed(0, 0, 0);
+		break;
+	case 3:
+		buttonPressed(1, 0, 0);
+		break;
+	}
+}
+
+static void release(GtkGLArea * area, GdkEventButton * event, void * data)
+{
+	gint x, y;
+	get_pointer_position(area, & x, & y);
+	switch (event->button)
+	{
+	case 1:
+		buttonReleased(- 1, 0, 0);
+		break;
+	case 2:
+		buttonReleased(0, 0, 0);
+		break;
+	case 3:
+		buttonPressed(1, 0, 0);
+		break;
+	}
+}
+
+static void scroll(GtkGLArea * area, GdkEventScroll * event, void * data)
+{
+	if (event->delta_y != 0)
+	{
+		gint x, y;
+		get_pointer_position(area, & x, & y);
+		wheelMoved(- event->delta_y, 0, 0);
+	}
 }
 
 int main(int argc, char * * argv)
@@ -66,6 +127,13 @@ int main(int argc, char * * argv)
 	g_signal_connect(area, "unrealize", G_CALLBACK(unrealize), NULL);
 	g_signal_connect(area, "render", G_CALLBACK(render), NULL);
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+	gtk_widget_set_events(area, GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK/* | GDK_SCROLL_MASK*/);
+	g_signal_connect(area, "button_press_event", G_CALLBACK(press), NULL);
+	g_signal_connect(area, "button_release_event", G_CALLBACK(release), NULL);
+	// GtkArea does not give scroll events...
+	gtk_widget_set_events(window, GDK_SCROLL_MASK);
+	g_signal_connect(window, "scroll_event", G_CALLBACK(scroll), NULL);
 
 	gtk_widget_show_all(GTK_WIDGET(window));
 
