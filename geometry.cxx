@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <math.h>
 #include "geometry.h"
 
@@ -153,4 +152,250 @@ void proj(float * mat, float width, float height, float depth)
 	prod(mat, mat2);
 }
 
+Matrix4x4::Matrix4x4()
+{
+	elements[0] = 1.0f;
+	elements[1] = 0.0f;
+	elements[2] = 0.0f;
+	elements[3] = 0.0f;
+
+	elements[4] = 0.0f;
+	elements[5] = 1.0f;
+	elements[6] = 0.0f;
+	elements[7] = 0.0f;
+
+	elements[8] = 0.0f;
+	elements[9] = 0.0f;
+	elements[10] = 1.0f;
+	elements[11] = 0.0f;
+
+	elements[12] = 0.0f;
+	elements[13] = 0.0f;
+	elements[14] = 0.0f;
+	elements[15] = 1.0f;
+}
+
+
+class Stop : public Direction
+{
+public:
+	static Stop singleton;
+	Stop();
+	virtual void getMatrix(float * matrix);
+	virtual void getInvertedMatrix(float * matrix);
+};
+
+Stop Stop::singleton;
+
+Stop::Stop()
+{
+}
+
+void Stop::getMatrix(float * matrix)
+{
+}
+
+void Stop::getInvertedMatrix(float * matrix)
+{
+}
+
+
+Direction * Direction::stop = & Stop::singleton;
+
+Direction::Direction()
+{
+}
+
+
+Move::Move(Direction * next) : next(next)
+{
+}
+
+void Move::getMatrix(float * matrix)
+{
+	move(matrix, dx, dy, dz);
+	next->getMatrix(matrix);
+}
+
+void Move::getInvertedMatrix(float * matrix)
+{
+	next->getInvertedMatrix(matrix);
+	move(matrix, - dx, - dy, - dz);
+}
+
+
+RotX::RotX(Direction * next) : next(next)
+{
+}
+
+void RotX::getMatrix(float * matrix)
+{
+	rotX(matrix, angle);
+	next->getMatrix(matrix);
+}
+
+void RotX::getInvertedMatrix(float * matrix)
+{
+	next->getInvertedMatrix(matrix);
+	rotX(matrix, - angle);
+}
+
+
+RotY::RotY(Direction * next) : next(next)
+{
+}
+
+void RotY::getMatrix(float * matrix)
+{
+	rotY(matrix, angle);
+	next->getMatrix(matrix);
+}
+
+void RotY::getInvertedMatrix(float * matrix)
+{
+	next->getInvertedMatrix(matrix);
+	rotY(matrix, - angle);
+}
+
+
+RotZ::RotZ(Direction * next) : next(next)
+{
+}
+
+void RotZ::getMatrix(float * matrix)
+{
+	rotX(matrix, angle);
+	next->getMatrix(matrix);
+}
+
+void RotZ::getInvertedMatrix(float * matrix)
+{
+	next->getInvertedMatrix(matrix);
+	rotZ(matrix, - angle);
+}
+
+
+Projection::Projection(Direction * direction) : direction(direction)
+{
+}
+
+void Projection::getMatrix(float * matrix)
+{
+	direction->getInvertedMatrix(matrix);
+	proj(matrix, width, height, depth);
+}
+
+
+Texture * Texture::last = nullptr;
+Texture::Texture(const char * path) : path(path)
+{
+	if (last == nullptr)
+	{
+		id = 1;
+	}
+	else
+	{
+		id = last->id + 1;
+	}
+	next = last;
+	last = this;
+}
+
+Figure * Figure::last = nullptr;
+Figure::Figure(const char * path) : path(path)
+{
+	if (last == nullptr)
+	{
+		id = 0;
+	}
+	else
+	{
+		id = last->id + 1;
+	}
+	next = last;
+	last = this;
+}
+
+
+class SentinelBeing : public Being
+{
+public:
+	static SentinelBeing singleton;
+	SentinelBeing();
+	virtual BeingType getType();
+	virtual Figure * getFigure();
+	virtual Texture * getTexture();
+};
+
+SentinelBeing SentinelBeing::singleton;
+
+SentinelBeing::SentinelBeing() : Being::Being(nullptr)
+{
+}
+
+BeingType SentinelBeing::getType()
+{
+	return SOLID_BEING;
+}
+
+Figure * SentinelBeing::getFigure()
+{
+	return nullptr;
+}
+
+Texture * SentinelBeing::getTexture()
+{
+	return nullptr;
+}
+
+
+Being::Being(Direction * direction) : direction(direction)
+{
+	// FIXME make this thread safe
+	next = & SentinelBeing::singleton;
+	prev = SentinelBeing::singleton.prev;
+	next->prev = this;
+	prev->next = this;
+	/*
+	 * SentinelBeing::singleton is also initialilzed here.
+	 * next = & SentinelBeing::singleton; // next = this
+	 * prev = SentinelBeing::singleton.prev; // prev = prev // no matter
+	 * next->prev = this; // prev = this
+	 * prev->next = this; // next = this // again
+	 */
+}
+
+Being::~Being()
+{
+	// FIXME make this thread safe
+	next->prev = prev;
+	prev->next = next;
+}
+
+Being * Being::getFirst()
+{
+	return SentinelBeing::singleton.next;
+}
+
+Being * Being::getNext()
+{
+	if (next == & SentinelBeing::singleton)
+	{
+		return nullptr;
+	}
+	return next;
+}
+
+void Being::getMatrix(float * matrix)
+{
+	direction->getMatrix(matrix);
+}
+
+
+Scene::Scene()
+{
+}
+Scene::~Scene()
+{
+}
 

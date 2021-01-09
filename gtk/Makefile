@@ -13,8 +13,8 @@ run: sample.exe ../earth.u-a.txt ../solid.u-a.txt ../screen.u-a.txt
 ../screen.u-a.txt: ../screen.u-z.txt
 	ruby ../norm.rb ../screen.u-z.txt ../screen.u-a.txt
 
-sample.exe: platform.c ../sample.cxx ../geometry.cxx
-	g++ -o sample.exe platform.c ../sample.cxx ../geometry.cxx ${CFLAGS}
+sample.exe: platform.c ../sample.cxx ../geometry.cxx ../common.cxx
+	g++ -o sample.exe platform.c ../sample.cxx ../geometry.cxx ../common.cxx ${CFLAGS}
 
 clean:
 	rm -f sample.exe
