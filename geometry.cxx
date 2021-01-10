@@ -264,7 +264,7 @@ RotZ::RotZ(Direction * next) : next(next)
 
 void RotZ::getMatrix(float * matrix)
 {
-	rotX(matrix, angle);
+	rotZ(matrix, angle);
 	next->getMatrix(matrix);
 }
 
