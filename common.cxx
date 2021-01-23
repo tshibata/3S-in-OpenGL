@@ -190,25 +190,27 @@ void readPNG(const char * path)
 	int height = png_get_image_height(png, info);
 	png_bytepp rows = png_get_rows(png, info);
 	int rowbytes = png_get_rowbytes(png, info);
-	std::vector<unsigned char> buf;
+	// convert the jagged array into a linear array
+	unsigned char * buf = (unsigned char *) malloc(rowbytes * height);
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < rowbytes; j++)
 		{
-			buf.push_back(rows[i][j]);
+			buf[i * rowbytes + j] = rows[i][j];
 		}
 	}
 	switch (png_get_color_type(png, info))
 	{
 	case PNG_COLOR_TYPE_RGB:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, buf.data());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, buf);
 	break;
 	case PNG_COLOR_TYPE_RGB_ALPHA:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf.data());
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
 	break;
 	default:
 		exit(6); // unsupported format
 	}
+	free(buf);
 	png_destroy_read_struct(& png, & info, nullptr);
 	fclose(fp);
 }
