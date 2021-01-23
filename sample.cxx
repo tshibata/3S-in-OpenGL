@@ -10,14 +10,12 @@ static Figure earthFigure("../earth.u-a.txt");
 static Texture flatTexture("../flat.png");
 static Texture bumpTexture("../bump.png");
 
-class Star : public Being
+class Star : public DirectedBeing<RotY<Move<Stop>>>
 {
 public:
-	RotY * rotY;
-	Move * move;
 	Star();
 };
-Star::Star() : Being::Being(rotY = new RotY(move = new Move(Direction::stop)))
+Star::Star() : DirectedBeing<RotY<Move<Stop>>>::DirectedBeing()
 {
 }
 
@@ -69,15 +67,15 @@ Texture * ScreenStar::getTexture()
 	return & flatTexture;
 }
 
-class Earth : public Being
+class Earth : public DirectedBeing<Stop>
 {
 public:
-	Earth(Direction * direction);
+	Earth();
 	virtual BeingType getType();
 	virtual Figure * getFigure();
 	virtual Texture * getTexture();
 };
-Earth::Earth(Direction * direction) : Being::Being(direction)
+Earth::Earth() : DirectedBeing<Stop>::DirectedBeing()
 {
 }
 BeingType Earth::getType()
@@ -96,9 +94,9 @@ Texture * Earth::getTexture()
 class DemoScene : public Scene
 {
 private:
-	Move * lightingMove;
-	RotY * lightingRotY;
-	RotX * lightingRotX;
+	Move<RotX<RotY<Stop>>> * lightingMove;
+	RotX<RotY<Stop>> * lightingRotX;
+	RotY<Stop> * lightingRotY;
 	Star * star[4];
 	Earth * earth;
 	float angle1 = 0.0;
@@ -116,14 +114,16 @@ DemoScene::DemoScene(float x, float y)
 	star[1] = new SolidStar();
 	star[2] = new ScreenStar();
 	star[3] = new ScreenStar();
-	earth = new Earth(Direction::stop);
+	earth = new Earth();
 
-	framing = new Projection(Direction::stop);
+	framing = new Projection(new Stop());
 	framing->width = 1;
 	framing->height = 1;
 	framing->depth = 3;
 
-	lightingMove = new Move(lightingRotX = new RotX(lightingRotY = new RotY(Direction::stop)));
+	lightingMove = new Move<RotX<RotY<Stop>>>();
+	lightingRotX = lightingMove->next;
+	lightingRotY = lightingRotX->next;
 	lighting = new Projection(lightingMove);
 	lightingMove->dx = - 2;
 	lightingMove->dy = 0;
@@ -136,10 +136,10 @@ DemoScene::DemoScene(float x, float y)
 
 	for (int i = 0; i < 4; i++)
 	{
-		star[i]->rotY->angle = i - angle1;
-		star[i]->move->dx = cosf(i - angle2) * 2;
-		star[i]->move->dy = 0;
-		star[i]->move->dz = 3 + sinf(i - angle2) * 2;
+		star[i]->direction->angle = i - angle1;
+		star[i]->direction->next->dx = cosf(i - angle2) * 2;
+		star[i]->direction->next->dy = 0;
+		star[i]->direction->next->dz = 3 + sinf(i - angle2) * 2;
 	}
 	prevX = x;
 	prevY = y;
@@ -170,10 +170,10 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 	angle2 += 0.005 * speed * fdt;
 	for (int i = 0; i < 4; i++)
 	{
-		star[i]->rotY->angle = i - angle1;
-		star[i]->move->dx = cosf(i - angle2) * 2;
-		star[i]->move->dy = 0;
-		star[i]->move->dz = 3 + sinf(i - angle2) * 2;
+		star[i]->direction->angle = i - angle1;
+		star[i]->direction->next->dx = cosf(i - angle2) * 2;
+		star[i]->direction->next->dy = 0;
+		star[i]->direction->next->dz = 3 + sinf(i - angle2) * 2;
 	}
 
 	prevX = x;

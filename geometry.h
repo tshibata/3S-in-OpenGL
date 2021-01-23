@@ -16,54 +16,97 @@ public:
 class Direction
 {
 public:
-	static Direction * stop;
 	Direction();
 	virtual void getMatrix(float * matrix) = 0;
 	virtual void getInvertedMatrix(float * matrix) = 0;
 };
 
-class Move : public Direction
+class Stop : public Direction
 {
-private:
-	Direction * next;
 public:
+	Stop();
+	virtual void getMatrix(float * matrix);
+	virtual void getInvertedMatrix(float * matrix);
+};
+
+template <typename T> class Move : public Direction
+{
+public:
+	T * const next;
 	float dx, dy, dz;
-	Move(Direction * next);
-	virtual void getMatrix(float * matrix);
-	virtual void getInvertedMatrix(float * matrix);
+	Move() : next(new T())
+	{
+	}
+	virtual void getMatrix(float * matrix)
+	{
+		move(matrix, dx, dy, dz);
+		next->getMatrix(matrix);
+	}
+	virtual void getInvertedMatrix(float * matrix)
+	{
+		next->getInvertedMatrix(matrix);
+		move(matrix, - dx, - dy, - dz);
+	}
 };
 
-class RotX : public Direction
+template <typename T> class RotX : public Direction
 {
-private:
-	Direction * next;
 public:
+	T * const next;
 	float angle;
-	RotX(Direction * next);
-	virtual void getMatrix(float * matrix);
-	virtual void getInvertedMatrix(float * matrix);
+	RotX() : next(new T())
+	{
+	}
+	virtual void getMatrix(float * matrix)
+	{
+		rotX(matrix, angle);
+		next->getMatrix(matrix);
+	}
+	virtual void getInvertedMatrix(float * matrix)
+	{
+		next->getInvertedMatrix(matrix);
+		rotX(matrix, - angle);
+	}
 };
 
-class RotY : public Direction
+template <typename T> class RotY : public Direction
 {
-private:
-	Direction * next;
 public:
+	T * const next;
 	float angle;
-	RotY(Direction * next);
-	virtual void getMatrix(float * matrix);
-	virtual void getInvertedMatrix(float * matrix);
+	RotY() : next(new T())
+	{
+	}
+	virtual void getMatrix(float * matrix)
+	{
+		rotY(matrix, angle);
+		next->getMatrix(matrix);
+	}
+	virtual void getInvertedMatrix(float * matrix)
+	{
+		next->getInvertedMatrix(matrix);
+		rotY(matrix, - angle);
+	}
 };
 
-class RotZ : public Direction
+template <typename T> class RotZ : public Direction
 {
-private:
-	Direction * next;
 public:
+	T * const next;
 	float angle;
-	RotZ(Direction * next);
-	virtual void getMatrix(float * matrix);
-	virtual void getInvertedMatrix(float * matrix);
+	RotZ() : next(new T())
+	{
+	}
+	virtual void getMatrix(float * matrix)
+	{
+		rotZ(matrix, angle);
+		next->getMatrix(matrix);
+	}
+	virtual void getInvertedMatrix(float * matrix)
+	{
+		next->getInvertedMatrix(matrix);
+		rotZ(matrix, - angle);
+	}
 };
 
 class Projection
@@ -101,21 +144,34 @@ enum BeingType
 	SOLID_BEING, SCREEN_BEING
 };
 
-class Being
+class AbstractBeing
 {
 private:
-	Direction * direction;
-	Being * prev;
-	Being * next;
+	AbstractBeing * prev;
+	AbstractBeing * next;
 public:
-	static Being * getFirst();
-	Being * getNext();
-	Being(Direction * direction);
+	static AbstractBeing * getFirst();
+	AbstractBeing * getNext();
+	AbstractBeing();
 	void getMatrix(float * matrix);
+	virtual Direction * getDirection() = 0;
 	virtual BeingType getType() = 0;
 	virtual Figure * getFigure() = 0;
 	virtual Texture * getTexture() = 0;
-	virtual ~Being();
+	virtual ~AbstractBeing();
+};
+
+template <typename T> class DirectedBeing : public AbstractBeing
+{
+public:
+	T * direction;
+	DirectedBeing() : direction(new T())
+	{
+	}
+	virtual Direction * getDirection()
+	{
+		return direction;
+	}
 };
 
 class Scene

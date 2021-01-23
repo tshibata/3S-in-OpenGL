@@ -135,17 +135,6 @@ Matrix4x4::Matrix4x4()
 }
 
 
-class Stop : public Direction
-{
-public:
-	static Stop singleton;
-	Stop();
-	virtual void getMatrix(float * matrix);
-	virtual void getInvertedMatrix(float * matrix);
-};
-
-Stop Stop::singleton;
-
 Stop::Stop()
 {
 }
@@ -159,78 +148,8 @@ void Stop::getInvertedMatrix(float * matrix)
 }
 
 
-Direction * Direction::stop = & Stop::singleton;
-
 Direction::Direction()
 {
-}
-
-
-Move::Move(Direction * next) : next(next)
-{
-}
-
-void Move::getMatrix(float * matrix)
-{
-	move(matrix, dx, dy, dz);
-	next->getMatrix(matrix);
-}
-
-void Move::getInvertedMatrix(float * matrix)
-{
-	next->getInvertedMatrix(matrix);
-	move(matrix, - dx, - dy, - dz);
-}
-
-
-RotX::RotX(Direction * next) : next(next)
-{
-}
-
-void RotX::getMatrix(float * matrix)
-{
-	rotX(matrix, angle);
-	next->getMatrix(matrix);
-}
-
-void RotX::getInvertedMatrix(float * matrix)
-{
-	next->getInvertedMatrix(matrix);
-	rotX(matrix, - angle);
-}
-
-
-RotY::RotY(Direction * next) : next(next)
-{
-}
-
-void RotY::getMatrix(float * matrix)
-{
-	rotY(matrix, angle);
-	next->getMatrix(matrix);
-}
-
-void RotY::getInvertedMatrix(float * matrix)
-{
-	next->getInvertedMatrix(matrix);
-	rotY(matrix, - angle);
-}
-
-
-RotZ::RotZ(Direction * next) : next(next)
-{
-}
-
-void RotZ::getMatrix(float * matrix)
-{
-	rotZ(matrix, angle);
-	next->getMatrix(matrix);
-}
-
-void RotZ::getInvertedMatrix(float * matrix)
-{
-	next->getInvertedMatrix(matrix);
-	rotZ(matrix, - angle);
 }
 
 
@@ -276,11 +195,12 @@ Figure::Figure(const char * path) : path(path)
 }
 
 
-class SentinelBeing : public Being
+class SentinelBeing : public AbstractBeing
 {
 public:
 	static SentinelBeing singleton;
 	SentinelBeing();
+	virtual Direction * getDirection();
 	virtual BeingType getType();
 	virtual Figure * getFigure();
 	virtual Texture * getTexture();
@@ -288,8 +208,13 @@ public:
 
 SentinelBeing SentinelBeing::singleton;
 
-SentinelBeing::SentinelBeing() : Being::Being(nullptr)
+SentinelBeing::SentinelBeing() : AbstractBeing::AbstractBeing()
 {
+}
+
+Direction * SentinelBeing::getDirection()
+{
+	return nullptr;
 }
 
 BeingType SentinelBeing::getType()
@@ -308,7 +233,7 @@ Texture * SentinelBeing::getTexture()
 }
 
 
-Being::Being(Direction * direction) : direction(direction)
+AbstractBeing::AbstractBeing()
 {
 	// FIXME make this thread safe
 	next = & SentinelBeing::singleton;
@@ -324,19 +249,19 @@ Being::Being(Direction * direction) : direction(direction)
 	 */
 }
 
-Being::~Being()
+AbstractBeing::~AbstractBeing()
 {
 	// FIXME make this thread safe
 	next->prev = prev;
 	prev->next = next;
 }
 
-Being * Being::getFirst()
+AbstractBeing * AbstractBeing::getFirst()
 {
 	return SentinelBeing::singleton.next;
 }
 
-Being * Being::getNext()
+AbstractBeing * AbstractBeing::getNext()
 {
 	if (next == & SentinelBeing::singleton)
 	{
@@ -345,9 +270,9 @@ Being * Being::getNext()
 	return next;
 }
 
-void Being::getMatrix(float * matrix)
+void AbstractBeing::getMatrix(float * matrix)
 {
-	direction->getMatrix(matrix);
+	getDirection()->getMatrix(matrix);
 }
 
 
