@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
+#include "ref.h"
 #include "geometry.h"
 
 static Figure solidFigure("../solid.u-a.txt");

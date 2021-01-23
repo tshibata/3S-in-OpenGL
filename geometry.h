@@ -15,6 +15,9 @@ public:
 
 class Direction
 {
+friend Ref<Direction>;
+protected:
+	unsigned int refc;
 public:
 	Direction();
 	virtual void getMatrix(float * matrix) = 0;
@@ -23,6 +26,7 @@ public:
 
 class Stop : public Direction
 {
+friend Ref<Stop>;
 public:
 	Stop();
 	virtual void getMatrix(float * matrix);
@@ -31,8 +35,9 @@ public:
 
 template <typename T> class Move : public Direction
 {
+friend Ref<Move>;
 public:
-	T * const next;
+	Ref<T> const next;
 	float dx, dy, dz;
 	Move() : next(new T())
 	{
@@ -51,8 +56,9 @@ public:
 
 template <typename T> class RotX : public Direction
 {
+friend Ref<RotX>;
 public:
-	T * const next;
+	Ref<T> const next;
 	float angle;
 	RotX() : next(new T())
 	{
@@ -71,8 +77,9 @@ public:
 
 template <typename T> class RotY : public Direction
 {
+friend Ref<RotY>;
 public:
-	T * const next;
+	Ref<T> const next;
 	float angle;
 	RotY() : next(new T())
 	{
@@ -91,8 +98,9 @@ public:
 
 template <typename T> class RotZ : public Direction
 {
+friend Ref<RotZ>;
 public:
-	T * const next;
+	Ref<T> const next;
 	float angle;
 	RotZ() : next(new T())
 	{
@@ -112,7 +120,7 @@ public:
 class Projection
 {
 private:
-	Direction * direction;
+	Ref<Direction> direction;
 public:
 	float width, height, depth;
 	Projection(Direction * direction);
@@ -164,7 +172,7 @@ public:
 template <typename T> class DirectedBeing : public AbstractBeing
 {
 public:
-	T * direction;
+	Ref<T> direction;
 	DirectedBeing() : direction(new T())
 	{
 	}

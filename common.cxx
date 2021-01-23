@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <platform.h>
+#include "ref.h"
 #include "geometry.h"
 #include "common.h"
 
