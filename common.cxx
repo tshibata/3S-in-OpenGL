@@ -1,11 +1,6 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <png.h>
-#include <string>
-#include <vector>
-#include <regex>
-#include <iostream>
-#include <fstream>
 #include <platform.h>
 #include "ref.h"
 #include "geometry.h"
@@ -179,7 +174,7 @@ bool initiate()
 	{
 		unsigned char * data;
 		size_t size;
-		readTxt(f->path, & data, & size);
+		readBin(f->path, & data, & size);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[f->id]);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 		free(data);

@@ -4,62 +4,40 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <png.h>
-
-#include <string>
-#include <vector>
-#include <regex>
-#include <iostream>
-#include <fstream>
-
 #include <platform.h>
 #include "files.h"
 
-void readTxt(const char * path, unsigned char * * data, size_t * size)
+#define UC_MAGIC 299792
+#define UC_VERSION 1.0
+
+void readBin(const char * path, unsigned char * * data, size_t * size)
 {
-	static std::regex empty("^\\W*$");
-	static std::regex point("^\\W*u:(.*)\\W+v:(.*)\\W+x:(.*)\\W+y:(.*)\\W+z:(.*)\\W+a:(.*)\\W+b:(.*)\\W+c:(.*)\\W*$");
-
-	std::vector<float> vec;
-
-	std::fstream f;
-	f.open(path, std::ios_base::in);
-
-	std::string line;
-	std::smatch match;
-	while (std::getline(f, line, '\n'))
+	struct stat s;
+	if (stat(path, & s) != 0)
 	{
-		if (regex_match(line, match, empty))
-		{
-			// nothing to do
-		}
-		else if (regex_match(line, match, point))
-		{
-			vec.push_back(std::stof(match[1]));
-			vec.push_back(std::stof(match[2]));
-
-			vec.push_back(std::stof(match[3]));
-			vec.push_back(std::stof(match[4]));
-			vec.push_back(std::stof(match[5]));
-
-			vec.push_back(std::stof(match[6]));
-			vec.push_back(std::stof(match[7]));
-			vec.push_back(std::stof(match[8]));
-		}
-		else
-		{
-			exit(1);
-		}
+		exit(1); // failed to get file status
 	}
-
-	f.close();
-
-	* size = vec.size() * sizeof(float);
-	float * buf = (float *) malloc(* size);
-	for (int i = 0; i < vec.size(); i++)
+	FILE * fp = fopen(path, "rb");
+	if (! fp)
 	{
-		buf[i] = vec.data()[i];
+		exit(2); // failed to open
 	}
-	* data = (unsigned char *) buf;
+	float sig;
+	if (fread(& sig, sizeof(sig), 1, fp) != 1)
+	{
+		exit(3); // failed to read signature
+	}
+	if (sig != UC_MAGIC + UC_VERSION)
+	{
+		exit(4); // wrong signature
+	}
+	* data = (unsigned char *) malloc(s.st_size);
+	* size = s.st_size - sizeof(sig);
+	for (int i = 0; i < * size ; i++)
+	{
+		(* data)[i] = fgetc(fp);
+	}
+	fclose(fp);
 }
 
 void readPng(const char * path, unsigned char * * data, int * width, int * height, unsigned int * type)

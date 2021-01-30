@@ -4,9 +4,9 @@
 #include "ref.h"
 #include "geometry.h"
 
-static Figure solidFigure("../solid.u-a.txt");
-static Figure screenFigure("../screen.u-a.txt");
-static Figure earthFigure("../earth.u-a.txt");
+static Figure solidFigure("../solid.u-c.bin");
+static Figure screenFigure("../screen.u-c.bin");
+static Figure earthFigure("../earth.u-c.bin");
 
 static Texture flatTexture("../flat.png");
 static Texture bumpTexture("../bump.png");

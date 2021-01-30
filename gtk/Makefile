@@ -1,21 +1,21 @@
 
 CFLAGS = -I. -lstdc++ -lstdc++fs -lpng `pkg-config --cflags --libs gtk+-3.0 epoxy`
 
-run: sample.exe ../earth.u-a.txt ../solid.u-a.txt ../screen.u-a.txt
+run: sample.exe ../earth.u-c.bin ../solid.u-c.bin ../screen.u-c.bin
 	./sample.exe
 
-../earth.u-a.txt: ../earth.u-z.txt
-	ruby ../norm.rb ../earth.u-z.txt ../earth.u-a.txt
+../earth.u-c.bin: ../earth.u-c.txt
+	ruby ../u-ctxt2bin.rb ../earth.u-c.txt
 
-../solid.u-a.txt: ../solid.u-z.txt
-	ruby ../norm.rb ../solid.u-z.txt ../solid.u-a.txt
+../solid.u-c.bin: ../solid.u-c.txt
+	ruby ../u-ctxt2bin.rb ../solid.u-c.txt
 
-../screen.u-a.txt: ../screen.u-z.txt
-	ruby ../norm.rb ../screen.u-z.txt ../screen.u-a.txt
+../screen.u-c.bin: ../screen.u-c.txt
+	ruby ../u-ctxt2bin.rb ../screen.u-c.txt
 
 sample.exe: platform.c ../sample.cxx ../geometry.cxx ../common.cxx ../files.cxx
 	g++ -o sample.exe platform.c ../sample.cxx ../geometry.cxx ../common.cxx ../files.cxx ${CFLAGS}
 
 clean:
-	rm -f sample.exe
+	rm -f sample.exe ../*.u-c.bin
 
