@@ -10,6 +10,7 @@
 #include "ref.h"
 #include "geometry.h"
 #include "common.h"
+#include "files.h"
 
 const GLchar * SHADOW_VERT =
 R"(#version 330 core
@@ -156,108 +157,6 @@ GLuint initProgram(const GLchar * * vertSource, const GLchar * * fragSource)
 	return program;
 }
 
-void readPNG(const char * path)
-{
-	png_byte sig[8];
-	png_structp png;
-	png_infop info;
-	FILE * fp = fopen(path, "rb");
-	if (! fp)
-	{
-		exit(1); // failed to open
-	}
-	if (fread(sig, sizeof(png_byte), sizeof(sig), fp) != sizeof(sig))
-	{
-		exit(2); // no signature
-	}
-	if (png_sig_cmp(sig, 0, sizeof(sig)) != 0)
-	{
-		exit(3); // wrong signature
-	}
-	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-	if (png == nullptr) {
-		exit(4); // failed because of memory or whatever
-	}
-	info = png_create_info_struct(png);
-	if (info == nullptr) {
-		exit(5); // failed because of memory or whatever
-	}
-	png_init_io(png, fp);
-	png_set_sig_bytes(png, sizeof(sig));
-	int xform = PNG_TRANSFORM_PACKING | PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_EXPAND;
-	png_read_png(png, info, xform, nullptr);
-	int width = png_get_image_width(png, info);
-	int height = png_get_image_height(png, info);
-	png_bytepp rows = png_get_rows(png, info);
-	int rowbytes = png_get_rowbytes(png, info);
-	// convert the jagged array into a linear array
-	unsigned char * buf = (unsigned char *) malloc(rowbytes * height);
-	for (int i = 0; i < height; i++)
-	{
-		for (int j = 0; j < rowbytes; j++)
-		{
-			buf[i * rowbytes + j] = rows[i][j];
-		}
-	}
-	switch (png_get_color_type(png, info))
-	{
-	case PNG_COLOR_TYPE_RGB:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, buf);
-	break;
-	case PNG_COLOR_TYPE_RGB_ALPHA:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
-	break;
-	default:
-		exit(6); // unsupported format
-	}
-	free(buf);
-	png_destroy_read_struct(& png, & info, nullptr);
-	fclose(fp);
-}
-
-void readTxt(std::string name, GLuint vboIndex)
-{
-	static std::regex empty("^\\W*$");
-	static std::regex point("^\\W*u:(.*)\\W+v:(.*)\\W+x:(.*)\\W+y:(.*)\\W+z:(.*)\\W+a:(.*)\\W+b:(.*)\\W+c:(.*)\\W*$");
-
-	std::vector<float> vec;
-
-	std::fstream f;
-	f.open(name, std::ios_base::in);
-
-	std::string line;
-	std::smatch match;
-	while (std::getline(f, line, '\n'))
-	{
-		if (regex_match(line, match, empty))
-		{
-			// nothing to do
-		}
-		else if (regex_match(line, match, point))
-		{
-			vec.push_back(std::stof(match[1]));
-			vec.push_back(std::stof(match[2]));
-
-			vec.push_back(std::stof(match[3]));
-			vec.push_back(std::stof(match[4]));
-			vec.push_back(std::stof(match[5]));
-
-			vec.push_back(std::stof(match[6]));
-			vec.push_back(std::stof(match[7]));
-			vec.push_back(std::stof(match[8]));
-		}
-		else
-		{
-			exit(1);
-		}
-	}
-
-	f.close();
-
-	glBindBuffer(GL_ARRAY_BUFFER, vboIndex);
-	glBufferData(GL_ARRAY_BUFFER, vec.size() * sizeof(float), vec.data(), GL_STATIC_DRAW);
-}
-
 static GLuint vao;
 static GLuint * vbo;
 static GLuint * tex;
@@ -278,7 +177,12 @@ bool initiate()
 	glGenBuffers(Figure::last->id + 1, vbo);
 	for (Figure * f= Figure::last; f != nullptr; f = f->next)
 	{
-		readTxt(f->path, vbo[f->id]);
+		unsigned char * data;
+		size_t size;
+		readTxt(f->path, & data, & size);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[f->id]);
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+		free(data);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -301,13 +205,17 @@ bool initiate()
 
 	for (Texture * t = Texture::last; t != nullptr; t = t->next)
 	{
+		unsigned char * data;
+		int width, height;
+		unsigned int type;
 		glActiveTexture(GL_TEXTURE0 + t->id); // is this legal?
 		glBindTexture(GL_TEXTURE_2D, tex[t->id]);
-		readPNG(t->path);
+		readPng(t->path, & data, & width, & height, & type);
+		glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, data);
+		free(data);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
-
 
 	shadowProgram = initProgram(& SHADOW_VERT, & SHADOW_FRAG);
 	solidProgram = initProgram(& SOLID_VERT, & SOLID_FRAG);
