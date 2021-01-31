@@ -181,7 +181,7 @@ Texture::Texture(const char * path) : path(path)
 }
 
 Figure * Figure::last = nullptr;
-Figure::Figure(const char * path) : path(path)
+Figure::Figure(Texture * texture, const char * path) : texture(texture), path(path)
 {
 	if (last == nullptr)
 	{
@@ -204,7 +204,6 @@ public:
 	virtual Direction * getDirection();
 	virtual BeingType getType();
 	virtual Figure * getFigure();
-	virtual Texture * getTexture();
 };
 
 SentinelBeing SentinelBeing::singleton;
@@ -224,11 +223,6 @@ BeingType SentinelBeing::getType()
 }
 
 Figure * SentinelBeing::getFigure()
-{
-	return nullptr;
-}
-
-Texture * SentinelBeing::getTexture()
 {
 	return nullptr;
 }

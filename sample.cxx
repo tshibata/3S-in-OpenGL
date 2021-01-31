@@ -4,12 +4,12 @@
 #include "ref.h"
 #include "geometry.h"
 
-static Figure solidFigure("../solid.u-c.bin");
-static Figure screenFigure("../screen.u-c.bin");
-static Figure earthFigure("../earth.u-c.bin");
-
 static Texture flatTexture("../flat.png");
 static Texture bumpTexture("../bump.png");
+
+static Figure solidFigure(& bumpTexture, "../solid.u-c.bin");
+static Figure screenFigure(& flatTexture, "../screen.u-c.bin");
+static Figure earthFigure(& flatTexture, "../earth.u-c.bin");
 
 class Star : public DirectedBeing<RotY<Move<Stop>>>
 {
@@ -26,7 +26,6 @@ public:
 	SolidStar();
 	virtual BeingType getType();
 	virtual Figure * getFigure();
-	virtual Texture * getTexture();
 };
 SolidStar::SolidStar()
 {
@@ -39,10 +38,6 @@ Figure * SolidStar::getFigure()
 {
 	return & solidFigure;
 }
-Texture * SolidStar::getTexture()
-{
-	return & bumpTexture;
-}
 
 class ScreenStar : public Star
 {
@@ -50,7 +45,6 @@ public:
 	ScreenStar();
 	virtual BeingType getType();
 	virtual Figure * getFigure();
-	virtual Texture * getTexture();
 };
 ScreenStar::ScreenStar()
 {
@@ -63,10 +57,6 @@ Figure * ScreenStar::getFigure()
 {
 	return & screenFigure;
 }
-Texture * ScreenStar::getTexture()
-{
-	return & flatTexture;
-}
 
 class Earth : public DirectedBeing<Stop>
 {
@@ -74,7 +64,6 @@ public:
 	Earth();
 	virtual BeingType getType();
 	virtual Figure * getFigure();
-	virtual Texture * getTexture();
 };
 Earth::Earth() : DirectedBeing<Stop>::DirectedBeing()
 {
@@ -86,10 +75,6 @@ BeingType Earth::getType()
 Figure * Earth::getFigure()
 {
 	return & earthFigure;
-}
-Texture * Earth::getTexture()
-{
-	return & flatTexture;
 }
 
 class DemoScene : public Scene

@@ -141,10 +141,11 @@ class Figure
 {
 public:
 	static Figure * last;
+	Texture * texture;
 	const char * path;
 	int id;
 	Figure * next;
-	Figure(const char * path);
+	Figure(Texture * texture, const char * path);
 };
 
 enum BeingType
@@ -165,7 +166,6 @@ public:
 	virtual Direction * getDirection() = 0;
 	virtual BeingType getType() = 0;
 	virtual Figure * getFigure() = 0;
-	virtual Texture * getTexture() = 0;
 	virtual ~AbstractBeing();
 };
 

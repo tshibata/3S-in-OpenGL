@@ -166,22 +166,6 @@ bool initiate()
 {
 	GLboolean result;
 
-	glGenVertexArrays(1, & vao);
-
-	vbo = (GLuint *) malloc((Figure::last->id + 1) * sizeof(GLuint));
-	glGenBuffers(Figure::last->id + 1, vbo);
-	for (Figure * f= Figure::last; f != nullptr; f = f->next)
-	{
-		unsigned char * data;
-		size_t size;
-		readBin(f->path, & data, & size);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[f->id]);
-		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-		free(data);
-	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	tex = (GLuint *) malloc((Texture::last->id + 1) * sizeof(GLuint));
 	glGenTextures(Texture::last->id + 1, tex);
 
@@ -211,6 +195,22 @@ bool initiate()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
+
+	glGenVertexArrays(1, & vao);
+
+	vbo = (GLuint *) malloc((Figure::last->id + 1) * sizeof(GLuint));
+	glGenBuffers(Figure::last->id + 1, vbo);
+	for (Figure * f = Figure::last; f != nullptr; f = f->next)
+	{
+		unsigned char * data;
+		size_t size;
+		readBin(f->path, & data, & size);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[f->id]);
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+		free(data);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	shadowProgram = initProgram(& SHADOW_VERT, & SHADOW_FRAG);
 	solidProgram = initProgram(& SOLID_VERT, & SOLID_FRAG);
@@ -347,7 +347,7 @@ bool update(float x, float y)
 		glUniformMatrix4fv(glGetUniformLocation(solidProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
 
 		glUniform1i(glGetUniformLocation(solidProgram, "tex0"), 0);
-		glUniform1i(glGetUniformLocation(solidProgram, "tex1"), b->getTexture()->id);
+		glUniform1i(glGetUniformLocation(solidProgram, "tex1"), b->getFigure()->texture->id);
 
 		glBindAttribLocation(solidProgram, 0, "xyz0");
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
@@ -393,7 +393,7 @@ bool update(float x, float y)
 		glUniformMatrix4fv(glGetUniformLocation(screenProgram, "fmat"), 1, GL_FALSE, objectFramingMatrix);
 		glUniformMatrix4fv(glGetUniformLocation(screenProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
 
-		glUniform1i(glGetUniformLocation(screenProgram, "tex1"), b->getTexture()->id);
+		glUniform1i(glGetUniformLocation(screenProgram, "tex1"), b->getFigure()->texture->id);
 
 		glBindAttribLocation(screenProgram, 0, "xyz0");
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
