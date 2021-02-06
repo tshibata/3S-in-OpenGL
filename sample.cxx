@@ -2,7 +2,11 @@
 #include <math.h>
 #include <time.h>
 #include "ref.h"
+#include "common.h"
 #include "geometry.h"
+
+const int screenWidth = 512;
+const int screenHeight = 256;
 
 static Texture flatTexture("../flat.png");
 static Texture bumpTexture("../bump.png");
@@ -104,7 +108,7 @@ DemoScene::DemoScene(float x, float y)
 
 	framing = new Projection(new Stop());
 	framing->width = 1;
-	framing->height = 1;
+	framing->height = 0.5;
 	framing->depth = 3;
 
 	lightingMove = new Move<RotX<RotY<Stop>>>();

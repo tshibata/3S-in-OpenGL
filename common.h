@@ -1,3 +1,6 @@
+extern const int screenWidth;
+extern const int screenHeight;
+
 bool initiate();
 bool update(float x, float y);
 void terminate();
