@@ -84,9 +84,7 @@ Figure * Earth::getFigure()
 class DemoScene : public Scene
 {
 private:
-	Move<RotX<RotY<Stop>>> * lightingMove;
-	RotX<RotY<Stop>> * lightingRotX;
-	RotY<Stop> * lightingRotY;
+	Move<RotX<RotY<Stop>>> * lightningDirection;
 	Star * star[4];
 	Earth * earth;
 	float angle1 = 0.0;
@@ -106,23 +104,15 @@ DemoScene::DemoScene(float x, float y)
 	star[3] = new ScreenStar();
 	earth = new Earth();
 
-	framing = new Projection(new Stop());
-	framing->width = 1;
-	framing->height = 0.5;
-	framing->depth = 3;
+	framing = new Projection(new Stop(), 1, 0.5, 3);
 
-	lightingMove = new Move<RotX<RotY<Stop>>>();
-	lightingRotX = lightingMove->next;
-	lightingRotY = lightingRotX->next;
-	lighting = new Projection(lightingMove);
-	lightingMove->dx = - 2;
-	lightingMove->dy = 0;
-	lightingMove->dz = - 2;
-	lightingRotX->angle = - 0.5;
-	lightingRotY->angle = - 1;
-	lighting->width = 1;
-	lighting->height = 1;
-	lighting->depth = 3;
+	lightningDirection = new Move<RotX<RotY<Stop>>>();
+	lightningDirection->dx = - 2;
+	lightningDirection->dy = 0;
+	lightningDirection->dz = - 2;
+	lightningDirection->next->angle = - 0.5;
+	lightningDirection->next->next->angle = - 1;
+	lighting = new Projection(lightningDirection, 1, 1, 3);
 
 	for (int i = 0; i < 4; i++)
 	{

@@ -154,7 +154,8 @@ Direction::Direction()
 }
 
 
-Projection::Projection(Direction * direction) : direction(direction)
+Projection::Projection(Direction * direction, float width, float height, float depth)
+ : direction(direction), width(width), height(height), depth(depth)
 {
 }
 

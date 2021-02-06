@@ -39,7 +39,7 @@ friend Ref<Move>;
 public:
 	Ref<T> const next;
 	float dx, dy, dz;
-	Move() : next(new T())
+	Move() : next(new T()), dx(0), dy(0), dz(0)
 	{
 	}
 	virtual void getMatrix(float * matrix)
@@ -60,7 +60,7 @@ friend Ref<RotX>;
 public:
 	Ref<T> const next;
 	float angle;
-	RotX() : next(new T())
+	RotX() : next(new T()), angle(0)
 	{
 	}
 	virtual void getMatrix(float * matrix)
@@ -81,7 +81,7 @@ friend Ref<RotY>;
 public:
 	Ref<T> const next;
 	float angle;
-	RotY() : next(new T())
+	RotY() : next(new T()), angle(0)
 	{
 	}
 	virtual void getMatrix(float * matrix)
@@ -102,7 +102,7 @@ friend Ref<RotZ>;
 public:
 	Ref<T> const next;
 	float angle;
-	RotZ() : next(new T())
+	RotZ() : next(new T()), angle(0)
 	{
 	}
 	virtual void getMatrix(float * matrix)
@@ -123,7 +123,7 @@ private:
 	Ref<Direction> direction;
 public:
 	float width, height, depth;
-	Projection(Direction * direction);
+	Projection(Direction * direction, float widht, float height, float depth);
 	void getMatrix(float * matrix);
 };
 
