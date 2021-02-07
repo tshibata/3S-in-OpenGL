@@ -12,7 +12,7 @@ static Texture flatTexture("../flat.png");
 static Texture bumpTexture("../bump.png");
 
 static Figure solidFigure(& bumpTexture, "../solid.u-c.bin");
-static Figure screenFigure(& flatTexture, "../screen.u-c.bin");
+static Figure lucidFigure(& flatTexture, "../lucid.u-c.bin");
 static Figure earthFigure(& flatTexture, "../earth.u-c.bin");
 
 class Star : public DirectedBeing<RotY<Move<Stop>>>
@@ -43,23 +43,23 @@ Figure * SolidStar::getFigure()
 	return & solidFigure;
 }
 
-class ScreenStar : public Star
+class LucidStar : public Star
 {
 public:
-	ScreenStar();
+	LucidStar();
 	virtual BeingType getType();
 	virtual Figure * getFigure();
 };
-ScreenStar::ScreenStar()
+LucidStar::LucidStar()
 {
 }
-BeingType ScreenStar::getType()
+BeingType LucidStar::getType()
 {
-	return SCREEN_BEING;
+	return LUCID_BEING;
 }
-Figure * ScreenStar::getFigure()
+Figure * LucidStar::getFigure()
 {
-	return & screenFigure;
+	return & lucidFigure;
 }
 
 class Earth : public DirectedBeing<Stop>
@@ -100,8 +100,8 @@ DemoScene::DemoScene(float x, float y)
 {
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
-	star[2] = new ScreenStar();
-	star[3] = new ScreenStar();
+	star[2] = new LucidStar();
+	star[3] = new LucidStar();
 	earth = new Earth();
 
 	framing = new Projection(new Stop(), 1, 0.5, 3);

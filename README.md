@@ -7,8 +7,8 @@ An OpenGL Demo with Shadow, Solid and Screen
 
 ## Features
 - Shadow mapping
-- Solid (no alpha blending) object
-- Screen (as a layer mode)
+- Solid (normal blend mode) objects
+- Lucid (screen blend mode) objects
 - Texture mapping
 - GLSL
 

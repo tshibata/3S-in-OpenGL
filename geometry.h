@@ -150,7 +150,7 @@ public:
 
 enum BeingType
 {
-	SOLID_BEING, SCREEN_BEING
+	SOLID_BEING, LUCID_BEING
 };
 
 class AbstractBeing

@@ -61,7 +61,7 @@ void main() {
 	gl_FragColor = (texture(tex1, uv1).rgba * (i + 0.5) / 1.5);
 })";
 
-const GLchar * SCREEN_VERT =
+const GLchar * LUCID_VERT =
 R"(#version 330 core
 uniform mat4 fmat;
 uniform mat4 lmat;
@@ -76,7 +76,7 @@ void main() {
 	fnorm = fmat * vec4(norm + xyz0, 1.0) - gl_Position;
 })";
 
-const GLchar * SCREEN_FRAG =
+const GLchar * LUCID_FRAG =
 R"(#version 330 core
 uniform sampler2D tex1;
 in vec2 uv1;
@@ -157,7 +157,7 @@ static GLuint * vbo;
 static GLuint * tex;
 static GLuint shadowProgram;
 static GLuint solidProgram;
-static GLuint screenProgram;
+static GLuint lucidProgram;
 static GLuint shadowBuffer;
 static int frame = 0;
 static struct timespec t0;
@@ -214,7 +214,7 @@ bool initiate()
 
 	shadowProgram = initProgram(& SHADOW_VERT, & SHADOW_FRAG);
 	solidProgram = initProgram(& SOLID_VERT, & SOLID_FRAG);
-	screenProgram = initProgram(& SCREEN_VERT, & SCREEN_FRAG);
+	lucidProgram = initProgram(& LUCID_VERT, & LUCID_FRAG);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT); // TBD: better use default?
@@ -224,7 +224,7 @@ bool initiate()
 
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
-	return shadowProgram != 0 && solidProgram != 0 && screenProgram != 0;
+	return shadowProgram != 0 && solidProgram != 0 && lucidProgram != 0;
 }
 
 void terminate()
@@ -239,9 +239,9 @@ void terminate()
 	{
 		glDeleteProgram(solidProgram);
 	}
-	if (screenProgram != 0)
+	if (lucidProgram != 0)
 	{
-		glDeleteProgram(screenProgram);
+		glDeleteProgram(lucidProgram);
 	}
 }
 
@@ -368,9 +368,9 @@ bool update(float x, float y)
 	glDisableVertexAttribArray(2);
 
 
-	// screen
+	// lucid
 
-	glUseProgram(screenProgram);
+	glUseProgram(lucidProgram);
 	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
@@ -380,7 +380,7 @@ bool update(float x, float y)
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getType() == SCREEN_BEING)
+	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getType() == LUCID_BEING)
 	{
 		GLfloat objectLightingMatrix[16];
 		GLfloat objectFramingMatrix[16];
@@ -390,20 +390,20 @@ bool update(float x, float y)
 		prod(objectMatrix.elements, lightingMatrix.elements, objectLightingMatrix);
 		prod(objectMatrix.elements, framingMatrix.elements, objectFramingMatrix);
 
-		glUniformMatrix4fv(glGetUniformLocation(screenProgram, "fmat"), 1, GL_FALSE, objectFramingMatrix);
-		glUniformMatrix4fv(glGetUniformLocation(screenProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
+		glUniformMatrix4fv(glGetUniformLocation(lucidProgram, "fmat"), 1, GL_FALSE, objectFramingMatrix);
+		glUniformMatrix4fv(glGetUniformLocation(lucidProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
 
-		glUniform1i(glGetUniformLocation(screenProgram, "tex1"), b->getFigure()->texture->id);
+		glUniform1i(glGetUniformLocation(lucidProgram, "tex1"), b->getFigure()->texture->id);
 
-		glBindAttribLocation(screenProgram, 0, "xyz0");
+		glBindAttribLocation(lucidProgram, 0, "xyz0");
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
 
-		glBindAttribLocation(screenProgram, 1, "norm");
+		glBindAttribLocation(lucidProgram, 1, "norm");
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
 
-		glBindAttribLocation(screenProgram, 2, "uv0");
+		glBindAttribLocation(lucidProgram, 2, "uv0");
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
