@@ -28,15 +28,15 @@ class SolidStar : public Star
 {
 public:
 	SolidStar();
-	virtual BeingType getType();
+	virtual BlendMode getBlendMode();
 	virtual Figure * getFigure();
 };
 SolidStar::SolidStar()
 {
 }
-BeingType SolidStar::getType()
+BlendMode SolidStar::getBlendMode()
 {
-	return SOLID_BEING;
+	return SOLID_BLEND;
 }
 Figure * SolidStar::getFigure()
 {
@@ -47,15 +47,15 @@ class LucidStar : public Star
 {
 public:
 	LucidStar();
-	virtual BeingType getType();
+	virtual BlendMode getBlendMode();
 	virtual Figure * getFigure();
 };
 LucidStar::LucidStar()
 {
 }
-BeingType LucidStar::getType()
+BlendMode LucidStar::getBlendMode()
 {
-	return LUCID_BEING;
+	return LUCID_BLEND;
 }
 Figure * LucidStar::getFigure()
 {
@@ -66,15 +66,15 @@ class Earth : public DirectedBeing<Stop>
 {
 public:
 	Earth();
-	virtual BeingType getType();
+	virtual BlendMode getBlendMode();
 	virtual Figure * getFigure();
 };
 Earth::Earth() : DirectedBeing<Stop>::DirectedBeing()
 {
 }
-BeingType Earth::getType()
+BlendMode Earth::getBlendMode()
 {
-	return SOLID_BEING;
+	return SOLID_BLEND;
 }
 Figure * Earth::getFigure()
 {

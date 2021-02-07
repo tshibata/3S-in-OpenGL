@@ -298,7 +298,7 @@ bool update(float x, float y)
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);
 
-	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getType() == SOLID_BEING)
+	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getBlendMode() == SOLID_BLEND)
 	{
 		GLfloat objectLightingMatrix[16];
 		Matrix4x4 objectMatrix;
@@ -333,7 +333,7 @@ bool update(float x, float y)
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getType() == SOLID_BEING)
+	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getBlendMode() == SOLID_BLEND)
 	{
 		GLfloat objectLightingMatrix[16];
 		GLfloat objectFramingMatrix[16];
@@ -380,7 +380,7 @@ bool update(float x, float y)
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getType() == LUCID_BEING)
+	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getBlendMode() == LUCID_BLEND)
 	{
 		GLfloat objectLightingMatrix[16];
 		GLfloat objectFramingMatrix[16];

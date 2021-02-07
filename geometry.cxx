@@ -203,7 +203,7 @@ public:
 	static SentinelBeing singleton;
 	SentinelBeing();
 	virtual Direction * getDirection();
-	virtual BeingType getType();
+	virtual BlendMode getBlendMode();
 	virtual Figure * getFigure();
 };
 
@@ -218,9 +218,9 @@ Direction * SentinelBeing::getDirection()
 	return nullptr;
 }
 
-BeingType SentinelBeing::getType()
+BlendMode SentinelBeing::getBlendMode()
 {
-	return SOLID_BEING;
+	return SOLID_BLEND;
 }
 
 Figure * SentinelBeing::getFigure()

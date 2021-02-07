@@ -148,9 +148,9 @@ public:
 	Figure(Texture * texture, const char * path);
 };
 
-enum BeingType
+enum BlendMode
 {
-	SOLID_BEING, LUCID_BEING
+	SOLID_BLEND, LUCID_BLEND
 };
 
 class AbstractBeing
@@ -164,7 +164,7 @@ public:
 	AbstractBeing();
 	void getMatrix(float * matrix);
 	virtual Direction * getDirection() = 0;
-	virtual BeingType getType() = 0;
+	virtual BlendMode getBlendMode() = 0;
 	virtual Figure * getFigure() = 0;
 	virtual ~AbstractBeing();
 };
