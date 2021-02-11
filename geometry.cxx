@@ -1,6 +1,8 @@
 #include <math.h>
 #include "ref.h"
+#include "common.h"
 #include "geometry.h"
+#include "files.h"
 
 void prod(float * a, float * b, float * c)
 {
@@ -181,8 +183,10 @@ Texture::Texture(const char * path) : path(path)
 	last = this;
 }
 
+
 Figure * Figure::last = nullptr;
-Figure::Figure(Texture * texture, const char * path) : texture(texture), path(path)
+
+Figure::Figure(Texture * texture) : texture(texture)
 {
 	if (last == nullptr)
 	{
@@ -197,84 +201,61 @@ Figure::Figure(Texture * texture, const char * path) : texture(texture), path(pa
 }
 
 
-class SentinelBeing : public AbstractBeing
-{
-public:
-	static SentinelBeing singleton;
-	SentinelBeing();
-	virtual Direction * getDirection();
-	virtual BlendMode getBlendMode();
-	virtual Figure * getFigure();
-};
-
-SentinelBeing SentinelBeing::singleton;
-
-SentinelBeing::SentinelBeing() : AbstractBeing::AbstractBeing()
+SpacialFigure::SpacialFigure(Texture * texture, const char * path, BlendMode mode) : Figure::Figure(texture), path(path), mode(mode)
 {
 }
 
-Direction * SentinelBeing::getDirection()
+void SpacialFigure::getData(unsigned char * * data, size_t * size)
 {
-	return nullptr;
-}
-
-BlendMode SentinelBeing::getBlendMode()
-{
-	return SOLID_BLEND;
-}
-
-Figure * SentinelBeing::getFigure()
-{
-	return nullptr;
+	readBin(path, data, size);
 }
 
 
-AbstractBeing::AbstractBeing()
+SurficialFigure::SurficialFigure(Texture * texture, int x, int y, int left, int top, int right, int bottom) : Figure::Figure(texture), x(x), y(y), left(left), top(top), right(right), bottom(bottom)
 {
-	// FIXME make this thread safe
-	next = & SentinelBeing::singleton;
-	prev = SentinelBeing::singleton.prev;
-	next->prev = this;
-	prev->next = this;
-	/*
-	 * SentinelBeing::singleton is also initialilzed here.
-	 * next = & SentinelBeing::singleton; // next = this
-	 * prev = SentinelBeing::singleton.prev; // prev = prev // no matter
-	 * next->prev = this; // prev = this
-	 * prev->next = this; // next = this // again
-	 */
 }
 
-AbstractBeing::~AbstractBeing()
+void SurficialFigure::getData(unsigned char * * data, size_t * size)
 {
-	// FIXME make this thread safe
-	next->prev = prev;
-	prev->next = next;
-}
+	float * buf = (float *) malloc(30 * sizeof(float));
+	* data = (unsigned char *) buf;
+	* size = 30 * sizeof(float);
 
-AbstractBeing * AbstractBeing::getFirst()
-{
-	return SentinelBeing::singleton.next;
-}
+	float dstX1 = (2 * - left) / (float) screenWidth;
+	float dstY1 = (2 * top) / (float) screenHeight;
+	float dstX2 = (2 * right) / (float) screenWidth;
+	float dstY2 = (2 * - bottom) / (float) screenHeight;
+	float srcX1 = (x - left) / (float) texture->width;
+	float srcY1 = (y - top) / (float) texture->height;
+	float srcX2 = (x + right) / (float) texture->width;
+	float srcY2 = (y + bottom) / (float) texture->height;
 
-AbstractBeing * AbstractBeing::getNext()
-{
-	if (next == & SentinelBeing::singleton)
-	{
-		return nullptr;
-	}
-	return next;
-}
+	int i = 0;
 
-void AbstractBeing::getMatrix(float * matrix)
-{
-	getDirection()->getMatrix(matrix);
+	buf[i++] = srcX1;	buf[i++] = srcY2;
+	buf[i++] = dstX1;	buf[i++] = dstY2;	buf[i++] = 0.0f;
+
+	buf[i++] = srcX1;	buf[i++] = srcY1;
+	buf[i++] = dstX1;	buf[i++] = dstY1;	buf[i++] = 0.0f;
+
+	buf[i++] = srcX2;	buf[i++] = srcY2;
+	buf[i++] = dstX2;	buf[i++] = dstY2;	buf[i++] = 0.0f;
+
+	buf[i++] = srcX2;	buf[i++] = srcY2;
+	buf[i++] = dstX2;	buf[i++] = dstY2;	buf[i++] = 0.0f;
+
+	buf[i++] = srcX1;	buf[i++] = srcY1;
+	buf[i++] = dstX1;	buf[i++] = dstY1;	buf[i++] = 0.0f;
+
+	buf[i++] = srcX2;	buf[i++] = srcY1;
+	buf[i++] = dstX2;	buf[i++] = dstY1;	buf[i++] = 0.0f;
 }
 
 
 Scene::Scene()
 {
 }
+
 Scene::~Scene()
 {
 }

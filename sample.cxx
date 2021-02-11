@@ -5,22 +5,37 @@
 #include "common.h"
 #include "geometry.h"
 
+#define COUNTER_CAPACITY 6
+
 const int screenWidth = 512;
 const int screenHeight = 256;
 
 static Texture flatTexture("../flat.png");
 static Texture bumpTexture("../bump.png");
+static Texture digitTexture("../num8x8.png");
 
-static Figure solidFigure(& bumpTexture, "../solid.u-c.bin");
-static Figure lucidFigure(& flatTexture, "../lucid.u-c.bin");
-static Figure earthFigure(& flatTexture, "../earth.u-c.bin");
+static SpacialFigure solidFigure(& bumpTexture, "../solid.u-c.bin", SOLID_BLEND);
+static SpacialFigure lucidFigure(& flatTexture, "../lucid.u-c.bin", LUCID_BLEND);
+static SpacialFigure earthFigure(& flatTexture, "../earth.u-c.bin", SOLID_BLEND);
+SurficialFigure numFonts[] = {
+	SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 2 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 3 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 4 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 5 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 6 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 7 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 8 * 8, 8, 0, 8, 8, 0),
+	SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
+};
 
-class Star : public DirectedBeing<RotY<Move<Stop>>>
+class Star : public SpacialBeing<RotY<Move<Stop>>>
 {
 public:
 	Star();
 };
-Star::Star() : DirectedBeing<RotY<Move<Stop>>>::DirectedBeing()
+Star::Star()
 {
 }
 
@@ -28,17 +43,12 @@ class SolidStar : public Star
 {
 public:
 	SolidStar();
-	virtual BlendMode getBlendMode();
-	virtual Figure * getFigure();
+	virtual SpacialFigure * getFigure();
 };
 SolidStar::SolidStar()
 {
 }
-BlendMode SolidStar::getBlendMode()
-{
-	return SOLID_BLEND;
-}
-Figure * SolidStar::getFigure()
+SpacialFigure * SolidStar::getFigure()
 {
 	return & solidFigure;
 }
@@ -47,39 +57,39 @@ class LucidStar : public Star
 {
 public:
 	LucidStar();
-	virtual BlendMode getBlendMode();
-	virtual Figure * getFigure();
+	virtual SpacialFigure * getFigure();
 };
 LucidStar::LucidStar()
 {
 }
-BlendMode LucidStar::getBlendMode()
-{
-	return LUCID_BLEND;
-}
-Figure * LucidStar::getFigure()
+SpacialFigure * LucidStar::getFigure()
 {
 	return & lucidFigure;
 }
 
-class Earth : public DirectedBeing<Stop>
+class Earth : public SpacialBeing<Stop>
 {
 public:
 	Earth();
-	virtual BlendMode getBlendMode();
-	virtual Figure * getFigure();
+	virtual SpacialFigure * getFigure();
 };
-Earth::Earth() : DirectedBeing<Stop>::DirectedBeing()
+Earth::Earth()
 {
 }
-BlendMode Earth::getBlendMode()
-{
-	return SOLID_BLEND;
-}
-Figure * Earth::getFigure()
+SpacialFigure * Earth::getFigure()
 {
 	return & earthFigure;
 }
+
+class Digit : public SurficialBeing<Move<Stop>>
+{
+public:
+	int i = 0;
+	virtual SurficialFigure * getFigure()
+	{
+		return & numFonts[i];
+	}
+};
 
 class DemoScene : public Scene
 {
@@ -92,6 +102,8 @@ private:
 	float prevX = -1.0;
 	float prevY = -1.0;
 	double speed = 0.0;
+	Digit digit[COUNTER_CAPACITY];
+	int count = 0;
 public:
 	DemoScene(float x, float y);
 	Scene * rearrange(unsigned int dt, float x, float y);
@@ -121,6 +133,13 @@ DemoScene::DemoScene(float x, float y)
 		star[i]->direction->next->dy = 0;
 		star[i]->direction->next->dz = 3 + sinf(i - angle2) * 2;
 	}
+
+	for (int i = 0; i < COUNTER_CAPACITY; i++)
+	{
+		digit[i].direction->dx = 0.9 + (i * 8) * - 2.0 / screenWidth;
+		digit[i].direction->dy = 0.75;
+	}
+
 	prevX = x;
 	prevY = y;
 }
@@ -154,6 +173,13 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		star[i]->direction->next->dx = cosf(i - angle2) * 2;
 		star[i]->direction->next->dy = 0;
 		star[i]->direction->next->dz = 3 + sinf(i - angle2) * 2;
+	}
+
+	count++;
+	for (int i = 0, j = count; i < COUNTER_CAPACITY; i++)
+	{
+		digit[i].i = j % 10;
+		j = j / 10;
 	}
 
 	prevX = x;

@@ -87,6 +87,25 @@ void main() {
 	gl_FragColor = vec4(texture(tex1, uv1).rgb * a, 1.0);
 })";
 
+const GLchar * SOLID2D_VERT =
+R"(#version 330 core
+uniform mat4 fmat;
+in vec3 xyz0;
+in vec2 uv0;
+out vec2 uv1;
+void main() {
+	gl_Position = fmat * vec4(xyz0, 1.0);
+	uv1 = uv0;
+})";
+
+const GLchar * SOLID2D_FRAG =
+R"(#version 330 core
+uniform sampler2D tex;
+in vec2 uv1;
+void main() {
+	gl_FragColor = texture(tex, uv1);
+})";
+
 static GLboolean initShader(GLuint shader, const GLchar * * source)
 {
 	int status;
@@ -158,6 +177,7 @@ static GLuint * tex;
 static GLuint shadowProgram;
 static GLuint solidProgram;
 static GLuint lucidProgram;
+static GLuint solid2DProgram;
 static GLuint shadowBuffer;
 static int frame = 0;
 static struct timespec t0;
@@ -185,12 +205,11 @@ bool initiate()
 	for (Texture * t = Texture::last; t != nullptr; t = t->next)
 	{
 		unsigned char * data;
-		int width, height;
 		unsigned int type;
 		glActiveTexture(GL_TEXTURE0 + t->id); // is this legal?
 		glBindTexture(GL_TEXTURE_2D, tex[t->id]);
-		readPng(t->path, & data, & width, & height, & type);
-		glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, data);
+		readPng(t->path, & data, & t->width, & t->height, & type);
+		glTexImage2D(GL_TEXTURE_2D, 0, type, t->width, t->height, 0, type, GL_UNSIGNED_BYTE, data);
 		free(data);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -204,7 +223,7 @@ bool initiate()
 	{
 		unsigned char * data;
 		size_t size;
-		readBin(f->path, & data, & size);
+		f->getData(& data, & size);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[f->id]);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 		free(data);
@@ -215,6 +234,7 @@ bool initiate()
 	shadowProgram = initProgram(& SHADOW_VERT, & SHADOW_FRAG);
 	solidProgram = initProgram(& SOLID_VERT, & SOLID_FRAG);
 	lucidProgram = initProgram(& LUCID_VERT, & LUCID_FRAG);
+	solid2DProgram = initProgram(& SOLID2D_VERT, & SOLID2D_FRAG);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT); // TBD: better use default?
@@ -224,7 +244,7 @@ bool initiate()
 
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
-	return shadowProgram != 0 && solidProgram != 0 && lucidProgram != 0;
+	return shadowProgram != 0 && solidProgram != 0 && lucidProgram != 0 && solid2DProgram != 0;
 }
 
 void terminate()
@@ -242,6 +262,10 @@ void terminate()
 	if (lucidProgram != 0)
 	{
 		glDeleteProgram(lucidProgram);
+	}
+	if (solid2DProgram != 0)
+	{
+		glDeleteProgram(solid2DProgram);
 	}
 }
 
@@ -298,7 +322,7 @@ bool update(float x, float y)
 	glBindVertexArray(vao);
 	glEnableVertexAttribArray(0);
 
-	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getBlendMode() == SOLID_BLEND)
+	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext()) if (b->getFigure()->mode == SOLID_BLEND)
 	{
 		GLfloat objectLightingMatrix[16];
 		Matrix4x4 objectMatrix;
@@ -333,7 +357,7 @@ bool update(float x, float y)
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getBlendMode() == SOLID_BLEND)
+	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext()) if (b->getFigure()->mode == SOLID_BLEND)
 	{
 		GLfloat objectLightingMatrix[16];
 		GLfloat objectFramingMatrix[16];
@@ -380,7 +404,7 @@ bool update(float x, float y)
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	for (AbstractBeing * b = AbstractBeing::getFirst(); b != nullptr; b = b->getNext()) if (b->getBlendMode() == LUCID_BLEND)
+	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext()) if (b->getFigure()->mode == LUCID_BLEND)
 	{
 		GLfloat objectLightingMatrix[16];
 		GLfloat objectFramingMatrix[16];
@@ -412,6 +436,40 @@ bool update(float x, float y)
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
+
+
+	// super impose
+
+	glDepthMask(GL_TRUE);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glUseProgram(solid2DProgram);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	for (AbstractBeing<SurficialFigure> * b = AbstractBeing<SurficialFigure>::getFirst(); b != nullptr; b = b->getNext())
+	{
+		Matrix4x4 objectMatrix;
+		b->getMatrix(objectMatrix.elements);
+
+		glUniformMatrix4fv(glGetUniformLocation(solid2DProgram, "fmat"), 1, GL_FALSE, objectMatrix.elements);
+
+		glUniform1i(glGetUniformLocation(solid2DProgram, "tex"), b->getFigure()->texture->id);
+
+		glBindAttribLocation(solid2DProgram, 0, "xyz0");
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (2 * sizeof(float)));
+
+		glBindAttribLocation(solid2DProgram, 1, "uv0");
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+
+		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
+	}
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

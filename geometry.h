@@ -133,6 +133,7 @@ public:
 	static Texture * last;
 	const char * path;
 	int id;
+	int width, height;
 	Texture * next;
 	Texture(const char * path);
 };
@@ -142,10 +143,10 @@ class Figure
 public:
 	static Figure * last;
 	Texture * texture;
-	const char * path;
 	int id;
 	Figure * next;
-	Figure(Texture * texture, const char * path);
+	Figure(Texture * texuture);
+	virtual void getData(unsigned char * * data, size_t * size) = 0;
 };
 
 enum BlendMode
@@ -153,27 +154,54 @@ enum BlendMode
 	SOLID_BLEND, LUCID_BLEND
 };
 
-class AbstractBeing
+class SpacialFigure : public Figure
 {
-private:
-	AbstractBeing * prev;
-	AbstractBeing * next;
 public:
-	static AbstractBeing * getFirst();
-	AbstractBeing * getNext();
-	AbstractBeing();
-	void getMatrix(float * matrix);
-	virtual Direction * getDirection() = 0;
-	virtual BlendMode getBlendMode() = 0;
-	virtual Figure * getFigure() = 0;
-	virtual ~AbstractBeing();
+	BlendMode mode;
+	const char * path;
+	SpacialFigure(Texture * texture, const char * path, BlendMode mode);
+	virtual void getData(unsigned char * * data, size_t * size);
 };
 
-template <typename T> class DirectedBeing : public AbstractBeing
+class SurficialFigure : public Figure
 {
 public:
-	Ref<T> direction;
-	DirectedBeing() : direction(new T())
+	int x, y, left, top, right, bottom;
+	SurficialFigure(Texture * texture, int x, int y, int left, int top, int right, int bottom);
+	virtual void getData(unsigned char * * data, size_t * size);
+};
+
+template <typename T> class AbstractBeing
+{
+private:
+	static AbstractBeing<T> sentinel;
+	AbstractBeing<T> * prev;
+	AbstractBeing<T> * next;
+	AbstractBeing(AbstractBeing<T> * prev, AbstractBeing<T> * next) : prev(prev), next(next) {}
+public:
+	static AbstractBeing<T> * getFirst() { return sentinel.next; }
+	AbstractBeing * getNext() { if (next == & sentinel) { return nullptr; } else { return next; } }
+	AbstractBeing() : AbstractBeing(sentinel.prev, & sentinel) {
+		// FIXME make this thread safe
+		next->prev = this;
+		prev->next = this;
+	}
+	void getMatrix(float * matrix) { getDirection()->getMatrix(matrix); }
+	virtual Direction * getDirection() { return nullptr; }
+	virtual T * getFigure() { return nullptr; }
+	virtual ~AbstractBeing() {
+		// FIXME make this thread safe
+		next->prev = prev;
+		prev->next = next;
+	}
+};
+template <typename T> AbstractBeing<T> AbstractBeing<T>::sentinel(& sentinel, & sentinel);
+
+template <typename T, typename U> class FiniteBeing : public AbstractBeing<T>
+{
+public:
+	Ref<U> direction;
+	FiniteBeing() : direction(new U())
 	{
 	}
 	virtual Direction * getDirection()
@@ -181,6 +209,10 @@ public:
 		return direction;
 	}
 };
+
+template <typename T> using SpacialBeing = FiniteBeing<SpacialFigure, T>;
+
+template <typename T> using SurficialBeing = FiniteBeing<SurficialFigure, T>;
 
 class Scene
 {
