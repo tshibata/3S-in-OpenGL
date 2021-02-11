@@ -4,6 +4,7 @@ void rotX(float * mat, float a);
 void rotY(float * mat, float a);
 void rotZ(float * mat, float a);
 void move(float * mat, float x, float y, float z);
+void expand(float * mat, float sx, float sy, float sz);
 void proj(float * mat, float width, float height, float depth);
 
 class Matrix4x4
@@ -114,6 +115,27 @@ public:
 	{
 		next->getInvertedMatrix(matrix);
 		rotZ(matrix, - angle);
+	}
+};
+
+template <typename T> class Expand : public Direction
+{
+friend Ref<Expand>;
+public:
+	Ref<T> const next;
+	float scale, sx, sy, sz;
+	Expand() : next(new T()), scale(1), sx(1), sy(1), sz(1)
+	{
+	}
+	virtual void getMatrix(float * matrix)
+	{
+		expand(matrix, scale * sx, scale * sy, scale * sz);
+		next->getMatrix(matrix);
+	}
+	virtual void getInvertedMatrix(float * matrix)
+	{
+		next->getInvertedMatrix(matrix);
+		expand(matrix, 1 / (scale * sx), 1 / (scale * sy), 1 / (scale * sz));
 	}
 };
 

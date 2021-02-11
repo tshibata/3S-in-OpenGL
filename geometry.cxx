@@ -96,6 +96,17 @@ void move(float * mat, float x, float y, float z)
 	prod(mat, mat1);
 }
 
+void expand(float * mat, float sx, float sy, float sz)
+{
+	float mat1[16] = {
+		sx, 0.0f, 0.0f, 0.0f,
+		0.0f, sy, 0.0f, 0.0f,
+		0.0f, 0.0f, sz, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f,
+	};
+	prod(mat, mat1);
+}
+
 void proj(float * mat, float width, float height, float depth)
 {
 	float mat1[16] = {

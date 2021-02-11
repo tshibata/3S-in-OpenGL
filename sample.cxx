@@ -81,7 +81,7 @@ SpacialFigure * Earth::getFigure()
 	return & earthFigure;
 }
 
-class Digit : public SurficialBeing<Move<Stop>>
+class Digit : public SurficialBeing<Expand<Move<Stop>>>
 {
 public:
 	int i = 0;
@@ -136,8 +136,9 @@ DemoScene::DemoScene(float x, float y)
 
 	for (int i = 0; i < COUNTER_CAPACITY; i++)
 	{
-		digit[i].direction->dx = 0.9 + (i * 8) * - 2.0 / screenWidth;
-		digit[i].direction->dy = 0.75;
+		digit[i].direction->scale = 2;
+		digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / screenWidth;
+		digit[i].direction->next->dy = 0.75;
 	}
 
 	prevX = x;
