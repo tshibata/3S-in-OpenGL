@@ -21,6 +21,7 @@ protected:
 	unsigned int refc;
 public:
 	Direction();
+	virtual ~Direction();
 	virtual void getMatrix(float * matrix) = 0;
 	virtual void getInvertedMatrix(float * matrix) = 0;
 };

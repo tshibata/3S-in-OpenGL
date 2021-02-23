@@ -165,6 +165,9 @@ void Stop::getInvertedMatrix(float * matrix)
 Direction::Direction()
 {
 }
+Direction::~Direction()
+{
+}
 
 
 Projection::Projection(Direction * direction, float width, float height, float depth)
