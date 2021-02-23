@@ -1,5 +1,5 @@
 
-CFLAGS = -I. -lstdc++ -lstdc++fs -lpng `pkg-config --cflags --libs gtk+-3.0 epoxy`
+CFLAGS = -I. -lpng `pkg-config --cflags --libs gtk+-3.0 epoxy`
 
 run: sample.exe ../earth.u-c.bin ../solid.u-c.bin ../lucid.u-c.bin
 	./sample.exe

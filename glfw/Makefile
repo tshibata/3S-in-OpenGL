@@ -1,5 +1,5 @@
 
-CFLAGS = -I. -lstdc++ -lstdc++fs -lpng -lGL -lGLEW -lglfw
+CFLAGS = -I. -lpng -lGL -lGLEW -lglfw
 
 run: sample.exe ../earth.u-c.bin ../solid.u-c.bin ../lucid.u-c.bin
 	./sample.exe

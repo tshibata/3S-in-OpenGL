@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <math.h>
-#include <time.h>
 #include "ref.h"
 #include "common.h"
 #include "geometry.h"
