@@ -147,8 +147,8 @@ DemoScene::DemoScene(float x, float y)
 Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 {
 	float fdt = dt * 0.000001; // us -> s
-	if (0 <= prevX && prevX < 512 && 0 <= x && x < 512
-	 && 0 <= prevY && prevY < 512 && 0 <= y && y < 512
+	if (0 <= prevX && prevX < screenWidth && 0 <= x && x < screenWidth
+	 && 0 <= prevY && prevY < screenHeight && 0 <= y && y < screenHeight
 	 && speed < prevX - x)
 	{ // when mouse pointer moved inside the area, faster than stars
 		speed = (prevX - x) / fdt;
