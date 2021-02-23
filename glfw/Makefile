@@ -1,21 +1,23 @@
 
-CFLAGS = -I. -lpng -lGL -lGLEW -lglfw
+CXX = clang++
+CXXFLAGS = -I.
+LDFLAGS = -lpng -lGL -lGLEW -lglfw
 
 run: sample.exe ../earth.u-c.bin ../solid.u-c.bin ../lucid.u-c.bin
 	./sample.exe
 
-../earth.u-c.bin: ../earth.u-c.txt
-	ruby ../u-ctxt2bin.rb ../earth.u-c.txt
+../%.u-c.bin: ../%.u-c.txt
+	ruby ../u-ctxt2bin.rb $<
 
-../solid.u-c.bin: ../solid.u-c.txt
-	ruby ../u-ctxt2bin.rb ../solid.u-c.txt
+sample.exe: platform.o sample.o geometry.o common.o files.o
+	${CXX} -o $@ $+ ${CXXFLAGS} ${LDFLAGS}
 
-../lucid.u-c.bin: ../lucid.u-c.txt
-	ruby ../u-ctxt2bin.rb ../lucid.u-c.txt
+platform.o: platform.cxx
+	${CXX} -c -o $@ $< ${CXXFLAGS}
 
-sample.exe: platform.c ../sample.cxx ../geometry.cxx ../common.cxx ../files.cxx
-	g++ -o sample.exe platform.c ../sample.cxx ../geometry.cxx ../common.cxx ../files.cxx ${CFLAGS}
+%.o : ../%.cxx
+	${CXX} -c -o $@ $< ${CXXFLAGS}
 
 clean:
-	rm -f sample.exe ../*.u-c.bin
+	rm -f sample.exe *.o ../*.u-c.bin
 
