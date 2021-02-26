@@ -240,11 +240,10 @@ template <typename T> using SurficialBeing = FiniteBeing<SurficialFigure, T>;
 class Scene
 {
 public:
-	Projection * framing;
-	Projection * lighting;
 	Scene();
-	virtual Scene * rearrange(unsigned int dt, float x, float y) = 0;
 	virtual ~Scene();
+	virtual void render() = 0;
+	virtual Scene * rearrange(unsigned int dt, float x, float y) = 0;
 };
 
 Scene * arrange(float x, float y);

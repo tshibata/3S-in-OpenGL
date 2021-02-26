@@ -5,106 +5,8 @@
 #include "ref.h"
 #include "geometry.h"
 #include "common.h"
+#include "renderer.h"
 #include "files.h"
-
-const GLchar * SHADOW_VERT =
-R"(#version 330 core
-uniform mat4 lmat;
-in vec3 xyz0;
-void main() {
-	gl_Position = lmat * vec4(xyz0, 1.0);
-})";
-
-const GLchar * SHADOW_FRAG =
-R"(#version 330 core
-void main() {
-	gl_FragDepth = gl_FragCoord.z;
-})";
-
-const GLchar * SOLID_VERT =
-R"(#version 330 core
-uniform mat4 fmat;
-uniform mat4 lmat;
-in vec3 xyz0;
-in vec3 norm;
-in vec2 uv0;
-out vec2 uv1;
-out vec4 lxyz;
-out vec4 lnorm;
-void main() {
-	gl_Position = fmat * vec4(xyz0, 1.0);
-	uv1 = uv0;
-	lxyz = lmat * vec4(xyz0, 1.0);
-	lnorm = lmat * vec4(norm + xyz0, 1.0) - lxyz;
-})";
-
-const GLchar * SOLID_FRAG =
-R"(#version 330 core
-uniform sampler2D tex0;
-uniform sampler2D tex1;
-in vec2 uv1;
-in vec4 lxyz;
-in vec4 lnorm;
-void main() {
-	// illuminance, light per area
-	float i = clamp(dot(vec4(0.0, 0.0, 1.0, 1.0), normalize(lnorm)), 0, 1);
-
-	// coordinate in the shadow map
-	float x = (lxyz.x / lxyz.w + 1.0) / 2;
-	float y = (lxyz.y / lxyz.w + 1.0) / 2;
-	float z = (lxyz.z / lxyz.w + 1.0) / 2;
-
-	if (i != 0 && texture(tex0, vec2(x, y)).x < z - 0.01 / i)
-	{
-		i = 0;
-	}
-	gl_FragColor = (texture(tex1, uv1).rgba * (i + 0.5) / 1.5);
-})";
-
-const GLchar * LUCID_VERT =
-R"(#version 330 core
-uniform mat4 fmat;
-uniform mat4 lmat;
-in vec3 xyz0;
-in vec3 norm;
-in vec2 uv0;
-out vec2 uv1;
-out vec4 fnorm;
-void main() {
-	gl_Position = fmat * vec4(xyz0, 1.0);
-	uv1 = uv0;
-	fnorm = fmat * vec4(norm + xyz0, 1.0) - gl_Position;
-})";
-
-const GLchar * LUCID_FRAG =
-R"(#version 330 core
-uniform sampler2D tex1;
-in vec2 uv1;
-in vec4 fnorm;
-void main() {
-	float a = abs(dot(vec4(0.0, 0.0, 1.0, 1.0), normalize(fnorm)));
-	a = 1.0 / (a + 1.0);
-	gl_FragColor = vec4(texture(tex1, uv1).rgb * a, 1.0);
-})";
-
-const GLchar * SOLID2D_VERT =
-R"(#version 330 core
-uniform mat4 fmat;
-in vec3 xyz0;
-in vec2 uv0;
-out vec2 uv1;
-void main() {
-	gl_Position = fmat * vec4(xyz0, 1.0);
-	uv1 = uv0;
-})";
-
-const GLchar * SOLID2D_FRAG =
-R"(#version 330 core
-uniform sampler2D tex;
-in vec2 uv1;
-void main() {
-	gl_FragColor = texture(tex, uv1);
-})";
 
 static GLboolean initShader(GLuint shader, const GLchar * * source)
 {
@@ -171,14 +73,11 @@ GLuint initProgram(const GLchar * * vertSource, const GLchar * * fragSource)
 	return program;
 }
 
-static GLuint vao;
-static GLuint * vbo;
-static GLuint * tex;
-static GLuint shadowProgram;
-static GLuint solidProgram;
-static GLuint lucidProgram;
-static GLuint solid2DProgram;
-static GLuint shadowBuffer;
+GLuint vao;
+GLuint * vbo;
+GLuint * tex;
+GLuint shadowBuffer;
+
 static int frame = 0;
 static struct timespec t0;
 
@@ -231,11 +130,6 @@ bool initiate()
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	shadowProgram = initProgram(& SHADOW_VERT, & SHADOW_FRAG);
-	solidProgram = initProgram(& SOLID_VERT, & SOLID_FRAG);
-	lucidProgram = initProgram(& LUCID_VERT, & LUCID_FRAG);
-	solid2DProgram = initProgram(& SOLID2D_VERT, & SOLID2D_FRAG);
-
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT); // TBD: better use default?
 
@@ -244,29 +138,13 @@ bool initiate()
 
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 
-	return shadowProgram != 0 && solidProgram != 0 && lucidProgram != 0 && solid2DProgram != 0;
+	return true;
 }
 
 void terminate()
 {
 	glDeleteBuffers(3, vbo);
 	glDeleteVertexArrays(1, & vao);
-	if (shadowProgram != 0)
-	{
-		glDeleteProgram(shadowProgram);
-	}
-	if (solidProgram != 0)
-	{
-		glDeleteProgram(solidProgram);
-	}
-	if (lucidProgram != 0)
-	{
-		glDeleteProgram(lucidProgram);
-	}
-	if (solid2DProgram != 0)
-	{
-		glDeleteProgram(solid2DProgram);
-	}
 }
 
 bool update(float x, float y)
@@ -301,176 +179,9 @@ bool update(float x, float y)
 		curr = next;
 	}
 
-	Matrix4x4 lightingMatrix;
-	curr->lighting->getMatrix(lightingMatrix.elements);
-	Matrix4x4 framingMatrix;
-	curr->framing->getMatrix(framingMatrix.elements);
-
-	GLint target;
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, & target);
-
-	glDisable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
-	glDepthMask(GL_TRUE);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
-
-	// shadow
-
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glUseProgram(shadowProgram);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-
-	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext()) if (b->getFigure()->mode == SOLID_BLEND)
-	{
-		GLfloat objectLightingMatrix[16];
-		Matrix4x4 objectMatrix;
-		b->getMatrix(objectMatrix.elements);
-
-		prod(objectMatrix.elements, lightingMatrix.elements, objectLightingMatrix);
-
-		glBindAttribLocation(shadowProgram, 0, "xyz0");
-
-		glUniformMatrix4fv(glGetUniformLocation(shadowProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
-
-		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
-	}
-	glDrawBuffer(GL_NONE);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		fprintf(stderr, "framebuffer incomplete\n");
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, target);
-	glDisableVertexAttribArray(0);
-
-
-	// solid
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(solidProgram);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
 
-	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext()) if (b->getFigure()->mode == SOLID_BLEND)
-	{
-		GLfloat objectLightingMatrix[16];
-		GLfloat objectFramingMatrix[16];
-		Matrix4x4 objectMatrix;
-		b->getMatrix(objectMatrix.elements);
-
-		prod(objectMatrix.elements, lightingMatrix.elements, objectLightingMatrix);
-		prod(objectMatrix.elements, framingMatrix.elements, objectFramingMatrix);
-
-		glUniformMatrix4fv(glGetUniformLocation(solidProgram, "fmat"), 1, GL_FALSE, objectFramingMatrix);
-		glUniformMatrix4fv(glGetUniformLocation(solidProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
-
-		glUniform1i(glGetUniformLocation(solidProgram, "tex0"), 0);
-		glUniform1i(glGetUniformLocation(solidProgram, "tex1"), b->getFigure()->texture->id);
-
-		glBindAttribLocation(solidProgram, 0, "xyz0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
-
-		glBindAttribLocation(solidProgram, 1, "norm");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
-
-		glBindAttribLocation(solidProgram, 2, "uv0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-
-		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
-	}
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-
-
-	// lucid
-
-	glUseProgram(lucidProgram);
-	glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
-	glEnable(GL_BLEND);
-	glDisable(GL_CULL_FACE);
-	glDepthMask(GL_FALSE);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
-	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext()) if (b->getFigure()->mode == LUCID_BLEND)
-	{
-		GLfloat objectLightingMatrix[16];
-		GLfloat objectFramingMatrix[16];
-		Matrix4x4 objectMatrix;
-		b->getMatrix(objectMatrix.elements);
-
-		prod(objectMatrix.elements, lightingMatrix.elements, objectLightingMatrix);
-		prod(objectMatrix.elements, framingMatrix.elements, objectFramingMatrix);
-
-		glUniformMatrix4fv(glGetUniformLocation(lucidProgram, "fmat"), 1, GL_FALSE, objectFramingMatrix);
-		glUniformMatrix4fv(glGetUniformLocation(lucidProgram, "lmat"), 1, GL_FALSE, objectLightingMatrix);
-
-		glUniform1i(glGetUniformLocation(lucidProgram, "tex1"), b->getFigure()->texture->id);
-
-		glBindAttribLocation(lucidProgram, 0, "xyz0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
-
-		glBindAttribLocation(lucidProgram, 1, "norm");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
-
-		glBindAttribLocation(lucidProgram, 2, "uv0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-
-		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
-	}
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(2);
-
-
-	// super impose
-
-	glDepthMask(GL_TRUE);
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glUseProgram(solid2DProgram);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_BLEND);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-
-	for (AbstractBeing<SurficialFigure> * b = AbstractBeing<SurficialFigure>::getFirst(); b != nullptr; b = b->getNext())
-	{
-		Matrix4x4 objectMatrix;
-		b->getMatrix(objectMatrix.elements);
-
-		glUniformMatrix4fv(glGetUniformLocation(solid2DProgram, "fmat"), 1, GL_FALSE, objectMatrix.elements);
-
-		glUniform1i(glGetUniformLocation(solid2DProgram, "tex"), b->getFigure()->texture->id);
-
-		glBindAttribLocation(solid2DProgram, 0, "xyz0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (2 * sizeof(float)));
-
-		glBindAttribLocation(solid2DProgram, 1, "uv0");
-		glBindBuffer(GL_ARRAY_BUFFER, vbo[b->getFigure()->id]);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
-
-		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
-	}
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-
+	curr->render();
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

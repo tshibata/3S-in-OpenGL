@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <math.h>
+#include <platform.h>
 #include "ref.h"
 #include "common.h"
 #include "geometry.h"
+#include "renderer.h"
 
 #define COUNTER_CAPACITY 6
 
@@ -93,6 +95,9 @@ public:
 class DemoScene : public Scene
 {
 private:
+	Projection * framing;
+	Projection * lighting;
+
 	Move<RotX<RotY<Stop>>> * lightningDirection;
 	Star * star[4];
 	Earth * earth;
@@ -105,6 +110,7 @@ private:
 	int count = 0;
 public:
 	DemoScene(float x, float y);
+	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
 DemoScene::DemoScene(float x, float y)
@@ -142,6 +148,31 @@ DemoScene::DemoScene(float x, float y)
 
 	prevX = x;
 	prevY = y;
+}
+void DemoScene::render()
+{
+	static ShadowRenderer shadowRenderer;
+	static SolidRenderer solidRenderer;
+	static LucidRenderer lucidRenderer;
+	static Solid2DRenderer solid2DRenderer;
+
+	Matrix4x4 lightingMatrix;
+	lighting->getMatrix(lightingMatrix.elements);
+
+	Matrix4x4 framingMatrix;
+	framing->getMatrix(framingMatrix.elements);
+
+	shadowRenderer.lightingMatrix = lightingMatrix.elements;
+	shadowRenderer.process();
+
+	solidRenderer.framingMatrix = framingMatrix.elements;
+	solidRenderer.lightingMatrix = lightingMatrix.elements;
+	solidRenderer.process();
+
+	lucidRenderer.framingMatrix = framingMatrix.elements;
+	lucidRenderer.process();
+
+	solid2DRenderer.process();
 }
 Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 {

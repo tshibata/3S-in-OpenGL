@@ -1,4 +1,5 @@
 #include <math.h>
+#include <platform.h>
 #include "ref.h"
 #include "common.h"
 #include "geometry.h"
