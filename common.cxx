@@ -76,7 +76,6 @@ GLuint initProgram(const GLchar * * vertSource, const GLchar * * fragSource)
 GLuint vao;
 GLuint * vbo;
 GLuint * tex;
-GLuint shadowBuffer;
 
 static int frame = 0;
 static struct timespec t0;
@@ -85,33 +84,33 @@ bool initiate()
 {
 	GLboolean result;
 
-	tex = (GLuint *) malloc((Texture::last->id + 1) * sizeof(GLuint));
-	glGenTextures(Texture::last->id + 1, tex);
-
-	glGenFramebuffers(1, & shadowBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, tex[0]);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, tex[0], 0);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	tex = (GLuint *) malloc((Texture::nextId()) * sizeof(GLuint));
+	glGenTextures(Texture::nextId(), tex);
 
 	for (Texture * t = Texture::last; t != nullptr; t = t->next)
 	{
-		unsigned char * data;
-		unsigned int type;
+		glGenFramebuffers(1, & t->frameBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, t->frameBuffer);
 		glActiveTexture(GL_TEXTURE0 + t->id); // is this legal?
 		glBindTexture(GL_TEXTURE_2D, tex[t->id]);
-		readPng(t->path, & data, & t->width, & t->height, & type);
-		glTexImage2D(GL_TEXTURE_2D, 0, type, t->width, t->height, 0, type, GL_UNSIGNED_BYTE, data);
-		free(data);
+		if (t->path == nullptr)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, t->width, t->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		}
+		else
+		{
+			unsigned char * data;
+			unsigned int type;
+			readPng(t->path, & data, & t->width, & t->height, & type);
+			glTexImage2D(GL_TEXTURE_2D, 0, type, t->width, t->height, 0, type, GL_UNSIGNED_BYTE, data);
+			free(data);
+		}
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, tex[t->id], 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	glGenVertexArrays(1, & vao);

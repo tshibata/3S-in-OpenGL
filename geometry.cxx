@@ -184,18 +184,27 @@ void Projection::getMatrix(float * matrix)
 
 
 Texture * Texture::last = nullptr;
-Texture::Texture(const char * path) : path(path)
+
+Texture::Texture(const char * path) : path(path), id(nextId()), next(last)
+{
+	last = this;
+}
+
+Texture::Texture(int width, int height) : width(width), height(height), path(nullptr), id(nextId()), next(last)
+{
+	last = this;
+}
+
+int Texture::nextId()
 {
 	if (last == nullptr)
 	{
-		id = 1;
+		return 0;
 	}
 	else
 	{
-		id = last->id + 1;
+		return last->id + 1;
 	}
-	next = last;
-	last = this;
 }
 
 

@@ -6,7 +6,7 @@
 #include "common.h"
 #include "renderer.h"
 
-SolidRenderer::SolidRenderer()
+SolidRenderer::SolidRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
 {
 	const GLchar * vert =
 		R"(#version 330 core
@@ -69,8 +69,7 @@ void SolidRenderer::process()
 	UniformMatrix<SpacialFigure> lmat(program, "lmat", lightingMatrix);
 	UniformTexture<SpacialFigure> tex(program, "tex");
 
-	GLint shadowMap = glGetUniformLocation(program, "shadowMap");
-	glUniform1i(shadowMap, 0);
+	glUniform1i(glGetUniformLocation(program, "shadowMap"), shadowMap->id);
 
 	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext())
 	{

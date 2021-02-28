@@ -6,7 +6,7 @@
 #include "common.h"
 #include "renderer.h"
 
-ShadowRenderer::ShadowRenderer()
+ShadowRenderer::ShadowRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
 {
 	const GLchar * vert =
 		R"(#version 330 core
@@ -35,7 +35,11 @@ void ShadowRenderer::process()
 {
 	GLint target;
 	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, & target);
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowMap->frameBuffer);
+
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	glViewport(0, 0, shadowMap->width, shadowMap->height);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
@@ -60,5 +64,6 @@ void ShadowRenderer::process()
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, target);
+	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 

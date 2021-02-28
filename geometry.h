@@ -155,10 +155,13 @@ class Texture
 public:
 	static Texture * last;
 	const char * path;
-	int id;
+	const int id;
+	unsigned int frameBuffer;
 	int width, height;
 	Texture * next;
 	Texture(const char * path);
+	Texture(int witdh, int height);
+	static int nextId();
 };
 
 class Figure

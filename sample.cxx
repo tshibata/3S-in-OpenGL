@@ -11,6 +11,7 @@
 const int screenWidth = 512;
 const int screenHeight = 256;
 
+static Texture shadowMap(512, 256);
 static Texture flatTexture("../flat.png");
 static Texture bumpTexture("../bump.png");
 static Texture digitTexture("../num8x8.png");
@@ -97,7 +98,6 @@ class DemoScene : public Scene
 private:
 	Projection * framing;
 	Projection * lighting;
-
 	Move<RotX<RotY<Stop>>> * lightningDirection;
 	Star * star[4];
 	Earth * earth;
@@ -151,8 +151,8 @@ DemoScene::DemoScene(float x, float y)
 }
 void DemoScene::render()
 {
-	static ShadowRenderer shadowRenderer;
-	static SolidRenderer solidRenderer;
+	static ShadowRenderer shadowRenderer(shadowMap);
+	static SolidRenderer solidRenderer(shadowMap);
 	static LucidRenderer lucidRenderer;
 	static Solid2DRenderer solid2DRenderer;
 

@@ -1,7 +1,6 @@
 extern GLuint vao;
 extern GLuint * vbo;
 extern GLuint * tex;
-extern GLuint shadowBuffer;
 
 template <typename T> class DirectUniform
 {
@@ -97,7 +96,8 @@ private:
 	GLuint program;
 public:
 	float * lightingMatrix;
-	ShadowRenderer();
+	Texture * shadowMap;
+	ShadowRenderer(Texture & shadowMap);
 	~ShadowRenderer();
 	void process();
 };
@@ -109,7 +109,8 @@ private:
 public:
 	float * framingMatrix;
 	float * lightingMatrix;
-	SolidRenderer();
+	Texture * shadowMap;
+	SolidRenderer(Texture & shadowMap);
 	~SolidRenderer();
 	void process();
 };
