@@ -108,22 +108,15 @@ void expand(float * mat, float sx, float sy, float sz)
 	prod(mat, mat1);
 }
 
-void proj(float * mat, float width, float height, float depth)
+void proj(float * mat, float width, float height, float near, float far)
 {
 	float mat1[16] = {
-		1.0f / (width * depth), 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f / (height * depth), 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f / depth, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f,
+		2.0f / width, 0.0f, 0.0f, 0.0f,
+		0.0f, 2.0f / height, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f / (far - near), 1.0f / far,
+		0.0f, 0.0f, - near / (far - near), 0.0f,
 	};
 	prod(mat, mat1);
-	float mat2[16] = {
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f, 1.0f,
-	};
-	prod(mat, mat2);
 }
 
 Matrix4x4::Matrix4x4()
@@ -171,15 +164,15 @@ Direction::~Direction()
 }
 
 
-Projection::Projection(Direction * direction, float width, float height, float depth)
- : direction(direction), width(width), height(height), depth(depth)
+Projection::Projection(Direction * direction, float width, float height, float near, float far)
+ : direction(direction), width(width), height(height), near(near), far(far)
 {
 }
 
 void Projection::getMatrix(float * matrix)
 {
 	direction->getInvertedMatrix(matrix);
-	proj(matrix, width, height, depth);
+	proj(matrix, width, height, near, far);
 }
 
 

@@ -5,7 +5,7 @@ void rotY(float * mat, float a);
 void rotZ(float * mat, float a);
 void move(float * mat, float x, float y, float z);
 void expand(float * mat, float sx, float sy, float sz);
-void proj(float * mat, float width, float height, float depth);
+void proj(float * mat, float width, float height, float near, float far);
 
 class Matrix4x4
 {
@@ -145,8 +145,8 @@ class Projection
 private:
 	Ref<Direction> direction;
 public:
-	float width, height, depth;
-	Projection(Direction * direction, float widht, float height, float depth);
+	float width, height, near, far;
+	Projection(Direction * direction, float widht, float height, float near, float far);
 	void getMatrix(float * matrix);
 };
 

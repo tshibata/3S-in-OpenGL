@@ -98,6 +98,7 @@ class DemoScene : public Scene
 private:
 	Projection * framing;
 	Projection * lighting;
+	Move<Stop> * framingDirection;
 	Move<RotX<RotY<Stop>>> * lightningDirection;
 	Star * star[4];
 	Earth * earth;
@@ -121,15 +122,17 @@ DemoScene::DemoScene(float x, float y)
 	star[3] = new LucidStar();
 	earth = new Earth();
 
-	framing = new Projection(new Stop(), 1, 0.5, 3);
+	framingDirection = new Move<Stop>();
+	framingDirection->dz = -3;
+	framing = new Projection(framingDirection, 20, 10, 5, 15);
 
 	lightningDirection = new Move<RotX<RotY<Stop>>>();
 	lightningDirection->dx = - 2;
 	lightningDirection->dy = 0;
-	lightningDirection->dz = - 2;
+	lightningDirection->dz = - 5;
 	lightningDirection->next->angle = - 0.5;
 	lightningDirection->next->next->angle = - 1;
-	lighting = new Projection(lightningDirection, 1, 1, 3);
+	lighting = new Projection(lightningDirection, 20, 10, 5, 15);
 
 	for (int i = 0; i < 4; i++)
 	{
