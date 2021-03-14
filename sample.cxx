@@ -32,7 +32,7 @@ SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
 };
 
-class Star : public SpacialBeing<RotY<Move<Stop>>>
+class Star : public SpacialBeing<RotZ<Move<Stop>>>
 {
 public:
 	Star();
@@ -98,8 +98,8 @@ class DemoScene : public Scene
 private:
 	Projection * framing;
 	Projection * lighting;
-	Move<Stop> * framingDirection;
-	Move<RotX<RotY<Stop>>> * lightningDirection;
+	Ref<RotX<Move<Stop>>> framingDirection;
+	Ref<Move<RotX<RotZ<Stop>>>> lightningDirection;
 	Star * star[4];
 	Earth * earth;
 	float angle1 = 0.0;
@@ -122,17 +122,17 @@ DemoScene::DemoScene(float x, float y)
 	star[3] = new LucidStar();
 	earth = new Earth();
 
-	framingDirection = new Move<Stop>();
-	framingDirection->dz = -3;
+	framingDirection = new RotX<Move<Stop>>();
+	framingDirection->angle = 3.14159 / 2;
+	framingDirection->next->dy = -7;
+	framingDirection->next->dz = -1;
 	framing = new Projection(framingDirection, 20, 10, 5, 15);
 
-	lightningDirection = new Move<RotX<RotY<Stop>>>();
-	lightningDirection->dx = - 2;
-	lightningDirection->dy = 0;
-	lightningDirection->dz = - 5;
-	lightningDirection->next->angle = - 0.5;
-	lightningDirection->next->next->angle = - 1;
-	lighting = new Projection(lightningDirection, 20, 10, 5, 15);
+	lightningDirection = new Move<RotX<RotZ<Stop>>>();
+	lightningDirection->dz = -7;
+	lightningDirection->next->angle = 3.14159 / 3;
+	lightningDirection->next->next->angle = 3.14159 / 4;
+	lighting = new Projection(lightningDirection, 30, 15, 5, 20);
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -205,8 +205,8 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 	{
 		star[i]->direction->angle = i - angle1;
 		star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		star[i]->direction->next->dy = 0;
-		star[i]->direction->next->dz = 3 + sinf(i - angle2) * 2;
+		star[i]->direction->next->dz = -1;
+		star[i]->direction->next->dy = sinf(i - angle2) * 2;
 	}
 
 	count++;
