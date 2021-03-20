@@ -74,6 +74,13 @@ void readPng(const char * path, unsigned char * * data, int * width, int * heigh
 	* height = png_get_image_height(png, info);
 	png_bytepp rows = png_get_rows(png, info);
 	int rowbytes = png_get_rowbytes(png, info);
+	switch (png_get_bit_depth(png, info))
+	{
+	case 8:
+		break;
+	default:
+		exit(6); // unsupported format
+	}
 	// convert the jagged array into a linear array
 	* data = (unsigned char *) malloc(rowbytes * * height);
 	for (int i = 0; i < * height; i++)
@@ -87,10 +94,10 @@ void readPng(const char * path, unsigned char * * data, int * width, int * heigh
 	{
 	case PNG_COLOR_TYPE_RGB:
 		* type = GL_RGB;
-	break;
+		break;
 	case PNG_COLOR_TYPE_RGB_ALPHA:
 		* type = GL_RGBA;
-	break;
+		break;
 	default:
 		exit(6); // unsupported format
 	}
