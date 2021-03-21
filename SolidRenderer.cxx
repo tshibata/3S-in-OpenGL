@@ -75,6 +75,9 @@ void SolidRenderer::process()
 	{
 		if (b->getFigure()->mode == SOLID_BLEND)
 		{
+			glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
+			glStencilFunc(GL_ALWAYS, b->label, 0xFF);
+
 			fmat.set(b);
 			lmat.set(b);
 			tex.set(b);

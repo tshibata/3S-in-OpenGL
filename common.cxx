@@ -135,7 +135,10 @@ bool initiate()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); // not needed
 
+	glEnable(GL_STENCIL_TEST);
+
 	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearStencil(0);
 
 	return true;
 }
@@ -178,7 +181,7 @@ bool update(float x, float y)
 		curr = next;
 	}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	curr->render();
 
@@ -189,5 +192,12 @@ bool update(float x, float y)
 	glFlush();
 
 	return true;
+}
+
+unsigned char pixelLabel(float x, float y)
+{
+	unsigned char c;
+	glReadPixels(x, screenHeight - y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, & c);
+	return c;
 }
 

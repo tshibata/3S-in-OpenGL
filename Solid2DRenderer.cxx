@@ -52,6 +52,9 @@ void Solid2DRenderer::process()
 
 	for (AbstractBeing<SurficialFigure> * b = AbstractBeing<SurficialFigure>::getFirst(); b != nullptr; b = b->getNext())
 	{
+		glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
+		glStencilFunc(GL_ALWAYS, b->label, 0xFF);
+
 		mat.set(b);
 		tex.set(b);
 		xyz0.set(b);

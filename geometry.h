@@ -205,6 +205,7 @@ private:
 	AbstractBeing<T> * next;
 	AbstractBeing(AbstractBeing<T> * prev, AbstractBeing<T> * next) : prev(prev), next(next) {}
 public:
+	unsigned char label = 0;
 	static AbstractBeing<T> * getFirst() { return sentinel.next; }
 	AbstractBeing * getNext() { if (next == & sentinel) { return nullptr; } else { return next; } }
 	AbstractBeing() : AbstractBeing(sentinel.prev, & sentinel) {

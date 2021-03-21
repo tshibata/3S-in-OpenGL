@@ -61,6 +61,9 @@ void LucidRenderer::process()
 	{
 		if (b->getFigure()->mode == LUCID_BLEND)
 		{
+			glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
+			glStencilFunc(GL_ALWAYS, b->label, 0xFF);
+
 			fmat.set(b);
 			tex.set(b);
 

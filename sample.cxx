@@ -49,6 +49,7 @@ public:
 };
 SolidStar::SolidStar()
 {
+	label = 1;
 }
 SpacialFigure * SolidStar::getFigure()
 {
@@ -180,19 +181,13 @@ void DemoScene::render()
 Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 {
 	float fdt = dt * 0.000001; // us -> s
-	if (0 <= prevX && prevX < screenWidth && 0 <= x && x < screenWidth
-	 && 0 <= prevY && prevY < screenHeight && 0 <= y && y < screenHeight
-	 && speed < prevX - x)
-	{ // when mouse pointer moved inside the area, faster than stars
-		speed = (prevX - x) / fdt;
-		if (1000 < speed)
-		{
-			speed = 1000; // speed limit
-		}
+	if (0 <= x && x < screenWidth && 0 <= y && y < screenHeight && pixelLabel(x, y) != 0)
+	{
+		speed = 1000;
 	}
 	else
 	{
-		speed = speed - fdt * 500;
+		speed = speed - fdt * 1000;
 		if (speed < 0)
 		{
 			speed = 0; // no rewind

@@ -11,3 +11,5 @@ void wheelMoved(float d, float x, float y);
 
 GLuint initProgram(const GLchar * * vertSource, const GLchar * * fragSource);
 
+unsigned char pixelLabel(float x, float y);
+

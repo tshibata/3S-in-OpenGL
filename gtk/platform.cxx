@@ -118,7 +118,7 @@ int main(int argc, char * * argv)
 	gtk_gl_area_set_auto_render(GTK_GL_AREA(area), TRUE);
 	gtk_gl_area_set_has_alpha(GTK_GL_AREA(area), FALSE);
 	gtk_gl_area_set_has_depth_buffer(GTK_GL_AREA(area), TRUE);
-	gtk_gl_area_set_has_stencil_buffer(GTK_GL_AREA(area), FALSE);
+	gtk_gl_area_set_has_stencil_buffer(GTK_GL_AREA(area), TRUE);
 	gtk_gl_area_set_use_es(GTK_GL_AREA(area), FALSE);
 
 	gtk_container_add(GTK_CONTAINER(window), area);
