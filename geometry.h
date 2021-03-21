@@ -197,18 +197,18 @@ public:
 	virtual void getData(unsigned char * * data, size_t * size);
 };
 
-template <typename T> class AbstractBeing
+template <typename T> class AbstractPresence
 {
 private:
-	static AbstractBeing<T> sentinel;
-	AbstractBeing<T> * prev;
-	AbstractBeing<T> * next;
-	AbstractBeing(AbstractBeing<T> * prev, AbstractBeing<T> * next) : prev(prev), next(next) {}
+	static AbstractPresence<T> sentinel;
+	AbstractPresence<T> * prev;
+	AbstractPresence<T> * next;
+	AbstractPresence(AbstractPresence<T> * prev, AbstractPresence<T> * next) : prev(prev), next(next) {}
 public:
 	unsigned char label = 0;
-	static AbstractBeing<T> * getFirst() { return sentinel.next; }
-	AbstractBeing * getNext() { if (next == & sentinel) { return nullptr; } else { return next; } }
-	AbstractBeing() : AbstractBeing(sentinel.prev, & sentinel) {
+	static AbstractPresence<T> * getFirst() { return sentinel.next; }
+	AbstractPresence * getNext() { if (next == & sentinel) { return nullptr; } else { return next; } }
+	AbstractPresence() : AbstractPresence(sentinel.prev, & sentinel) {
 		// FIXME make this thread safe
 		next->prev = this;
 		prev->next = this;
@@ -216,19 +216,19 @@ public:
 	void getMatrix(float * matrix) { getDirection()->getMatrix(matrix); }
 	virtual Direction * getDirection() { return nullptr; }
 	virtual T * getFigure() { return nullptr; }
-	virtual ~AbstractBeing() {
+	virtual ~AbstractPresence() {
 		// FIXME make this thread safe
 		next->prev = prev;
 		prev->next = next;
 	}
 };
-template <typename T> AbstractBeing<T> AbstractBeing<T>::sentinel(& sentinel, & sentinel);
+template <typename T> AbstractPresence<T> AbstractPresence<T>::sentinel(& sentinel, & sentinel);
 
-template <typename T, typename U> class FiniteBeing : public AbstractBeing<T>
+template <typename T, typename U> class FinitePresence : public AbstractPresence<T>
 {
 public:
 	Ref<U> direction;
-	FiniteBeing() : direction(new U())
+	FinitePresence() : direction(new U())
 	{
 	}
 	virtual Direction * getDirection()
@@ -237,9 +237,9 @@ public:
 	}
 };
 
-template <typename T> using SpacialBeing = FiniteBeing<SpacialFigure, T>;
+template <typename T> using SpacialPresence = FinitePresence<SpacialFigure, T>;
 
-template <typename T> using SurficialBeing = FiniteBeing<SurficialFigure, T>;
+template <typename T> using SurficialPresence = FinitePresence<SurficialFigure, T>;
 
 class Scene
 {

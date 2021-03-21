@@ -71,7 +71,7 @@ void SolidRenderer::process()
 
 	glUniform1i(glGetUniformLocation(program, "shadowMap"), shadowMap->id);
 
-	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext())
+	for (AbstractPresence<SpacialFigure> * b = AbstractPresence<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext())
 	{
 		if (b->getFigure()->mode == SOLID_BLEND)
 		{

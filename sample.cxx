@@ -32,7 +32,7 @@ SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
 };
 
-class Star : public SpacialBeing<RotZ<Move<Stop>>>
+class Star : public SpacialPresence<RotZ<Move<Stop>>>
 {
 public:
 	Star();
@@ -70,7 +70,7 @@ SpacialFigure * LucidStar::getFigure()
 	return & lucidFigure;
 }
 
-class Earth : public SpacialBeing<Stop>
+class Earth : public SpacialPresence<Stop>
 {
 public:
 	Earth();
@@ -84,7 +84,7 @@ SpacialFigure * Earth::getFigure()
 	return & earthFigure;
 }
 
-class Digit : public SurficialBeing<Expand<Move<Stop>>>
+class Digit : public SurficialPresence<Expand<Move<Stop>>>
 {
 public:
 	int i = 0;

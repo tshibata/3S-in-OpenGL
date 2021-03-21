@@ -57,7 +57,7 @@ void LucidRenderer::process()
 	UniformMatrix<SpacialFigure> fmat(program, "fmat", framingMatrix);
 	UniformTexture<SpacialFigure> tex(program, "tex");
 
-	for (AbstractBeing<SpacialFigure> * b = AbstractBeing<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext())
+	for (AbstractPresence<SpacialFigure> * b = AbstractPresence<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext())
 	{
 		if (b->getFigure()->mode == LUCID_BLEND)
 		{
