@@ -12,13 +12,14 @@ const int screenWidth = 512;
 const int screenHeight = 256;
 
 static Texture shadowMap(512, 256);
-static Texture flatTexture("../flat.png");
-static Texture bumpTexture("../bump.png");
+static Texture floorTexture("../Floor.png");
+static Texture solidTexture("../SolidStar.png");
+static Texture lucidTexture("../LucidStar.png");
 static Texture digitTexture("../num8x8.png");
 
-static SpacialFigure solidFigure(& bumpTexture, "../solid.u-c.bin", SOLID_BLEND);
-static SpacialFigure lucidFigure(& flatTexture, "../lucid.u-c.bin", LUCID_BLEND);
-static SpacialFigure earthFigure(& flatTexture, "../earth.u-c.bin", SOLID_BLEND);
+static SpacialFigure solidFigure(& solidTexture, "../Star.u-c.bin", SOLID_BLEND);
+static SpacialFigure lucidFigure(& lucidTexture, "../Star.u-c.bin", LUCID_BLEND);
+static SpacialFigure earthFigure(& floorTexture, "../Floor.u-c.bin", SOLID_BLEND);
 SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
