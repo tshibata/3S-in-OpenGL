@@ -71,7 +71,7 @@ void LucidRenderer::process()
 			abc0.set(b);
 			uv0.set(b);
 
-			glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
+			glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
 		}
 	}
 	glDisableVertexAttribArray(0);

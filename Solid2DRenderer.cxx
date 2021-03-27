@@ -60,7 +60,7 @@ void Solid2DRenderer::process()
 		xyz0.set(b);
 		uv0.set(b);
 
-		glDrawArrays(GL_TRIANGLES, 0, 3 * 5 * 2);
+		glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (5 * sizeof(float)));
 	}
 }
 

@@ -75,6 +75,7 @@ GLuint initProgram(const GLchar * * vertSource, const GLchar * * fragSource)
 
 GLuint vao;
 GLuint * vbo;
+GLsizei * vbSize;
 GLuint * tex;
 
 static int frame = 0;
@@ -116,6 +117,7 @@ bool initiate()
 	glGenVertexArrays(1, & vao);
 
 	vbo = (GLuint *) malloc((Figure::last->id + 1) * sizeof(GLuint));
+	vbSize = (GLsizei *) malloc((Figure::last->id + 1) * sizeof(GLsizei));
 	glGenBuffers(Figure::last->id + 1, vbo);
 	for (Figure * f = Figure::last; f != nullptr; f = f->next)
 	{
@@ -124,6 +126,7 @@ bool initiate()
 		f->getData(& data, & size);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[f->id]);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+		vbSize[f->id] = size;
 		free(data);
 	}
 
@@ -147,6 +150,9 @@ void terminate()
 {
 	glDeleteBuffers(3, vbo);
 	glDeleteVertexArrays(1, & vao);
+	free(tex);
+	free(vbo);
+	free(vbSize);
 }
 
 bool update(float x, float y)

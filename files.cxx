@@ -31,8 +31,8 @@ void readBin(const char * path, unsigned char * * data, size_t * size)
 	{
 		exit(4); // wrong signature
 	}
-	* data = (unsigned char *) malloc(s.st_size);
 	* size = s.st_size - sizeof(sig);
+	* data = (unsigned char *) malloc(* size);
 	for (int i = 0; i < * size ; i++)
 	{
 		(* data)[i] = fgetc(fp);

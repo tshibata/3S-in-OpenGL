@@ -1,5 +1,6 @@
 extern GLuint vao;
 extern GLuint * vbo;
+extern GLsizei * vbSize;
 extern GLuint * tex;
 
 template <typename T> class DirectUniform
