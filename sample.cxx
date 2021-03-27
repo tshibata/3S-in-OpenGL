@@ -139,8 +139,8 @@ DemoScene::DemoScene(float x, float y)
 	{
 		star[i]->direction->angle = i - angle1;
 		star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		star[i]->direction->next->dy = 0;
-		star[i]->direction->next->dz = 3 + sinf(i - angle2) * 2;
+		star[i]->direction->next->dy = sinf(i - angle2) * 2;
+		star[i]->direction->next->dz = -1;
 	}
 
 	for (int i = 0; i < COUNTER_CAPACITY; i++)
@@ -200,8 +200,8 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 	{
 		star[i]->direction->angle = i - angle1;
 		star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		star[i]->direction->next->dz = -1;
 		star[i]->direction->next->dy = sinf(i - angle2) * 2;
+		star[i]->direction->next->dz = -1;
 	}
 
 	count++;
