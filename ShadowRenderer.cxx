@@ -12,13 +12,24 @@ ShadowRenderer::ShadowRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
 		R"(#version 330 core
 		uniform mat4 lmat;
 		in vec3 xyz0;
+		in vec2 uv0;
+		out vec2 uv1;
 		void main() {
+			uv1 = uv0;
 			gl_Position = lmat * vec4(xyz0, 1.0);
 		})";
 
 	const GLchar * frag =
 		R"(#version 330 core
+		uniform sampler2D tex;
+		in vec2 uv1;
 		void main() {
+			vec4 color = texture(tex, uv1);
+			if (color.a == 0)
+			{
+				discard;
+			}
+
 			gl_FragDepth = gl_FragCoord.z;
 		})";
 
@@ -50,7 +61,9 @@ void ShadowRenderer::process()
 	glBindVertexArray(vao);
 
 	VertexAttrib<SpacialFigure> xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
+	VertexAttrib<SpacialFigure> uv0(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 	UniformMatrix<SpacialFigure> lmat(program, "lmat", lightingMatrix);
+	UniformTexture<SpacialFigure> tex(program, "tex");
 
 	for (AbstractPresence<SpacialFigure> * b = AbstractPresence<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext())
 	{
@@ -58,6 +71,8 @@ void ShadowRenderer::process()
 		{
 			lmat.set(b);
 			xyz0.set(b);
+			uv0.set(b);
+			tex.set(b);
 
 			glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
 		}

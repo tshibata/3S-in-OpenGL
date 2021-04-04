@@ -33,6 +33,12 @@ SolidRenderer::SolidRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
 		in vec4 lxyz;
 		in vec4 lnorm;
 		void main() {
+			vec4 color = texture(tex, uv1);
+			if (color.a == 0)
+			{
+				discard;
+			}
+
 			// illuminance, light per area
 			float i = clamp(dot(vec4(0.0, 0.0, 1.0, 1.0), normalize(lnorm)), 0, 1);
 
@@ -45,7 +51,7 @@ SolidRenderer::SolidRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
 				i = 0;
 			}
 
-			gl_FragColor = (texture(tex, uv1).rgba * (i + 0.5) / 1.5);
+			gl_FragColor = (color * (i + 0.5) / 1.5);
 		})";
 
 	program = initProgram(& vert, & frag);

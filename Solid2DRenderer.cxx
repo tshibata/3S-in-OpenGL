@@ -24,7 +24,12 @@ Solid2DRenderer::Solid2DRenderer()
 		uniform sampler2D tex;
 		in vec2 uv1;
 		void main() {
-			gl_FragColor = texture(tex, uv1);
+			vec4 color = texture(tex, uv1);
+			if (color.a == 0)
+			{
+				discard;
+			}
+			gl_FragColor = color;
 		})";
 
 	program = initProgram(& vert, & frag);
