@@ -51,28 +51,25 @@ void LucidRenderer::process()
 	glDepthMask(GL_FALSE);
 	glBindVertexArray(vao);
 
-	VertexAttrib<SpacialFigure> xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
-	VertexAttrib<SpacialFigure> abc0(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
-	VertexAttrib<SpacialFigure> uv0(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-	UniformMatrix<SpacialFigure> fmat(program, "fmat", framingMatrix);
-	UniformTexture<SpacialFigure> tex(program, "tex");
+	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
+	VertexAttrib abc0(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
+	VertexAttrib uv0(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+	UniformMatrix fmat(program, "fmat", framingMatrix);
+	UniformTexture tex(program, "tex");
 
-	for (AbstractPresence<SpacialFigure> * b = AbstractPresence<SpacialFigure>::getFirst(); b != nullptr; b = b->getNext())
+	for (AbstractPresence * b = lucid3D.getFirst(); b != nullptr; b = b->getNext())
 	{
-		if (b->getFigure()->mode == LUCID_BLEND)
-		{
-			glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
-			glStencilFunc(GL_ALWAYS, b->label, 0xFF);
+		glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
+		glStencilFunc(GL_ALWAYS, b->label, 0xFF);
 
-			fmat.set(b);
-			tex.set(b);
+		fmat.set(b);
+		tex.set(b);
 
-			xyz0.set(b);
-			abc0.set(b);
-			uv0.set(b);
+		xyz0.set(b);
+		abc0.set(b);
+		uv0.set(b);
 
-			glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
-		}
+		glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
 	}
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);

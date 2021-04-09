@@ -17,9 +17,9 @@ static Texture solidTexture("../SolidStar.png");
 static Texture lucidTexture("../LucidStar.png");
 static Texture digitTexture("../num8x8.png");
 
-static SpacialFigure solidFigure(& solidTexture, "../Star.u-c.bin", SOLID_BLEND);
-static SpacialFigure lucidFigure(& lucidTexture, "../Star.u-c.bin", LUCID_BLEND);
-static SpacialFigure earthFigure(& floorTexture, "../Floor.u-c.bin", SOLID_BLEND);
+static SpacialFigure solidFigure(& solidTexture, "../Star.u-c.bin");
+static SpacialFigure lucidFigure(& lucidTexture, "../Star.u-c.bin");
+static SpacialFigure earthFigure(& floorTexture, "../Floor.u-c.bin");
 SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
@@ -33,12 +33,12 @@ SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
 };
 
-class Star : public SpacialPresence<RotZ<Move<Stop>>>
+class Star : public FinitePresence<RotZ<Move<Stop>>>
 {
 public:
-	Star();
+	Star(RenderingMode & mode);
 };
-Star::Star()
+Star::Star(RenderingMode & mode) : FinitePresence::FinitePresence(mode)
 {
 }
 
@@ -46,13 +46,13 @@ class SolidStar : public Star
 {
 public:
 	SolidStar();
-	virtual SpacialFigure * getFigure();
+	virtual Figure * getFigure();
 };
-SolidStar::SolidStar()
+SolidStar::SolidStar() : Star::Star(solid3D)
 {
 	label = 1;
 }
-SpacialFigure * SolidStar::getFigure()
+Figure * SolidStar::getFigure()
 {
 	return & solidFigure;
 }
@@ -61,35 +61,36 @@ class LucidStar : public Star
 {
 public:
 	LucidStar();
-	virtual SpacialFigure * getFigure();
+	virtual Figure * getFigure();
 };
-LucidStar::LucidStar()
+LucidStar::LucidStar() : Star::Star(lucid3D)
 {
 }
-SpacialFigure * LucidStar::getFigure()
+Figure * LucidStar::getFigure()
 {
 	return & lucidFigure;
 }
 
-class Earth : public SpacialPresence<Stop>
+class Earth : public FinitePresence<Stop>
 {
 public:
 	Earth();
-	virtual SpacialFigure * getFigure();
+	virtual Figure * getFigure();
 };
-Earth::Earth()
+Earth::Earth() : FinitePresence::FinitePresence(solid3D)
 {
 }
-SpacialFigure * Earth::getFigure()
+Figure * Earth::getFigure()
 {
 	return & earthFigure;
 }
 
-class Digit : public SurficialPresence<Expand<Move<Stop>>>
+class Digit : public FinitePresence<Expand<Move<Stop>>>
 {
 public:
 	int i = 0;
-	virtual SurficialFigure * getFigure()
+	Digit() : FinitePresence::FinitePresence(solid2D) {}
+	virtual Figure * getFigure()
 	{
 		return & numFonts[i];
 	}

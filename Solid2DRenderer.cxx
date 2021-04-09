@@ -50,12 +50,12 @@ void Solid2DRenderer::process()
 	glEnable(GL_BLEND);
 	glBindVertexArray(vao);
 
-	DirectUniform<SurficialFigure> mat(program, "fmat");
-	UniformTexture<SurficialFigure> tex(program, "tex");
-	VertexAttrib<SurficialFigure> xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (2 * sizeof(float)));
-	VertexAttrib<SurficialFigure> uv0(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	DirectUniform mat(program, "fmat");
+	UniformTexture tex(program, "tex");
+	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (2 * sizeof(float)));
+	VertexAttrib uv0(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
 
-	for (AbstractPresence<SurficialFigure> * b = AbstractPresence<SurficialFigure>::getFirst(); b != nullptr; b = b->getNext())
+	for (AbstractPresence * b = solid2D.getFirst(); b != nullptr; b = b->getNext())
 	{
 		glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
 		glStencilFunc(GL_ALWAYS, b->label, 0xFF);

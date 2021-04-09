@@ -15,7 +15,7 @@ run: sample.exe ../Floor.u-c.bin ../Star.u-c.bin
 ../Star.u-c.txt: ../star.dae
 	ruby ../dae2u-c.rb ../star.dae
 
-sample.exe: platform.o sample.o geometry.o common.o files.o ShadowRenderer.o SolidRenderer.o LucidRenderer.o Solid2DRenderer.o
+sample.exe: platform.o sample.o geometry.o common.o files.o renderer.o ShadowRenderer.o SolidRenderer.o LucidRenderer.o Solid2DRenderer.o
 	${CXX} -o $@ $+ ${CXXFLAGS} ${LDFLAGS}
 
 platform.o: platform.cxx

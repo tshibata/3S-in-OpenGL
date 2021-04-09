@@ -5,6 +5,10 @@
 #include "geometry.h"
 #include "files.h"
 
+RenderingMode solid2D;
+RenderingMode solid3D;
+RenderingMode lucid3D;
+
 void prod(float * a, float * b, float * c)
 {
 	float c0 = a[0] * b[0] +  a[1] * b[4] +  a[2] * b[8] +  a[3] * b[12];
@@ -218,7 +222,7 @@ Figure::Figure(Texture * texture) : texture(texture)
 }
 
 
-SpacialFigure::SpacialFigure(Texture * texture, const char * path, BlendMode mode) : Figure::Figure(texture), path(path), mode(mode)
+SpacialFigure::SpacialFigure(Texture * texture, const char * path) : Figure::Figure(texture), path(path)
 {
 }
 
@@ -266,6 +270,58 @@ void SurficialFigure::getData(unsigned char * * data, size_t * size)
 
 	buf[i++] = srcX2;	buf[i++] = srcY1;
 	buf[i++] = dstX2;	buf[i++] = dstY1;	buf[i++] = 0.0f;
+}
+
+
+AbstractPresence::AbstractPresence() : mode(nullptr), prev(this), next(this)
+{
+}
+
+AbstractPresence::AbstractPresence(RenderingMode & mode) : prev(mode.sentinel.prev), next(& mode.sentinel), mode(& mode)
+{
+	// FIXME make this thread safe
+	next->prev = this;
+	prev->next = this;
+}
+
+AbstractPresence::~AbstractPresence()
+{
+	// FIXME make this thread safe
+	next->prev = prev;
+	prev->next = next;
+}
+
+void AbstractPresence::getMatrix(float * matrix)
+{
+	getDirection()->getMatrix(matrix);
+}
+
+AbstractPresence * AbstractPresence::getNext()
+{
+	if (next == & mode->sentinel)
+	{
+		return nullptr;
+	}
+	else
+	{
+		return next;
+	}
+}
+
+Direction * AbstractPresence::getDirection()
+{
+	return nullptr;
+}
+
+Figure * AbstractPresence::getFigure()
+{
+	return nullptr;
+}
+
+
+AbstractPresence * RenderingMode::getFirst()
+{
+	return sentinel.next;
 }
 
 

@@ -175,17 +175,11 @@ public:
 	virtual void getData(unsigned char * * data, size_t * size) = 0;
 };
 
-enum BlendMode
-{
-	SOLID_BLEND, LUCID_BLEND
-};
-
 class SpacialFigure : public Figure
 {
 public:
-	BlendMode mode;
 	const char * path;
-	SpacialFigure(Texture * texture, const char * path, BlendMode mode);
+	SpacialFigure(Texture * texture, const char * path);
 	virtual void getData(unsigned char * * data, size_t * size);
 };
 
@@ -197,38 +191,43 @@ public:
 	virtual void getData(unsigned char * * data, size_t * size);
 };
 
-template <typename T> class AbstractPresence
+class RenderingMode;
+
+class AbstractPresence
 {
+friend RenderingMode;
 private:
-	static AbstractPresence<T> sentinel;
-	AbstractPresence<T> * prev;
-	AbstractPresence<T> * next;
-	AbstractPresence(AbstractPresence<T> * prev, AbstractPresence<T> * next) : prev(prev), next(next) {}
+	RenderingMode * const mode; // TBD no need to be const?
+	AbstractPresence * prev;
+	AbstractPresence * next;
+	AbstractPresence();
 public:
 	unsigned char label = 0;
-	static AbstractPresence<T> * getFirst() { return sentinel.next; }
-	AbstractPresence * getNext() { if (next == & sentinel) { return nullptr; } else { return next; } }
-	AbstractPresence() : AbstractPresence(sentinel.prev, & sentinel) {
-		// FIXME make this thread safe
-		next->prev = this;
-		prev->next = this;
-	}
-	void getMatrix(float * matrix) { getDirection()->getMatrix(matrix); }
-	virtual Direction * getDirection() { return nullptr; }
-	virtual T * getFigure() { return nullptr; }
-	virtual ~AbstractPresence() {
-		// FIXME make this thread safe
-		next->prev = prev;
-		prev->next = next;
-	}
+	AbstractPresence(RenderingMode & mode);
+	virtual ~AbstractPresence();
+	AbstractPresence * getNext();
+	void getMatrix(float * matrix);
+	virtual Direction * getDirection();
+	virtual Figure * getFigure();
 };
-template <typename T> AbstractPresence<T> AbstractPresence<T>::sentinel(& sentinel, & sentinel);
 
-template <typename T, typename U> class FinitePresence : public AbstractPresence<T>
+class RenderingMode
+{
+friend AbstractPresence;
+private:
+	AbstractPresence sentinel;
+public:
+	AbstractPresence * getFirst();
+};
+extern RenderingMode solid2D;
+extern RenderingMode solid3D;
+extern RenderingMode lucid3D;
+
+template <typename U> class FinitePresence : public AbstractPresence
 {
 public:
 	Ref<U> direction;
-	FinitePresence() : direction(new U())
+	FinitePresence(RenderingMode & mode) : AbstractPresence::AbstractPresence(mode), direction(new U())
 	{
 	}
 	virtual Direction * getDirection()
@@ -236,10 +235,6 @@ public:
 		return direction;
 	}
 };
-
-template <typename T> using SpacialPresence = FinitePresence<SpacialFigure, T>;
-
-template <typename T> using SurficialPresence = FinitePresence<SurficialFigure, T>;
 
 class Scene
 {
