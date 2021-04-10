@@ -53,8 +53,8 @@ void Solid2DRenderer::process()
 	StencilOperation sop;
 	DirectUniform mat(program, "fmat");
 	UniformTexture tex(program, "tex");
-	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (2 * sizeof(float)));
-	VertexAttrib uv0(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
+	VertexAttrib uv0(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 
 	for (AbstractPresence * b = solid2D.getFirst(); b != nullptr; b = b->getNext())
 	{
@@ -65,7 +65,7 @@ void Solid2DRenderer::process()
 		xyz0.set(b);
 		uv0.set(b);
 
-		glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (5 * sizeof(float)));
+		glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
 	}
 }
 

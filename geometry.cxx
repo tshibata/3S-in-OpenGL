@@ -238,9 +238,9 @@ SurficialFigure::SurficialFigure(Texture * texture, int x, int y, int left, int 
 
 void SurficialFigure::getData(unsigned char * * data, size_t * size)
 {
-	float * buf = (float *) malloc(30 * sizeof(float));
+	float * buf = (float *) malloc(48 * sizeof(float));
 	* data = (unsigned char *) buf;
-	* size = 30 * sizeof(float);
+	* size = 48 * sizeof(float);
 
 	float dstX1 = (2 * - left) / (float) screenWidth;
 	float dstY1 = (2 * top) / (float) screenHeight;
@@ -255,21 +255,27 @@ void SurficialFigure::getData(unsigned char * * data, size_t * size)
 
 	buf[i++] = srcX1;	buf[i++] = srcY2;
 	buf[i++] = dstX1;	buf[i++] = dstY2;	buf[i++] = 0.0f;
+	buf[i++] = 0;	buf[i++] = 0;	buf[i++] = -1.0f;
 
 	buf[i++] = srcX1;	buf[i++] = srcY1;
 	buf[i++] = dstX1;	buf[i++] = dstY1;	buf[i++] = 0.0f;
+	buf[i++] = 0;	buf[i++] = 0;	buf[i++] = -1.0f;
 
 	buf[i++] = srcX2;	buf[i++] = srcY2;
 	buf[i++] = dstX2;	buf[i++] = dstY2;	buf[i++] = 0.0f;
+	buf[i++] = 0;	buf[i++] = 0;	buf[i++] = -1.0f;
 
 	buf[i++] = srcX2;	buf[i++] = srcY2;
 	buf[i++] = dstX2;	buf[i++] = dstY2;	buf[i++] = 0.0f;
+	buf[i++] = 0;	buf[i++] = 0;	buf[i++] = -1.0f;
 
 	buf[i++] = srcX1;	buf[i++] = srcY1;
 	buf[i++] = dstX1;	buf[i++] = dstY1;	buf[i++] = 0.0f;
+	buf[i++] = 0;	buf[i++] = 0;	buf[i++] = -1.0f;
 
 	buf[i++] = srcX2;	buf[i++] = srcY1;
 	buf[i++] = dstX2;	buf[i++] = dstY1;	buf[i++] = 0.0f;
+	buf[i++] = 0;	buf[i++] = 0;	buf[i++] = -1.0f;
 }
 
 
