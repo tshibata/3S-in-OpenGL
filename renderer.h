@@ -46,6 +46,13 @@ public:
 	void set(AbstractPresence * b);
 };
 
+class StencilOperation
+{
+public:
+	StencilOperation();
+	void set(AbstractPresence * b);
+};
+
 class ShadowRenderer
 {
 private:

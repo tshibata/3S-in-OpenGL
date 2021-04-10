@@ -50,6 +50,7 @@ void Solid2DRenderer::process()
 	glEnable(GL_BLEND);
 	glBindVertexArray(vao);
 
+	StencilOperation sop;
 	DirectUniform mat(program, "fmat");
 	UniformTexture tex(program, "tex");
 	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (2 * sizeof(float)));
@@ -57,8 +58,7 @@ void Solid2DRenderer::process()
 
 	for (AbstractPresence * b = solid2D.getFirst(); b != nullptr; b = b->getNext())
 	{
-		glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
-		glStencilFunc(GL_ALWAYS, b->label, 0xFF);
+		sop.set(b);
 
 		mat.set(b);
 		tex.set(b);

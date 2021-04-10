@@ -56,3 +56,12 @@ void VertexAttrib::set(AbstractPresence * b)
 	glVertexAttribPointer(index, size, type, normalized, stride, pointer);
 }
 
+StencilOperation::StencilOperation()
+{
+}
+void StencilOperation::set(AbstractPresence * b)
+{
+	glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
+	glStencilFunc(GL_ALWAYS, b->label, 0xFF);
+}
+

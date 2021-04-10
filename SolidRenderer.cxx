@@ -68,6 +68,7 @@ void SolidRenderer::process()
 	glUseProgram(program);
 	glBindVertexArray(vao);
 
+	StencilOperation sop;
 	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
 	VertexAttrib abc0(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
 	VertexAttrib uv0(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
@@ -79,8 +80,7 @@ void SolidRenderer::process()
 
 	for (AbstractPresence * b = solid3D.getFirst(); b != nullptr; b = b->getNext())
 	{
-		glStencilOp(GL_KEEP, GL_KEEP, b->label ? GL_REPLACE : GL_KEEP);
-		glStencilFunc(GL_ALWAYS, b->label, 0xFF);
+		sop.set(b);
 
 		fmat.set(b);
 		lmat.set(b);
