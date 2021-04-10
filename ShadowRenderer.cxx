@@ -1,3 +1,4 @@
+#include <utility>
 #include <stdlib.h>
 #include <stdio.h>
 #include <platform.h>
@@ -60,20 +61,11 @@ void ShadowRenderer::process()
 	glUseProgram(program);
 	glBindVertexArray(vao);
 
-	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
-	VertexAttrib uv0(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-	UniformMatrix lmat(program, "lmat", lightingMatrix);
-	UniformTexture tex(program, "tex");
-
-	for (AbstractPresence * b = solid3D.getFirst(); b != nullptr; b = b->getNext())
-	{
-		lmat.set(b);
-		xyz0.set(b);
-		uv0.set(b);
-		tex.set(b);
-
-		glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
-	}
+	present(solid3D,
+		VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
+		VertexAttrib(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0),
+		UniformMatrix(program, "lmat", lightingMatrix),
+		UniformTexture(program, "tex"));
 
 	glBindFramebuffer(GL_FRAMEBUFFER, target);
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);

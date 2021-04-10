@@ -3,6 +3,23 @@ extern GLuint * vbo;
 extern GLsizei * vbSize;
 extern GLuint * tex;
 
+void setPresence(AbstractPresence * p);
+
+template <class Head, class... Tail> void setPresence(AbstractPresence * p, Head&& head, Tail&&... tail)
+{
+	head.set(p);
+	setPresence(p, std::forward<Tail>(tail)...);
+}
+
+template <class... Tail> void present(RenderingMode & mode, Tail... tail)
+{
+	for (AbstractPresence * b = mode.getFirst(); b != nullptr; b = b->getNext())
+	{
+		setPresence(b, std::forward<Tail>(tail)...);
+		glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
+	}
+}
+
 class DirectUniform
 {
 private:

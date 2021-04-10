@@ -1,3 +1,4 @@
+#include <utility>
 #include <stdlib.h>
 #include <stdio.h>
 #include <platform.h>
@@ -70,26 +71,13 @@ void SolidRenderer::process()
 
 	glUniform1i(glGetUniformLocation(program, "shadowMap"), shadowMap->id);
 
-	StencilOperation sop;
-	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
-	VertexAttrib abc0(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
-	VertexAttrib uv0(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-	UniformMatrix fmat(program, "fmat", framingMatrix);
-	UniformMatrix lmat(program, "lmat", lightingMatrix);
-	UniformTexture tex(program, "tex");
-
-	for (AbstractPresence * b = solid3D.getFirst(); b != nullptr; b = b->getNext())
-	{
-		sop.set(b);
-
-		fmat.set(b);
-		lmat.set(b);
-		tex.set(b);
-		xyz0.set(b);
-		abc0.set(b);
-		uv0.set(b);
-
-		glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
-	}
+	present(solid3D,
+		StencilOperation(),
+		VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
+		VertexAttrib(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float))),
+		VertexAttrib(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0),
+		UniformMatrix(program, "fmat", framingMatrix),
+		UniformMatrix(program, "lmat", lightingMatrix),
+		UniformTexture(program, "tex"));
 }
 

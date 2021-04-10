@@ -1,3 +1,4 @@
+#include <utility>
 #include <stdlib.h>
 #include <stdio.h>
 #include <platform.h>
@@ -5,6 +6,10 @@
 #include "geometry.h"
 #include "common.h"
 #include "renderer.h"
+
+void setPresence(AbstractPresence * p)
+{
+}
 
 DirectUniform::DirectUniform(GLuint program, const GLchar *name)
 {
