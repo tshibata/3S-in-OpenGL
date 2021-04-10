@@ -68,6 +68,8 @@ void SolidRenderer::process()
 	glUseProgram(program);
 	glBindVertexArray(vao);
 
+	glUniform1i(glGetUniformLocation(program, "shadowMap"), shadowMap->id);
+
 	StencilOperation sop;
 	VertexAttrib xyz0(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float)));
 	VertexAttrib abc0(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float)));
@@ -75,8 +77,6 @@ void SolidRenderer::process()
 	UniformMatrix fmat(program, "fmat", framingMatrix);
 	UniformMatrix lmat(program, "lmat", lightingMatrix);
 	UniformTexture tex(program, "tex");
-
-	glUniform1i(glGetUniformLocation(program, "shadowMap"), shadowMap->id);
 
 	for (AbstractPresence * b = solid3D.getFirst(); b != nullptr; b = b->getNext())
 	{
