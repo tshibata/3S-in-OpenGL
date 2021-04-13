@@ -100,10 +100,8 @@ public:
 class DemoScene : public Scene
 {
 private:
-	Projection * framing;
-	Projection * lighting;
-	Ref<RotX<Move<Stop>>> framingDirection;
-	Ref<Move<RotX<RotZ<Stop>>>> lightningDirection;
+	Projection<RotX<Move<Stop>>> framing;
+	Projection<Move<RotX<RotZ<Stop>>>> lighting;
 	Star * star[4];
 	Earth * earth;
 	float angle1 = 0.0;
@@ -118,7 +116,7 @@ public:
 	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y)
+DemoScene::DemoScene(float x, float y) : framing(20, 10, 5, 15), lighting(30, 15, 5, 20)
 {
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
@@ -126,17 +124,13 @@ DemoScene::DemoScene(float x, float y)
 	star[3] = new LucidStar();
 	earth = new Earth();
 
-	framingDirection = new RotX<Move<Stop>>();
-	framingDirection->angle = 3.14159 / 2;
-	framingDirection->next->dy = -7;
-	framingDirection->next->dz = -1;
-	framing = new Projection(framingDirection, 20, 10, 5, 15);
+	framing.direction->angle = 3.14159 / 2;
+	framing.direction->next->dy = -7;
+	framing.direction->next->dz = -1;
 
-	lightningDirection = new Move<RotX<RotZ<Stop>>>();
-	lightningDirection->dz = -7;
-	lightningDirection->next->angle = 3.14159 / 3;
-	lightningDirection->next->next->angle = 3.14159 / 4;
-	lighting = new Projection(lightningDirection, 30, 15, 5, 20);
+	lighting.direction->dz = -7;
+	lighting.direction->next->angle = 3.14159 / 3;
+	lighting.direction->next->next->angle = 3.14159 / 4;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -164,10 +158,10 @@ void DemoScene::render()
 	static Solid2DRenderer solid2DRenderer;
 
 	Matrix4x4 lightingMatrix;
-	lighting->getMatrix(lightingMatrix.elements);
+	lighting.getMatrix(lightingMatrix.elements);
 
 	Matrix4x4 framingMatrix;
-	framing->getMatrix(framingMatrix.elements);
+	framing.getMatrix(framingMatrix.elements);
 
 	shadowRenderer.lightingMatrix = lightingMatrix.elements;
 	shadowRenderer.process();

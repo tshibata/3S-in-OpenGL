@@ -140,14 +140,23 @@ public:
 	}
 };
 
-class Projection
+template <typename T> class Projection
 {
+friend Ref<Projection>;
 private:
-	Ref<Direction> direction;
+	unsigned int refc;
 public:
+	Ref<T> const direction;
 	float width, height, near, far;
-	Projection(Direction * direction, float widht, float height, float near, float far);
-	void getMatrix(float * matrix);
+	Projection(float width, float height, float near, float far)
+	 : direction(new T()), width(width), height(height), near(near), far(far)
+	{
+	}
+	void getMatrix(float * matrix)
+	{
+		direction->getInvertedMatrix(matrix);
+		proj(matrix, width, height, near, far);
+	}
 };
 
 class Texture

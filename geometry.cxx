@@ -168,18 +168,6 @@ Direction::~Direction()
 }
 
 
-Projection::Projection(Direction * direction, float width, float height, float near, float far)
- : direction(direction), width(width), height(height), near(near), far(far)
-{
-}
-
-void Projection::getMatrix(float * matrix)
-{
-	direction->getInvertedMatrix(matrix);
-	proj(matrix, width, height, near, far);
-}
-
-
 Texture * Texture::last = nullptr;
 
 Texture::Texture(const char * path) : path(path), id(nextId()), next(last)
