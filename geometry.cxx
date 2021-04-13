@@ -112,7 +112,18 @@ void expand(float * mat, float sx, float sy, float sz)
 	prod(mat, mat1);
 }
 
-void proj(float * mat, float width, float height, float near, float far)
+void para(float * mat, float width, float height, float near, float far)
+{
+	float mat1[16] = {
+		2.0f / width, 0.0f, 0.0f, 0.0f,
+		0.0f, 2.0f / height, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f / (far - near), 0.0f,
+		0.0f, 0.0f, - near / (far - near), 1.0f,
+	};
+	prod(mat, mat1);
+}
+
+void pers(float * mat, float width, float height, float near, float far)
 {
 	float mat1[16] = {
 		2.0f / width, 0.0f, 0.0f, 0.0f,
@@ -164,6 +175,11 @@ Direction::Direction()
 {
 }
 Direction::~Direction()
+{
+}
+
+
+Projection::Projection(float width, float height, float near, float far) : width(width), height(height), near(near), far(far)
 {
 }
 

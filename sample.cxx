@@ -100,8 +100,8 @@ public:
 class DemoScene : public Scene
 {
 private:
-	Projection<RotX<Move<Stop>>> framing;
-	Projection<Move<RotX<RotZ<Stop>>>> lighting;
+	PerspectiveProjection<RotX<Move<Stop>>> framing;
+	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
 	Star * star[4];
 	Earth * earth;
 	float angle1 = 0.0;

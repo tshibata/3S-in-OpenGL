@@ -5,7 +5,8 @@ void rotY(float * mat, float a);
 void rotZ(float * mat, float a);
 void move(float * mat, float x, float y, float z);
 void expand(float * mat, float sx, float sy, float sz);
-void proj(float * mat, float width, float height, float near, float far);
+void para(float * mat, float width, float height, float near, float far);
+void pers(float * mat, float width, float height, float near, float far);
 
 class Matrix4x4
 {
@@ -140,22 +141,43 @@ public:
 	}
 };
 
-template <typename T> class Projection
+class Projection
 {
 friend Ref<Projection>;
-private:
+protected:
 	unsigned int refc;
 public:
-	Ref<T> const direction;
 	float width, height, near, far;
-	Projection(float width, float height, float near, float far)
-	 : direction(new T()), width(width), height(height), near(near), far(far)
+	Projection(float width, float height, float near, float far);
+};
+
+template <typename T> class ParallelProjection : public Projection
+{
+public:
+	Ref<T> const direction;
+	ParallelProjection(float width, float height, float near, float far)
+	 : Projection::Projection(width, height, near, far), direction(new T())
 	{
 	}
 	void getMatrix(float * matrix)
 	{
 		direction->getInvertedMatrix(matrix);
-		proj(matrix, width, height, near, far);
+		para(matrix, width, height, near, far);
+	}
+};
+
+template <typename T> class PerspectiveProjection : public Projection
+{
+public:
+	Ref<T> const direction;
+	PerspectiveProjection(float width, float height, float near, float far)
+	 : Projection::Projection(width, height, near, far), direction(new T())
+	{
+	}
+	void getMatrix(float * matrix)
+	{
+		direction->getInvertedMatrix(matrix);
+		pers(matrix, width, height, near, far);
 	}
 };
 
