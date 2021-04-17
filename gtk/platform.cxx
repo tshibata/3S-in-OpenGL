@@ -66,13 +66,13 @@ static void press(GtkGLArea * area, GdkEventButton * event, void * data)
 	switch (event->button)
 	{
 	case 1:
-		buttonPressed(- 1, 0, 0);
+		buttonPressed(- 1, x, y);
 		break;
 	case 2:
-		buttonPressed(0, 0, 0);
+		buttonPressed(0, x, y);
 		break;
 	case 3:
-		buttonPressed(1, 0, 0);
+		buttonPressed(1, x, y);
 		break;
 	}
 }
@@ -84,13 +84,13 @@ static void release(GtkGLArea * area, GdkEventButton * event, void * data)
 	switch (event->button)
 	{
 	case 1:
-		buttonReleased(- 1, 0, 0);
+		buttonReleased(- 1, x, y);
 		break;
 	case 2:
-		buttonReleased(0, 0, 0);
+		buttonReleased(0, x, y);
 		break;
 	case 3:
-		buttonPressed(1, 0, 0);
+		buttonPressed(1, x, y);
 		break;
 	}
 }
