@@ -118,7 +118,7 @@ public:
 	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y) : framing(20, 10, 5, 15), lighting(30, 15, 5, 20)
+DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(30, 15, 5, 20)
 {
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
@@ -196,7 +196,23 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 	{
 		framing.direction->angle += (x - prevX) * 0.001f;
 		framing.direction->next->next->dy += cosf(framing.direction->angle) * (y - prevY) * 0.01f;
+		if (framing.direction->next->next->dy < -14)
+		{
+			framing.direction->next->next->dy = -14;
+		}
+		if (14 < framing.direction->next->next->dy)
+		{
+			framing.direction->next->next->dy = 14;
+		}
 		framing.direction->next->next->dx -= sinf(framing.direction->angle) * (y - prevY) * 0.01f;
+		if (framing.direction->next->next->dx < -14)
+		{
+			framing.direction->next->next->dx = -14;
+		}
+		if (14 < framing.direction->next->next->dx)
+		{
+			framing.direction->next->next->dx = 14;
+		}
 	}
 
 	angle1 += 0.029 * speed * fdt;
