@@ -9,8 +9,8 @@
 
 #define COUNTER_CAPACITY 6
 
-const int screenWidth = 512;
-const int screenHeight = 256;
+const int screenWidth = 1024;
+const int screenHeight = 512;
 
 static Texture shadowMap(512, 256);
 static Texture floorTexture("../Floor.png");
@@ -97,17 +97,19 @@ public:
 	}
 };
 
+static bool pressed = false;
+static float prevX;
+static float prevY;
+
 class DemoScene : public Scene
 {
 private:
-	PerspectiveProjection<RotX<Move<Stop>>> framing;
+	PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing;
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
 	Star * star[4];
-	Earth * earth;
+	Earth earth;
 	float angle1 = 0.0;
 	float angle2 = 0.0;
-	float prevX = -1.0;
-	float prevY = -1.0;
 	double speed = 0.0;
 	Digit digit[COUNTER_CAPACITY];
 	int count = 0;
@@ -122,11 +124,10 @@ DemoScene::DemoScene(float x, float y) : framing(20, 10, 5, 15), lighting(30, 15
 	star[1] = new SolidStar();
 	star[2] = new LucidStar();
 	star[3] = new LucidStar();
-	earth = new Earth();
 
-	framing.direction->angle = 3.14159 / 2;
-	framing.direction->next->dy = -7;
-	framing.direction->next->dz = -1;
+	framing.direction->next->next->dy = -10;
+	framing.direction->next->next->dz = -1.5;
+	framing.direction->next->angle = 3.14159 / 2;
 
 	lighting.direction->dz = -7;
 	lighting.direction->next->angle = 3.14159 / 3;
@@ -191,6 +192,13 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		}
 	}
 
+	if (pressed)
+	{
+		framing.direction->angle += (x - prevX) * 0.001f;
+		framing.direction->next->next->dy += cosf(framing.direction->angle) * (y - prevY) * 0.01f;
+		framing.direction->next->next->dx -= sinf(framing.direction->angle) * (y - prevY) * 0.01f;
+	}
+
 	angle1 += 0.029 * speed * fdt;
 	angle2 += 0.005 * speed * fdt;
 	for (int i = 0; i < 4; i++)
@@ -221,12 +229,14 @@ Scene * arrange(float x, float y)
 
 void buttonPressed(int pos, float x, float y)
 {
-	printf("buttonPressed %d\n", pos);
+	pressed = true;
+	prevX = x;
+	prevY = y;
 }
 
 void buttonReleased(int pos, float x, float y)
 {
-	printf("buttonReleased %d\n", pos);
+	pressed = false;
 }
 
 void wheelMoved(float d, float x, float y)
