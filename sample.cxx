@@ -12,7 +12,7 @@
 const int screenWidth = 1024;
 const int screenHeight = 512;
 
-static Texture shadowMap(512, 256);
+static Texture shadowMap(1024, 512);
 static Texture floorTexture("../Floor.png");
 static Texture solidTexture("../SolidStar.png");
 static Texture lucidTexture("../LucidStar.png");
@@ -118,7 +118,7 @@ public:
 	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(30, 15, 5, 20)
+DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 30, 10, 30)
 {
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
@@ -195,7 +195,7 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 	if (pressed)
 	{
 		framing.direction->angle += (x - prevX) * 0.001f;
-		framing.direction->next->next->dy += cosf(framing.direction->angle) * (y - prevY) * 0.01f;
+		framing.direction->next->next->dy += cosf(framing.direction->angle) * (y - prevY) * 0.02f;
 		if (framing.direction->next->next->dy < -14)
 		{
 			framing.direction->next->next->dy = -14;
