@@ -329,9 +329,13 @@ Figure * AbstractPresence::getFigure()
 }
 
 
+RenderingMode::RenderingMode() : sentinel(* this)
+{
+}
+
 AbstractPresence * RenderingMode::getFirst()
 {
-	return sentinel.next;
+	return sentinel.getNext();
 }
 
 

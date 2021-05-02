@@ -248,6 +248,7 @@ friend AbstractPresence;
 private:
 	AbstractPresence sentinel;
 public:
+	RenderingMode();
 	AbstractPresence * getFirst();
 };
 extern RenderingMode solid2D;
