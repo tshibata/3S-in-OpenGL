@@ -10,10 +10,10 @@ run: sample.exe ../Floor.u-c.bin ../Star.u-c.bin
 	ruby ../u-ctxt2bin.rb $<
 
 ../Floor.u-c.txt: ../floor.dae
-	ruby ../dae2u-c.rb ../floor.dae
+	ruby ../dae2u-c.rb ../floor.dae Floor
 
 ../Star.u-c.txt: ../star.dae
-	ruby ../dae2u-c.rb ../star.dae
+	ruby ../dae2u-c.rb ../star.dae Star
 
 sample.exe: platform.o sample.o geometry.o common.o files.o renderer.o ShadowRenderer.o SolidRenderer.o LucidRenderer.o Solid2DRenderer.o
 	${CXX} -o $@ $+ ${CXXFLAGS} ${LDFLAGS}

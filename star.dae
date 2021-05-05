@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0</authoring_tool>
     </contributor>
-    <created>2021-04-02T22:47:37</created>
-    <modified>2021-04-02T22:47:37</modified>
+    <created>2021-05-05T13:29:54</created>
+    <modified>2021-05-05T13:29:54</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -34,13 +34,13 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">1 1 1 1</color>
+              <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
               <texture texture="Star_png-sampler"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.25 0.25 0.25 1</color>
+              <color sid="specular">0.125 0.125 0.125 1</color>
             </specular>
             <shininess>
               <float sid="shininess">50</float>
@@ -72,7 +72,7 @@
           </technique_common>
         </source>
         <source id="Star-mesh-normals">
-          <float_array id="Star-mesh-normals-array" count="30">0.6974567 -0.6798521 0.2266173 -0.6974567 -0.6798521 0.2266173 0 -0.6798522 0.7333492 -0.4310517 -0.6798525 -0.5932918 0.4310517 0.6798524 -0.5932918 0 0.679852 0.7333495 0.4310519 -0.6798522 -0.5932919 -0.4310518 0.6798523 -0.5932919 0.6974568 0.679852 0.2266174 -0.6974566 0.6798521 0.2266174</float_array>
+          <float_array id="Star-mesh-normals-array" count="30">0.6974567 -0.679852 0.2266173 -0.6974567 -0.679852 0.2266173 0 -0.6798522 0.7333493 -0.4310518 -0.6798524 -0.5932918 0.4310519 0.6798524 -0.5932919 0 0.6798522 0.7333493 0.4310519 -0.6798521 -0.5932921 -0.4310519 0.6798522 -0.593292 0.6974567 0.6798521 0.2266173 -0.6974565 0.6798523 0.2266173</float_array>
           <technique_common>
             <accessor source="#Star-mesh-normals-array" count="10" stride="3">
               <param name="X" type="float"/>
@@ -106,7 +106,7 @@
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
       <node id="Star" name="Star" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0.5 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Star-mesh" name="Star">
           <bind_material>
             <technique_common>
