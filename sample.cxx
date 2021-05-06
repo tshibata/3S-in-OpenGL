@@ -13,6 +13,7 @@ const int screenWidth = 1024;
 const int screenHeight = 512;
 
 static Texture shadowMap(1024, 512);
+static Texture backgroundTexture("../Landscape.png");
 static Texture floorTexture("../Floor.png");
 static Texture cuboid243Texture("../Cuboid243.png");
 static Texture cuboid465Texture("../Cuboid465.png");
@@ -21,6 +22,10 @@ static Texture solidTexture("../SolidStar.png");
 static Texture lucidTexture("../LucidStar.png");
 static Texture digitTexture("../num8x8.png");
 
+static SurficialFigure backgroundFigures[] = {
+	SurficialFigure(& backgroundTexture, 256, 64, 256, 64, 256, 64),
+	SurficialFigure(& backgroundTexture, 256 + 512, 64, 256, 64, 256, 64),
+};
 static SpacialFigure cuboid243Figure(& cuboid243Texture, "../Cuboid243.u-c.bin");
 static SpacialFigure cuboid465Figure(& cuboid465Texture, "../Cuboid465.u-c.bin");
 static SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "../Cuboid8E9.u-c.bin");
@@ -38,6 +43,21 @@ static SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 7 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 8 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
+};
+
+class Background : public FinitePresence<Expand<Move<Stop>>>
+{
+private:
+	int index;
+public:
+	Background(int index) : FinitePresence::FinitePresence(background), index(index)
+	{
+		direction->scale = 4.0f;
+	}
+	virtual Figure * getFigure()
+	{
+		return & backgroundFigures[index];
+	}
 };
 
 class Star : public FinitePresence<RotZ<Move<Stop>>>
@@ -154,6 +174,8 @@ class DemoScene : public Scene
 private:
 	PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing;
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
+	Background sky1;
+	Background sky2;
 	Star * star[4];
 	Cuboid8E9 cuboid1;
 	Cuboid465 cuboid2;
@@ -182,7 +204,7 @@ public:
 	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 30, 10, 40)
+DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 30, 10, 40), sky1(0), sky2(1)
 {
 	cuboid1.direction->angle = 3 * M_PI / 2;
 	cuboid1.direction->next->dx = -11;
@@ -240,12 +262,12 @@ DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 
 
 	framing.direction->next->next->dy = -10;
 	framing.direction->next->next->dz = -1.5;
-	framing.direction->next->angle = 3.14159 / 2;
+	framing.direction->next->angle = M_PI / 2;
 
 	lighting.direction->dy = 5;
 	lighting.direction->dz = -15;
-	lighting.direction->next->angle = 3.14159 / 3;
-	lighting.direction->next->next->angle = 3.14159 / 4;
+	lighting.direction->next->angle = M_PI / 3;
+	lighting.direction->next->next->angle = M_PI / 4;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -267,10 +289,13 @@ DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 
 }
 void DemoScene::render()
 {
+	static BackgroundRenderer backgroundRenderer;
 	static ShadowRenderer shadowRenderer(shadowMap);
 	static SolidRenderer solidRenderer(shadowMap);
 	static LucidRenderer lucidRenderer;
 	static Solid2DRenderer solid2DRenderer;
+
+	backgroundRenderer.process();
 
 	Matrix4x4 lightingMatrix;
 	lighting.getMatrix(lightingMatrix.elements);
@@ -345,6 +370,10 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		digit[i].i = j % 10;
 		j = j / 10;
 	}
+
+	float turn = framing.direction->angle / (M_PI * 2);
+	sky1.direction->next->dx = (turn - floor(turn + 0.5)) * 8;
+	sky2.direction->next->dx = (turn - floor(turn) - 0.5) * 8;
 
 	prevX = x;
 	prevY = y;

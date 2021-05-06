@@ -70,6 +70,16 @@ public:
 	void set(AbstractPresence * b);
 };
 
+class BackgroundRenderer
+{
+private:
+	GLuint program;
+public:
+	BackgroundRenderer();
+	~BackgroundRenderer();
+	void process();
+};
+
 class ShadowRenderer
 {
 private:
