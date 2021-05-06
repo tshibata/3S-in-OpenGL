@@ -14,14 +14,20 @@ const int screenHeight = 512;
 
 static Texture shadowMap(1024, 512);
 static Texture floorTexture("../Floor.png");
+static Texture cuboid243Texture("../Cuboid243.png");
+static Texture cuboid465Texture("../Cuboid465.png");
+static Texture cuboid8E9Texture("../Cuboid8E9.png");
 static Texture solidTexture("../SolidStar.png");
 static Texture lucidTexture("../LucidStar.png");
 static Texture digitTexture("../num8x8.png");
 
+static SpacialFigure cuboid243Figure(& cuboid243Texture, "../Cuboid243.u-c.bin");
+static SpacialFigure cuboid465Figure(& cuboid465Texture, "../Cuboid465.u-c.bin");
+static SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "../Cuboid8E9.u-c.bin");
 static SpacialFigure solidFigure(& solidTexture, "../Star.u-c.bin");
 static SpacialFigure lucidFigure(& lucidTexture, "../Star.u-c.bin");
 static SpacialFigure earthFigure(& floorTexture, "../Floor.u-c.bin");
-SurficialFigure numFonts[] = {
+static SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 2 * 8, 8, 0, 8, 8, 0),
@@ -86,6 +92,48 @@ Figure * Earth::getFigure()
 	return & earthFigure;
 }
 
+class Cuboid243 : public FinitePresence<RotZ<Move<Stop>>>
+{
+public:
+	Cuboid243();
+	virtual Figure * getFigure();
+};
+Cuboid243::Cuboid243() : FinitePresence::FinitePresence(solid3D)
+{
+}
+Figure * Cuboid243::getFigure()
+{
+	return & cuboid243Figure;
+}
+
+class Cuboid465 : public FinitePresence<RotZ<Move<Stop>>>
+{
+public:
+	Cuboid465();
+	virtual Figure * getFigure();
+};
+Cuboid465::Cuboid465() : FinitePresence::FinitePresence(solid3D)
+{
+}
+Figure * Cuboid465::getFigure()
+{
+	return & cuboid465Figure;
+}
+
+class Cuboid8E9 : public FinitePresence<RotZ<Move<Stop>>>
+{
+public:
+	Cuboid8E9();
+	virtual Figure * getFigure();
+};
+Cuboid8E9::Cuboid8E9() : FinitePresence::FinitePresence(solid3D)
+{
+}
+Figure * Cuboid8E9::getFigure()
+{
+	return & cuboid8E9Figure;
+}
+
 class Digit : public FinitePresence<Expand<Move<Stop>>>
 {
 public:
@@ -107,6 +155,22 @@ private:
 	PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing;
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
 	Star * star[4];
+	Cuboid8E9 cuboid1;
+	Cuboid465 cuboid2;
+	Cuboid8E9 cuboid3;
+	Cuboid243 cuboid4;
+	Cuboid8E9 cuboid5;
+	Cuboid465 cuboid6;
+	Cuboid465 cuboid7;
+	Cuboid8E9 cuboid8;
+	Cuboid465 cuboid9;
+	Cuboid243 cuboid10;
+	Cuboid465 cuboid11;
+	Cuboid465 cuboid12;
+	Cuboid243 cuboid13;
+	Cuboid465 cuboid14;
+	Cuboid8E9 cuboid15;
+	Cuboid465 cuboid16;
 	Earth earth;
 	float angle1 = 0.0;
 	float angle2 = 0.0;
@@ -118,8 +182,57 @@ public:
 	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 30, 10, 30)
+DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 30, 10, 40)
 {
+	cuboid1.direction->angle = 3 * M_PI / 2;
+	cuboid1.direction->next->dx = -11;
+	cuboid1.direction->next->dy = 19;
+	cuboid2.direction->angle = M_PI / 2;
+	cuboid2.direction->next->dx = -1;
+	cuboid2.direction->next->dy = 17;
+	cuboid3.direction->angle = M_PI / 2;
+	cuboid3.direction->next->dx = 9;
+	cuboid3.direction->next->dy = 19;
+	cuboid4.direction->angle = 0 * M_PI / 2;
+	cuboid4.direction->next->dx = 16;
+	cuboid4.direction->next->dy = 13;
+	cuboid5.direction->angle = 0 * M_PI / 2;
+	cuboid5.direction->next->dx = 19;
+	cuboid5.direction->next->dy = 4;
+	cuboid6.direction->angle = 0 * M_PI / 2;
+	cuboid6.direction->next->dx = 17;
+	cuboid6.direction->next->dy = -6;
+	cuboid7.direction->angle = 2 * M_PI / 2;
+	cuboid7.direction->next->dx = 17;
+	cuboid7.direction->next->dy = -12;
+	cuboid8.direction->angle = M_PI / 2;
+	cuboid8.direction->next->dx = 9;
+	cuboid8.direction->next->dy = -19;
+	cuboid9.direction->angle = 0 * M_PI / 2;
+	cuboid9.direction->next->dx = 0;
+	cuboid9.direction->next->dy = -18;
+	cuboid10.direction->angle = M_PI / 2;
+	cuboid10.direction->next->dx = -4;
+	cuboid10.direction->next->dy = -16;
+	cuboid11.direction->angle = M_PI / 2;
+	cuboid11.direction->next->dx = -9;
+	cuboid11.direction->next->dy = -17;
+	cuboid12.direction->angle = 2 * M_PI / 2;
+	cuboid12.direction->next->dx = -14;
+	cuboid12.direction->next->dy = -18;
+	cuboid13.direction->angle = 0 * M_PI / 2;
+	cuboid13.direction->next->dx = -16;
+	cuboid13.direction->next->dy = -13;
+	cuboid14.direction->angle = 0 * M_PI / 2;
+	cuboid14.direction->next->dx = -17;
+	cuboid14.direction->next->dy = -8;
+	cuboid15.direction->angle = 2 * M_PI / 2;
+	cuboid15.direction->next->dx = -19;
+	cuboid15.direction->next->dy = 2;
+	cuboid16.direction->angle = 0 * M_PI / 2;
+	cuboid16.direction->next->dx = -17;
+	cuboid16.direction->next->dy = 12;
+
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
 	star[2] = new LucidStar();
@@ -129,7 +242,8 @@ DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 
 	framing.direction->next->next->dz = -1.5;
 	framing.direction->next->angle = 3.14159 / 2;
 
-	lighting.direction->dz = -7;
+	lighting.direction->dy = 5;
+	lighting.direction->dz = -15;
 	lighting.direction->next->angle = 3.14159 / 3;
 	lighting.direction->next->next->angle = 3.14159 / 4;
 
