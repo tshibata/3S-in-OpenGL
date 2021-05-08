@@ -22,10 +22,7 @@ static Texture solidTexture("../SolidStar.png");
 static Texture lucidTexture("../LucidStar.png");
 static Texture digitTexture("../num8x8.png");
 
-static SurficialFigure backgroundFigures[] = {
-	SurficialFigure(& backgroundTexture, 256, 64, 256, 64, 256, 64),
-	SurficialFigure(& backgroundTexture, 256 + 512, 64, 256, 64, 256, 64),
-};
+static SurficialFigure backgroundFigure = SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
 static SpacialFigure cuboid243Figure(& cuboid243Texture, "../Cuboid243.u-c.bin");
 static SpacialFigure cuboid465Figure(& cuboid465Texture, "../Cuboid465.u-c.bin");
 static SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "../Cuboid8E9.u-c.bin");
@@ -47,18 +44,17 @@ static SurficialFigure numFonts[] = {
 
 class Background : public FinitePresence<Expand<Move<Stop>>>
 {
-private:
-	int index;
 public:
-	Background(int index) : FinitePresence::FinitePresence(background), index(index)
-	{
-		direction->scale = 4.0f;
-	}
-	virtual Figure * getFigure()
-	{
-		return & backgroundFigures[index];
-	}
+	Background();
+	virtual Figure * getFigure();
 };
+Background::Background() : FinitePresence::FinitePresence(background)
+{
+}
+Figure * Background::getFigure()
+{
+	return & backgroundFigure;
+}
 
 class Star : public FinitePresence<RotZ<Move<Stop>>>
 {
@@ -204,7 +200,7 @@ public:
 	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y) : framing(50, 25, 0.5, 50), lighting(60, 30, 10, 40), sky1(0), sky2(1)
+DemoScene::DemoScene(float x, float y) : framing(100, 50, 0.5, 50), lighting(60, 30, 10, 40)
 {
 	cuboid1.direction->angle = 3 * M_PI / 2;
 	cuboid1.direction->next->dx = -11;
@@ -295,6 +291,13 @@ void DemoScene::render()
 	static LucidRenderer lucidRenderer;
 	static Solid2DRenderer solid2DRenderer;
 
+	float sect = M_PI / (atan((framing.width / 2) / framing.far));
+	float turn = framing.direction->angle / (M_PI * 2);
+	sky1.direction->scale = screenWidth * sect / sky1.getFigure()->texture->width;
+	sky1.direction->next->dx = (turn - floor(turn) - 1) * (2 * sect);
+	sky2.direction->scale = screenWidth * sect / sky2.getFigure()->texture->width;
+	sky2.direction->next->dx = (turn - floor(turn)) * (2 * sect);
+
 	backgroundRenderer.process();
 
 	Matrix4x4 lightingMatrix;
@@ -370,10 +373,6 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		digit[i].i = j % 10;
 		j = j / 10;
 	}
-
-	float turn = framing.direction->angle / (M_PI * 2);
-	sky1.direction->next->dx = (turn - floor(turn + 0.5)) * 8;
-	sky2.direction->next->dx = (turn - floor(turn) - 0.5) * 8;
 
 	prevX = x;
 	prevY = y;
