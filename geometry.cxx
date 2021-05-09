@@ -5,6 +5,7 @@
 #include "geometry.h"
 #include "files.h"
 
+RenderingMode background;
 RenderingMode solid2D;
 RenderingMode solid3D;
 RenderingMode lucid3D;

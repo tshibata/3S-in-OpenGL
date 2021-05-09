@@ -9,19 +9,27 @@
 
 #define COUNTER_CAPACITY 6
 
-const int screenWidth = 512;
-const int screenHeight = 256;
+const int screenWidth = 1024;
+const int screenHeight = 512;
 
-static Texture shadowMap(512, 256);
+static Texture shadowMap(1024, 512);
+static Texture backgroundTexture("../Landscape.png");
 static Texture floorTexture("../Floor.png");
+static Texture cuboid243Texture("../Cuboid243.png");
+static Texture cuboid465Texture("../Cuboid465.png");
+static Texture cuboid8E9Texture("../Cuboid8E9.png");
 static Texture solidTexture("../SolidStar.png");
 static Texture lucidTexture("../LucidStar.png");
 static Texture digitTexture("../num8x8.png");
 
+static SurficialFigure backgroundFigure = SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
+static SpacialFigure cuboid243Figure(& cuboid243Texture, "../Cuboid243.u-c.bin");
+static SpacialFigure cuboid465Figure(& cuboid465Texture, "../Cuboid465.u-c.bin");
+static SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "../Cuboid8E9.u-c.bin");
 static SpacialFigure solidFigure(& solidTexture, "../Star.u-c.bin");
 static SpacialFigure lucidFigure(& lucidTexture, "../Star.u-c.bin");
 static SpacialFigure earthFigure(& floorTexture, "../Floor.u-c.bin");
-SurficialFigure numFonts[] = {
+static SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 2 * 8, 8, 0, 8, 8, 0),
@@ -33,6 +41,20 @@ SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 8 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
 };
+
+class Background : public FinitePresence<Expand<Move<Stop>>>
+{
+public:
+	Background();
+	virtual Figure * getFigure();
+};
+Background::Background() : FinitePresence::FinitePresence(background)
+{
+}
+Figure * Background::getFigure()
+{
+	return & backgroundFigure;
+}
 
 class Star : public FinitePresence<RotZ<Move<Stop>>>
 {
@@ -86,6 +108,48 @@ Figure * Earth::getFigure()
 	return & earthFigure;
 }
 
+class Cuboid243 : public FinitePresence<RotZ<Move<Stop>>>
+{
+public:
+	Cuboid243();
+	virtual Figure * getFigure();
+};
+Cuboid243::Cuboid243() : FinitePresence::FinitePresence(solid3D)
+{
+}
+Figure * Cuboid243::getFigure()
+{
+	return & cuboid243Figure;
+}
+
+class Cuboid465 : public FinitePresence<RotZ<Move<Stop>>>
+{
+public:
+	Cuboid465();
+	virtual Figure * getFigure();
+};
+Cuboid465::Cuboid465() : FinitePresence::FinitePresence(solid3D)
+{
+}
+Figure * Cuboid465::getFigure()
+{
+	return & cuboid465Figure;
+}
+
+class Cuboid8E9 : public FinitePresence<RotZ<Move<Stop>>>
+{
+public:
+	Cuboid8E9();
+	virtual Figure * getFigure();
+};
+Cuboid8E9::Cuboid8E9() : FinitePresence::FinitePresence(solid3D)
+{
+}
+Figure * Cuboid8E9::getFigure()
+{
+	return & cuboid8E9Figure;
+}
+
 class Digit : public FinitePresence<Expand<Move<Stop>>>
 {
 public:
@@ -97,17 +161,37 @@ public:
 	}
 };
 
+static bool pressed = false;
+static float prevX;
+static float prevY;
+
 class DemoScene : public Scene
 {
 private:
-	PerspectiveProjection<RotX<Move<Stop>>> framing;
+	PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing;
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
+	Background sky1;
+	Background sky2;
 	Star * star[4];
-	Earth * earth;
+	Cuboid8E9 cuboid1;
+	Cuboid465 cuboid2;
+	Cuboid8E9 cuboid3;
+	Cuboid243 cuboid4;
+	Cuboid8E9 cuboid5;
+	Cuboid465 cuboid6;
+	Cuboid465 cuboid7;
+	Cuboid8E9 cuboid8;
+	Cuboid465 cuboid9;
+	Cuboid243 cuboid10;
+	Cuboid465 cuboid11;
+	Cuboid465 cuboid12;
+	Cuboid243 cuboid13;
+	Cuboid465 cuboid14;
+	Cuboid8E9 cuboid15;
+	Cuboid465 cuboid16;
+	Earth earth;
 	float angle1 = 0.0;
 	float angle2 = 0.0;
-	float prevX = -1.0;
-	float prevY = -1.0;
 	double speed = 0.0;
 	Digit digit[COUNTER_CAPACITY];
 	int count = 0;
@@ -116,21 +200,70 @@ public:
 	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y) : framing(20, 10, 5, 15), lighting(30, 15, 5, 20)
+DemoScene::DemoScene(float x, float y) : framing(100, 50, 0.5, 50), lighting(60, 30, 10, 40)
 {
+	cuboid1.direction->angle = 3 * M_PI / 2;
+	cuboid1.direction->next->dx = -11;
+	cuboid1.direction->next->dy = 19;
+	cuboid2.direction->angle = M_PI / 2;
+	cuboid2.direction->next->dx = -1;
+	cuboid2.direction->next->dy = 17;
+	cuboid3.direction->angle = M_PI / 2;
+	cuboid3.direction->next->dx = 9;
+	cuboid3.direction->next->dy = 19;
+	cuboid4.direction->angle = 0 * M_PI / 2;
+	cuboid4.direction->next->dx = 16;
+	cuboid4.direction->next->dy = 13;
+	cuboid5.direction->angle = 0 * M_PI / 2;
+	cuboid5.direction->next->dx = 19;
+	cuboid5.direction->next->dy = 4;
+	cuboid6.direction->angle = 0 * M_PI / 2;
+	cuboid6.direction->next->dx = 17;
+	cuboid6.direction->next->dy = -6;
+	cuboid7.direction->angle = 2 * M_PI / 2;
+	cuboid7.direction->next->dx = 17;
+	cuboid7.direction->next->dy = -12;
+	cuboid8.direction->angle = M_PI / 2;
+	cuboid8.direction->next->dx = 9;
+	cuboid8.direction->next->dy = -19;
+	cuboid9.direction->angle = 0 * M_PI / 2;
+	cuboid9.direction->next->dx = 0;
+	cuboid9.direction->next->dy = -18;
+	cuboid10.direction->angle = M_PI / 2;
+	cuboid10.direction->next->dx = -4;
+	cuboid10.direction->next->dy = -16;
+	cuboid11.direction->angle = M_PI / 2;
+	cuboid11.direction->next->dx = -9;
+	cuboid11.direction->next->dy = -17;
+	cuboid12.direction->angle = 2 * M_PI / 2;
+	cuboid12.direction->next->dx = -14;
+	cuboid12.direction->next->dy = -18;
+	cuboid13.direction->angle = 0 * M_PI / 2;
+	cuboid13.direction->next->dx = -16;
+	cuboid13.direction->next->dy = -13;
+	cuboid14.direction->angle = 0 * M_PI / 2;
+	cuboid14.direction->next->dx = -17;
+	cuboid14.direction->next->dy = -8;
+	cuboid15.direction->angle = 2 * M_PI / 2;
+	cuboid15.direction->next->dx = -19;
+	cuboid15.direction->next->dy = 2;
+	cuboid16.direction->angle = 0 * M_PI / 2;
+	cuboid16.direction->next->dx = -17;
+	cuboid16.direction->next->dy = 12;
+
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
 	star[2] = new LucidStar();
 	star[3] = new LucidStar();
-	earth = new Earth();
 
-	framing.direction->angle = 3.14159 / 2;
-	framing.direction->next->dy = -7;
-	framing.direction->next->dz = -1;
+	framing.direction->next->next->dy = -10;
+	framing.direction->next->next->dz = -1.5;
+	framing.direction->next->angle = M_PI / 2;
 
-	lighting.direction->dz = -7;
-	lighting.direction->next->angle = 3.14159 / 3;
-	lighting.direction->next->next->angle = 3.14159 / 4;
+	lighting.direction->dy = 5;
+	lighting.direction->dz = -15;
+	lighting.direction->next->angle = M_PI / 3;
+	lighting.direction->next->next->angle = M_PI / 4;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -152,10 +285,20 @@ DemoScene::DemoScene(float x, float y) : framing(20, 10, 5, 15), lighting(30, 15
 }
 void DemoScene::render()
 {
+	static BackgroundRenderer backgroundRenderer;
 	static ShadowRenderer shadowRenderer(shadowMap);
 	static SolidRenderer solidRenderer(shadowMap);
 	static LucidRenderer lucidRenderer;
 	static Solid2DRenderer solid2DRenderer;
+
+	float sect = M_PI / (atan((framing.width / 2) / framing.far));
+	float turn = framing.direction->angle / (M_PI * 2);
+	sky1.direction->scale = screenWidth * sect / sky1.getFigure()->texture->width;
+	sky1.direction->next->dx = (turn - floor(turn) - 1) * (2 * sect);
+	sky2.direction->scale = screenWidth * sect / sky2.getFigure()->texture->width;
+	sky2.direction->next->dx = (turn - floor(turn)) * (2 * sect);
+
+	backgroundRenderer.process();
 
 	Matrix4x4 lightingMatrix;
 	lighting.getMatrix(lightingMatrix.elements);
@@ -191,6 +334,29 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		}
 	}
 
+	if (pressed)
+	{
+		framing.direction->angle += (x - prevX) * 0.001f;
+		framing.direction->next->next->dy += cosf(framing.direction->angle) * (y - prevY) * 0.02f;
+		if (framing.direction->next->next->dy < -14)
+		{
+			framing.direction->next->next->dy = -14;
+		}
+		if (14 < framing.direction->next->next->dy)
+		{
+			framing.direction->next->next->dy = 14;
+		}
+		framing.direction->next->next->dx -= sinf(framing.direction->angle) * (y - prevY) * 0.01f;
+		if (framing.direction->next->next->dx < -14)
+		{
+			framing.direction->next->next->dx = -14;
+		}
+		if (14 < framing.direction->next->next->dx)
+		{
+			framing.direction->next->next->dx = 14;
+		}
+	}
+
 	angle1 += 0.029 * speed * fdt;
 	angle2 += 0.005 * speed * fdt;
 	for (int i = 0; i < 4; i++)
@@ -221,12 +387,14 @@ Scene * arrange(float x, float y)
 
 void buttonPressed(int pos, float x, float y)
 {
-	printf("buttonPressed %d\n", pos);
+	pressed = true;
+	prevX = x;
+	prevY = y;
 }
 
 void buttonReleased(int pos, float x, float y)
 {
-	printf("buttonReleased %d\n", pos);
+	pressed = false;
 }
 
 void wheelMoved(float d, float x, float y)
