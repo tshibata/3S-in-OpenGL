@@ -44,10 +44,10 @@ SolidRenderer::SolidRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
 			float i = clamp(dot(vec4(0.0, 0.0, 1.0, 1.0), normalize(lnorm)), 0, 1);
 
 			// coordinate in the shadow map
-			float x = (lxyz.x / lxyz.w + 1.0) / 2;
-			float y = (lxyz.y / lxyz.w + 1.0) / 2;
-			float z = (lxyz.z / lxyz.w + 1.0) / 2;
-			if (texture(shadowMap, vec2(x, y)).x < z - 0.01 / i)
+			float x = (lxyz.x + 1.0) / 2;
+			float y = (lxyz.y + 1.0) / 2;
+			float z = (lxyz.z + 1.0) / 2;
+			if (texture(shadowMap, vec2(x, y)).x < z - 0.001 / i)
 			{
 				i = 0;
 			}
