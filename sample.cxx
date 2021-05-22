@@ -3,9 +3,12 @@
 #include <math.h>
 #include <platform.h>
 #include "ref.h"
+#include "Percipi.h"
 #include "common.h"
 #include "geometry.h"
 #include "renderer.h"
+#include "Plane.h"
+#include "Mecell.h"
 
 #define COUNTER_CAPACITY 6
 
@@ -94,7 +97,7 @@ Figure * LucidStar::getFigure()
 	return & lucidFigure;
 }
 
-class Earth : public FinitePresence<Stop>
+class Earth : public FinitePresence<Move<Stop>>
 {
 public:
 	Earth();
@@ -165,14 +168,18 @@ static bool pressed = false;
 static float prevX;
 static float prevY;
 
-class DemoScene : public Scene
+static PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing(100, 50, 0.5, 50);
+
+class Props1
 {
+friend Res<Props1>;
 private:
-	PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing;
-	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
-	Background sky1;
-	Background sky2;
-	Star * star[4];
+	static Props1 * singleton;
+	int refc = 0;
+public:
+	Props1();
+	~Props1();
+	Earth earth;
 	Cuboid8E9 cuboid1;
 	Cuboid465 cuboid2;
 	Cuboid8E9 cuboid3;
@@ -188,28 +195,20 @@ private:
 	Cuboid243 cuboid13;
 	Cuboid465 cuboid14;
 	Cuboid8E9 cuboid15;
-	Cuboid465 cuboid16;
-	Earth earth;
-	float angle1 = 0.0;
-	float angle2 = 0.0;
-	double speed = 0.0;
+	Star * star[4];
 	Digit digit[COUNTER_CAPACITY];
-	int count = 0;
-public:
-	DemoScene(float x, float y);
-	void render();
-	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y) : framing(100, 50, 0.5, 50), lighting(60, 30, 10, 40)
+Props1 * Props1::singleton = nullptr;
+Props1::Props1()
 {
-	cuboid1.direction->angle = 3 * M_PI / 2;
-	cuboid1.direction->next->dx = -11;
-	cuboid1.direction->next->dy = 19;
+	cuboid1.direction->angle = 2 * M_PI / 2;
+	cuboid1.direction->next->dx = -9;
+	cuboid1.direction->next->dy = 22;
 	cuboid2.direction->angle = M_PI / 2;
-	cuboid2.direction->next->dx = -1;
+	cuboid2.direction->next->dx = -2;
 	cuboid2.direction->next->dy = 17;
 	cuboid3.direction->angle = M_PI / 2;
-	cuboid3.direction->next->dx = 9;
+	cuboid3.direction->next->dx = 8;
 	cuboid3.direction->next->dy = 19;
 	cuboid4.direction->angle = 0 * M_PI / 2;
 	cuboid4.direction->next->dx = 16;
@@ -244,40 +243,133 @@ DemoScene::DemoScene(float x, float y) : framing(100, 50, 0.5, 50), lighting(60,
 	cuboid14.direction->angle = 0 * M_PI / 2;
 	cuboid14.direction->next->dx = -17;
 	cuboid14.direction->next->dy = -8;
-	cuboid15.direction->angle = 2 * M_PI / 2;
-	cuboid15.direction->next->dx = -19;
-	cuboid15.direction->next->dy = 2;
-	cuboid16.direction->angle = 0 * M_PI / 2;
-	cuboid16.direction->next->dx = -17;
-	cuboid16.direction->next->dy = 12;
+	cuboid15.direction->angle = 3 * M_PI / 2;
+	cuboid15.direction->next->dx = -22;
+	cuboid15.direction->next->dy = -1;
 
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
 	star[2] = new LucidStar();
 	star[3] = new LucidStar();
+}
+Props1::~Props1()
+{
+	delete star[0];
+	delete star[1];
+	delete star[2];
+	delete star[3];
+}
 
-	framing.direction->next->next->dy = -10;
-	framing.direction->next->next->dz = -1.5;
-	framing.direction->next->angle = M_PI / 2;
+class Props2
+{
+friend Res<Props2>;
+private:
+	static Props2 * singleton;
+	int refc = 0;
+public:
+	Props2();
+	~Props2();
+	Earth earth1;
+	Earth earth2;
+	Earth earth3;
+	Cuboid243 cuboid1;
+	Cuboid465 cuboid2;
+	Cuboid465 cuboid3;
+	Cuboid8E9 cuboid4;
+	Cuboid465 cuboid5;
+	Cuboid8E9 cuboid6;
+	Cuboid243 cuboid7;
+	Cuboid465 cuboid8;
+	Cuboid8E9 cuboid9;
+	Cuboid8E9 cuboid10;
+};
+Props2 * Props2::singleton = nullptr;
+Props2::Props2()
+{
+	earth1.direction->dx = -30;
+	earth1.direction->dy = 0;
+	earth2.direction->dx = 0;
+	earth2.direction->dy = 30;
+	earth3.direction->dx = -30;
+	earth3.direction->dy = 30;
+	cuboid1.direction->angle = 1 * M_PI / 2;
+	cuboid1.direction->next->dx = -31;
+	cuboid1.direction->next->dy = 2;
+	cuboid2.direction->angle = 0 * M_PI / 2;
+	cuboid2.direction->next->dx = -35;
+	cuboid2.direction->next->dy = 5;
+	cuboid3.direction->angle = 1 * M_PI / 2;
+	cuboid3.direction->next->dx = -36;
+	cuboid3.direction->next->dy = 10;
+	cuboid4.direction->angle = 2 * M_PI / 2;
+	cuboid4.direction->next->dx = -37;
+	cuboid4.direction->next->dy = 19;
+	cuboid5.direction->angle = 2 * M_PI / 2;
+	cuboid5.direction->next->dx = -35;
+	cuboid5.direction->next->dy = 29;
+	cuboid6.direction->angle = 0 * M_PI / 2;
+	cuboid6.direction->next->dx = -37;
+	cuboid6.direction->next->dy = 39;
+	cuboid7.direction->angle = 1 * M_PI / 2;
+	cuboid7.direction->next->dx = -31;
+	cuboid7.direction->next->dy = 38;
+	cuboid8.direction->angle = 1 * M_PI / 2;
+	cuboid8.direction->next->dx = -26;
+	cuboid8.direction->next->dy = 39;
+	cuboid9.direction->angle = 1 * M_PI / 2;
+	cuboid9.direction->next->dx = -16;
+	cuboid9.direction->next->dy = 41;
+	cuboid10.direction->angle = 2 * M_PI / 2;
+	cuboid10.direction->next->dx = -9;
+	cuboid10.direction->next->dy = 36;
+}
+Props2::~Props2()
+{
+}
 
-	lighting.direction->dy = 5;
-	lighting.direction->dz = -15;
-	lighting.direction->next->angle = M_PI / 3;
-	lighting.direction->next->next->angle = M_PI / 4;
+class MecellScene : public Scene
+{
+public:
+	Mecell * mecell;
+	MecellScene(Mecell * mecell);
+};
+MecellScene::MecellScene(Mecell * mecell) : mecell(mecell)
+{
+}
 
+class DemoScene : public MecellScene
+{
+private:
+	Background sky1;
+	Background sky2;
+	Res<Props1> props1;
+	Res<Props2> props2;
+	float angle1 = 0.0;
+	float angle2 = 0.0;
+	double speed = 0.0;
+	int count = 0;
+protected:
+	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
+public:
+	DemoScene(float x, float y, Mecell * mecell);
+	void render();
+	Scene * rearrange(unsigned int dt, float x, float y);
+};
+DemoScene::DemoScene(float x, float y, Mecell * mecell) : MecellScene::MecellScene(mecell), lighting(60, 30, 10, 40)
+{
 	for (int i = 0; i < 4; i++)
 	{
-		star[i]->direction->angle = i - angle1;
-		star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		star[i]->direction->next->dy = sinf(i - angle2) * 2;
-		star[i]->direction->next->dz = -1;
+		props1->star[i]->direction->angle = i - angle1;
+		props1->star[i]->direction->next->dx = cosf(i - angle2) * 2;
+		props1->star[i]->direction->next->dy = sinf(i - angle2) * 2;
+		props1->star[i]->direction->next->dz = -1;
 	}
 
 	for (int i = 0; i < COUNTER_CAPACITY; i++)
 	{
-		digit[i].direction->scale = 2;
-		digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / screenWidth;
-		digit[i].direction->next->dy = 0.75;
+		props1->digit[i].direction->scale = 2;
+		props1->digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / screenWidth;
+		props1->digit[i].direction->next->dy = 0.75;
 	}
 
 	prevX = x;
@@ -320,6 +412,8 @@ void DemoScene::render()
 }
 Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 {
+	Scene * next = this;
+
 	float fdt = dt * 0.000001; // us -> s
 	if (0 <= x && x < screenWidth && 0 <= y && y < screenHeight && pixelLabel(x, y) != 0)
 	{
@@ -337,23 +431,15 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 	if (pressed)
 	{
 		framing.direction->angle += (x - prevX) * 0.001f;
-		framing.direction->next->next->dy += cosf(framing.direction->angle) * (y - prevY) * 0.02f;
-		if (framing.direction->next->next->dy < -14)
+
+		float dx = sinf(framing.direction->angle) * (y - prevY) * -0.01f;
+		float dy = cosf(framing.direction->angle) * (y - prevY) * 0.02f;
+		Mecell * dst = mecell->transit(framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy);
+		framing.direction->next->next->dx += dx;
+		framing.direction->next->next->dy += dy;
+		if (dst != mecell)
 		{
-			framing.direction->next->next->dy = -14;
-		}
-		if (14 < framing.direction->next->next->dy)
-		{
-			framing.direction->next->next->dy = 14;
-		}
-		framing.direction->next->next->dx -= sinf(framing.direction->angle) * (y - prevY) * 0.01f;
-		if (framing.direction->next->next->dx < -14)
-		{
-			framing.direction->next->next->dx = -14;
-		}
-		if (14 < framing.direction->next->next->dx)
-		{
-			framing.direction->next->next->dx = 14;
+			next = (* dst->creator)(x, y, dst);
 		}
 	}
 
@@ -361,28 +447,84 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 	angle2 += 0.005 * speed * fdt;
 	for (int i = 0; i < 4; i++)
 	{
-		star[i]->direction->angle = i - angle1;
-		star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		star[i]->direction->next->dy = sinf(i - angle2) * 2;
-		star[i]->direction->next->dz = -1;
+		props1->star[i]->direction->angle = i - angle1;
+		props1->star[i]->direction->next->dx = cosf(i - angle2) * 2;
+		props1->star[i]->direction->next->dy = sinf(i - angle2) * 2;
+		props1->star[i]->direction->next->dz = -1;
 	}
 
 	count++;
 	for (int i = 0, j = count; i < COUNTER_CAPACITY; i++)
 	{
-		digit[i].i = j % 10;
+		props1->digit[i].i = j % 10;
 		j = j / 10;
 	}
 
 	prevX = x;
 	prevY = y;
 
-	return this;
+	return next;
 }
+
+class DemoScene1 : public DemoScene
+{
+public:
+	DemoScene1(float x, float y, Mecell * mecell);
+};
+DemoScene1::DemoScene1(float x, float y, Mecell * mecell) : DemoScene::DemoScene(x, y, mecell)
+{
+	lighting.direction->dy = 5;
+	lighting.direction->dz = -15;
+	lighting.direction->next->angle = M_PI / 3;
+	lighting.direction->next->next->angle = M_PI / 4;
+}
+
+class DemoScene2 : public DemoScene
+{
+public:
+	DemoScene2(float x, float y, Mecell * mecell);
+};
+DemoScene2::DemoScene2(float x, float y, Mecell * mecell) : DemoScene::DemoScene(x, y, mecell)
+{
+	lighting.direction->dx = -20;
+	lighting.direction->dy = 2;
+	lighting.direction->dz = -15;
+	lighting.direction->next->angle = M_PI / 3;
+	lighting.direction->next->next->angle = M_PI / 4;
+}
+
+extern Mecell cell1;
+extern Mecell cell2;
+
+Mecell cell1 = {
+(Plane []) {
+	{1, 0, 0, -14},
+	{-1, 0, 0, -14},
+	{0, 1, 0, -14},
+	{0, -1, 0, -14},
+	{0, 0, 0, 0}
+}, (Mecell * []) {
+	& cell2,
+	nullptr
+}, & create<Scene, DemoScene1> };
+Mecell cell2 = { (Plane []) {
+	{1, 0, 0, 14},
+	{-1, 0, 0, -32},
+	{0, 1, 0, -36},
+	{0, -1, 0, 4},
+	{0, 0, 0, 0}
+}, (Mecell * []) {
+	& cell1,
+	nullptr
+}, & create<Scene, DemoScene2> };
 
 Scene * arrange(float x, float y)
 {
-	return new DemoScene(x, y);
+	framing.direction->next->next->dy = -10;
+	framing.direction->next->next->dz = -1.5;
+	framing.direction->next->angle = M_PI / 2;
+
+	return new DemoScene1(x, y, & cell1);
 }
 
 void buttonPressed(int pos, float x, float y)

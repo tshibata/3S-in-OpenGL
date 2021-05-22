@@ -24,7 +24,7 @@ run: sample.exe ../Floor.u-c.bin ../Star.u-c.bin ../Cuboid243.u-c.bin ../Cuboid4
 ../Cuboid8E9.u-c.txt: ../Cuboid8E9.dae
 	ruby ../dae2u-c.rb ../Cuboid8E9.dae Cuboid8E9
 
-sample.exe: platform.o sample.o geometry.o common.o files.o renderer.o ShadowRenderer.o SolidRenderer.o LucidRenderer.o Solid2DRenderer.o BackgroundRenderer.o
+sample.exe: platform.o sample.o geometry.o common.o files.o renderer.o ShadowRenderer.o SolidRenderer.o LucidRenderer.o Solid2DRenderer.o BackgroundRenderer.o Plane.o Mecell.o
 	${CXX} -o $@ $+ ${CXXFLAGS} ${LDFLAGS}
 
 platform.o: platform.cxx
