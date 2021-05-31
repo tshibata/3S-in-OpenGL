@@ -439,7 +439,7 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		framing.direction->next->next->dy += dy;
 		if (dst != mecell)
 		{
-			next = (* dst->creator)(x, y, dst);
+			next = (* dst->depction)(x, y, dst);
 		}
 	}
 
@@ -506,7 +506,7 @@ Mecell cell1 = {
 }, (Mecell * []) {
 	& cell2,
 	nullptr
-}, & create<Scene, DemoScene1> };
+}, & cue<DemoScene1> };
 Mecell cell2 = { (Plane []) {
 	{1, 0, 0, 14},
 	{-1, 0, 0, -32},
@@ -516,7 +516,7 @@ Mecell cell2 = { (Plane []) {
 }, (Mecell * []) {
 	& cell1,
 	nullptr
-}, & create<Scene, DemoScene2> };
+}, & cue<DemoScene2> };
 
 Scene * arrange(float x, float y)
 {

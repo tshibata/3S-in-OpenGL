@@ -1,18 +1,16 @@
 class Mecell;
 
-template <typename T> using Creator = T * (*)(float x, float y, Mecell * mecell);
-
 class Mecell
 {
 public:
 	Plane * limits;
 	Mecell * * adjacents;
-	Creator<Scene> creator;
+	Scene * (* depction)(float x, float y, Mecell * mecell);
 	Mecell * transit(float x, float y, float & dx, float & dy);
 };
 
-template <typename T, typename U> T * create(float x, float y, Mecell * mecell)
+template <typename T> Scene * cue(float x, float y, Mecell * mecell)
 {
-	return (T *) new U(x, y, mecell);
+	return (Scene *) new T(x, y, mecell);
 }
 
