@@ -17,7 +17,7 @@ public:
 
 class Direction
 {
-friend Ref<Direction>;
+friend Basis<Direction>;
 protected:
 	unsigned int refc;
 public:
@@ -29,7 +29,7 @@ public:
 
 class Stop : public Direction
 {
-friend Ref<Stop>;
+friend Basis<Stop>;
 public:
 	Stop();
 	virtual void getMatrix(float * matrix);
@@ -38,9 +38,9 @@ public:
 
 template <typename T> class Move : public Direction
 {
-friend Ref<Move>;
+friend Basis<Move>;
 public:
-	Ref<T> const next;
+	Basis<T> const next;
 	float dx, dy, dz;
 	Move() : next(new T()), dx(0), dy(0), dz(0)
 	{
@@ -59,9 +59,9 @@ public:
 
 template <typename T> class RotX : public Direction
 {
-friend Ref<RotX>;
+friend Basis<RotX>;
 public:
-	Ref<T> const next;
+	Basis<T> const next;
 	float angle;
 	RotX() : next(new T()), angle(0)
 	{
@@ -80,9 +80,9 @@ public:
 
 template <typename T> class RotY : public Direction
 {
-friend Ref<RotY>;
+friend Basis<RotY>;
 public:
-	Ref<T> const next;
+	Basis<T> const next;
 	float angle;
 	RotY() : next(new T()), angle(0)
 	{
@@ -101,9 +101,9 @@ public:
 
 template <typename T> class RotZ : public Direction
 {
-friend Ref<RotZ>;
+friend Basis<RotZ>;
 public:
-	Ref<T> const next;
+	Basis<T> const next;
 	float angle;
 	RotZ() : next(new T()), angle(0)
 	{
@@ -122,9 +122,9 @@ public:
 
 template <typename T> class Expand : public Direction
 {
-friend Ref<Expand>;
+friend Basis<Expand>;
 public:
-	Ref<T> const next;
+	Basis<T> const next;
 	float scale, sx, sy, sz;
 	Expand() : next(new T()), scale(1), sx(1), sy(1), sz(1)
 	{
@@ -143,7 +143,7 @@ public:
 
 class Projection
 {
-friend Ref<Projection>;
+friend Basis<Projection>;
 protected:
 	unsigned int refc;
 public:
@@ -154,7 +154,7 @@ public:
 template <typename T> class ParallelProjection : public Projection
 {
 public:
-	Ref<T> const direction;
+	Basis<T> const direction;
 	ParallelProjection(float width, float height, float near, float far)
 	 : Projection::Projection(width, height, near, far), direction(new T())
 	{
@@ -169,7 +169,7 @@ public:
 template <typename T> class PerspectiveProjection : public Projection
 {
 public:
-	Ref<T> const direction;
+	Basis<T> const direction;
 	PerspectiveProjection(float width, float height, float near, float far)
 	 : Projection::Projection(width, height, near, far), direction(new T())
 	{
@@ -259,7 +259,7 @@ extern RenderingMode lucid3D;
 template <typename U> class FinitePresence : public AbstractPresence
 {
 public:
-	Ref<U> direction;
+	Basis<U> direction;
 	FinitePresence(RenderingMode & mode) : AbstractPresence::AbstractPresence(mode), direction(new U())
 	{
 	}

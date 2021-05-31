@@ -1,4 +1,4 @@
-template<typename T> class Ref
+template<typename T> class ReferenceCounted
 {
 public:
 private:
@@ -35,38 +35,38 @@ private:
 
 public:
 
-	Ref() : ptr(nullptr)
+	ReferenceCounted() : ptr(nullptr)
 	{
 #ifdef DEBUG
-		std::cout << "Ref()" << std::endl;
+		std::cout << "ReferenceCounted()" << std::endl;
 #endif
 	}
 
-	Ref(T * p) : ptr(p)
+	ReferenceCounted(T * p) : ptr(p)
 	{
 #ifdef DEBUG
-		std::cout << "Ref(T * p)" << std::endl;
-#endif
-		tie();
-	}
-
-	Ref(const Ref<T> & r) : ptr(r.ptr)
-	{
-#ifdef DEBUG
-		std::cout << "Ref(const Ref<T> & r)" << std::endl;
+		std::cout << "ReferenceCounted(T * p)" << std::endl;
 #endif
 		tie();
 	}
 
-	template<typename U> Ref(const Ref<U> & r) : ptr((T *) r.ptr)
+	ReferenceCounted(const ReferenceCounted<T> & r) : ptr(r.ptr)
 	{
 #ifdef DEBUG
-		std::cout << "Ref(const Ref<U> & r)" << std::endl;
+		std::cout << "ReferenceCounted(const ReferenceCounted<T> & r)" << std::endl;
 #endif
 		tie();
 	}
 
-	Ref<T> & operator = (T * p)
+	template<typename U> ReferenceCounted(const ReferenceCounted<U> & r) : ptr((T *) r.ptr)
+	{
+#ifdef DEBUG
+		std::cout << "ReferenceCounted(const ReferenceCounted<U> & r)" << std::endl;
+#endif
+		tie();
+	}
+
+	ReferenceCounted<T> & operator = (T * p)
 	{
 #ifdef DEBUG
 		std::cout << "operator = (T * p)" << std::endl;
@@ -77,10 +77,10 @@ public:
 		return * this;
 	}
 
-	Ref<T> & operator = (const Ref<T> & r)
+	ReferenceCounted<T> & operator = (const ReferenceCounted<T> & r)
 	{
 #ifdef DEBUG
-		std::cout << "operator = (const Ref<T> & r)" << std::endl;
+		std::cout << "operator = (const ReferenceCounted<T> & r)" << std::endl;
 #endif
 		cut();
 		ptr = (T *) r;
@@ -88,10 +88,10 @@ public:
 		return * this;
 	}
 
-	template<typename U> Ref<T> & operator = (const Ref<U> & r)
+	template<typename U> ReferenceCounted<T> & operator = (const ReferenceCounted<U> & r)
 	{
 #ifdef DEBUG
-		std::cout << "operator = (const Ref<U> & r)" << std::endl;
+		std::cout << "operator = (const ReferenceCounted<U> & r)" << std::endl;
 #endif
 		cut();
 		ptr = (T *) r;
@@ -123,28 +123,30 @@ public:
 		return ptr == p;
 	}
 
-	bool operator == (const Ref<T> & r)
+	bool operator == (const ReferenceCounted<T> & r)
 	{
 #ifdef DEBUG
-		std::cout << "operator == (const Ref<T> & r)" << std::endl;
+		std::cout << "operator == (const ReferenceCounted<T> & r)" << std::endl;
 #endif
 		return ptr == (T *) r;
 	}
 
-	template<typename U> bool operator == (const Ref<U> & r)
+	template<typename U> bool operator == (const ReferenceCounted<U> & r)
 	{
 #ifdef DEBUG
-		std::cout << "operator == (const Ref<U> & r)" << std::endl;
+		std::cout << "operator == (const ReferenceCounted<U> & r)" << std::endl;
 #endif
 		return ptr == (T *) r;
 	}
 
-	~Ref()
+	~ReferenceCounted()
 	{
 #ifdef DEBUG
-		std::cout << "~Ref()" << std::endl;
+		std::cout << "~ReferenceCounted()" << std::endl;
 #endif
 		cut();
 	}
 };
+
+template <typename T> using Basis = const ReferenceCounted<T>;
 

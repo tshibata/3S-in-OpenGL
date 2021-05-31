@@ -1,12 +1,12 @@
 #include <cassert>
 #include <iostream>
-#include "ref.h"
+#include "Basis.h"
 
 static int count = 0;
 
 class Foo
 {
-friend Ref<Foo>;
+friend ReferenceCounted<Foo>;
 protected:
 	int refc = 0;
 public:
@@ -26,13 +26,13 @@ Foo::~Foo()
 
 class Bar : public Foo
 {
-friend Ref<Bar>;
+friend ReferenceCounted<Bar>;
 };
 
 void simpleTest()
 {
 	{
-		Ref<Foo> a = new Foo();
+		ReferenceCounted<Foo> a = new Foo();
 	}
 	assert(count == 0);
 }
@@ -40,7 +40,7 @@ void simpleTest()
 void renewTest()
 {
 	{
-		Ref<Foo> a = new Foo();
+		ReferenceCounted<Foo> a = new Foo();
 		a = new Foo();
 	}
 	assert(count == 0);
@@ -49,8 +49,8 @@ void renewTest()
 void assignTest()
 {
 	{
-		Ref<Foo> a;
-		Ref<Foo> b = new Foo();
+		ReferenceCounted<Foo> a;
+		ReferenceCounted<Foo> b = new Foo();
 		a = b;
 	}
 	assert(count == 0);
@@ -59,8 +59,8 @@ void assignTest()
 void assignUpTest()
 {
 	{
-		Ref<Foo> a;
-		Ref<Bar> b = new Bar();
+		ReferenceCounted<Foo> a;
+		ReferenceCounted<Bar> b = new Bar();
 		a = b;
 	}
 	assert(count == 0);
@@ -69,8 +69,8 @@ void assignUpTest()
 void reassignTest()
 {
 	{
-		Ref<Foo> a = new Foo();
-		Ref<Foo> b = new Foo();
+		ReferenceCounted<Foo> a = new Foo();
+		ReferenceCounted<Foo> b = new Foo();
 		a = b;
 	}
 	assert(count == 0);
@@ -79,8 +79,8 @@ void reassignTest()
 void reassignUpTest()
 {
 	{
-		Ref<Foo> a = new Foo();
-		Ref<Bar> b = new Bar();
+		ReferenceCounted<Foo> a = new Foo();
+		ReferenceCounted<Bar> b = new Bar();
 		a = b;
 	}
 	assert(count == 0);
