@@ -1,4 +1,16 @@
-template<typename T> class Res
+template<typename T> T * & percipiInstance()
+{
+	static T * instance = nullptr;
+	return instance;
+}
+
+template<typename T> int & percipiCounter()
+{
+	static int counter = 0;
+	return counter;
+}
+
+template<typename T> class Percipi
 {
 private:
 	T * ptr;
@@ -7,9 +19,9 @@ private:
 		if (ptr != nullptr)
 		{
 #ifdef DEBUG
-			std::cout << ptr->refc << "++" << std::endl;
+			std::cout << percipiCounter<T>() << "++" << std::endl;
 #endif
-			ptr->refc++;
+			percipiCounter<T>()++;
 		}
 	}
 	inline void cut()
@@ -17,34 +29,30 @@ private:
 		if (ptr != nullptr)
 		{
 #ifdef DEBUG
-			std::cout << ptr->refc << "--" << std::endl;
+			std::cout << percipiCounter<T>() << "--" << std::endl;
 #endif
-			ptr->refc--;
-#ifdef DEBUG
-			if (ptr->refc <= 0)
-#else
-			if (ptr->refc == 0) // refc can be unsigned
-#endif
+			percipiCounter<T>()--;
+			if (percipiCounter<T>() <= 0)
 			{
 				delete ptr;
 				ptr = nullptr;
-				T::singleton = nullptr;
+				percipiInstance<T>() = nullptr;
 			}
 		}
 	}
 
 public:
 
-	Res()
+	Percipi()
 	{
 #ifdef DEBUG
-		std::cout << "Res()" << std::endl;
+		std::cout << "Percipi()" << std::endl;
 #endif
-		if (T::singleton == nullptr)
+		if (percipiInstance<T>() == nullptr)
 		{
-			T::singleton = new T();
+			percipiInstance<T>() = new T();
 		}
-		ptr = T::singleton;
+		ptr = percipiInstance<T>();
 		tie();
 	}
 
@@ -56,10 +64,10 @@ public:
 		return ptr;
 	}
 
-	~Res()
+	~Percipi()
 	{
 #ifdef DEBUG
-		std::cout << "~Res()" << std::endl;
+		std::cout << "~Percipi()" << std::endl;
 #endif
 		cut();
 	}

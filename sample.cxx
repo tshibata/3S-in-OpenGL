@@ -172,10 +172,6 @@ static PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing(100, 50, 0.5, 50);
 
 class Props1
 {
-friend Res<Props1>;
-private:
-	static Props1 * singleton;
-	int refc = 0;
 public:
 	Props1();
 	~Props1();
@@ -198,7 +194,6 @@ public:
 	Star * star[4];
 	Digit digit[COUNTER_CAPACITY];
 };
-Props1 * Props1::singleton = nullptr;
 Props1::Props1()
 {
 	cuboid1.direction->angle = 2 * M_PI / 2;
@@ -262,10 +257,6 @@ Props1::~Props1()
 
 class Props2
 {
-friend Res<Props2>;
-private:
-	static Props2 * singleton;
-	int refc = 0;
 public:
 	Props2();
 	~Props2();
@@ -283,7 +274,6 @@ public:
 	Cuboid8E9 cuboid9;
 	Cuboid8E9 cuboid10;
 };
-Props2 * Props2::singleton = nullptr;
 Props2::Props2()
 {
 	earth1.direction->dx = -30;
@@ -342,8 +332,8 @@ class DemoScene : public MecellScene
 private:
 	Background sky1;
 	Background sky2;
-	Res<Props1> props1;
-	Res<Props2> props2;
+	Percipi<Props1> props1;
+	Percipi<Props2> props2;
 	float angle1 = 0.0;
 	float angle2 = 0.0;
 	double speed = 0.0;
