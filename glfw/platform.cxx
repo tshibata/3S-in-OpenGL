@@ -66,6 +66,7 @@ int main(int argc, char * * argv)
 	glfwSetErrorCallback(errorHandler);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	GLFWwindow * const window(glfwCreateWindow(screenWidth, screenHeight, "Shadow, Solid & Screen", NULL, NULL));
 	if (window == NULL){
 		return 2;
