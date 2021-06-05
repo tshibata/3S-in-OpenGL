@@ -165,87 +165,113 @@ public:
 };
 
 static bool pressed = false;
+static float origY;
 static float prevX;
 static float prevY;
 
 static PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing(100, 50, 0.5, 50);
+
+
+class Props0
+{
+public:
+	Props0();
+	Cuboid8E9 cuboid1;
+	Cuboid8E9 cuboid2;
+};
+Props0::Props0()
+{
+	cuboid1.direction->angle = 2 * M_PI / 2;
+	cuboid1.direction->next->dx = -9;
+	cuboid1.direction->next->dy = 22;
+	cuboid2.direction->angle = 1 * M_PI / 2;
+	cuboid2.direction->next->dx = 2;
+	cuboid2.direction->next->dy = 25;
+}
 
 class Props1
 {
 public:
 	Props1();
 	~Props1();
+	void rearrange(float dt, float x, float y);
 	Earth earth;
-	Cuboid8E9 cuboid1;
-	Cuboid465 cuboid2;
-	Cuboid8E9 cuboid3;
-	Cuboid243 cuboid4;
-	Cuboid8E9 cuboid5;
+	Cuboid465 cuboid1;
+	Cuboid8E9 cuboid2;
+	Cuboid243 cuboid3;
+	Cuboid8E9 cuboid4;
+	Cuboid465 cuboid5;
 	Cuboid465 cuboid6;
-	Cuboid465 cuboid7;
-	Cuboid8E9 cuboid8;
-	Cuboid465 cuboid9;
-	Cuboid243 cuboid10;
+	Cuboid8E9 cuboid7;
+	Cuboid465 cuboid8;
+	Cuboid243 cuboid9;
+	Cuboid465 cuboid10;
 	Cuboid465 cuboid11;
-	Cuboid465 cuboid12;
-	Cuboid243 cuboid13;
-	Cuboid465 cuboid14;
-	Cuboid8E9 cuboid15;
+	Cuboid243 cuboid12;
+	Cuboid465 cuboid13;
+	Cuboid8E9 cuboid14;
 	Star * star[4];
-	Digit digit[COUNTER_CAPACITY];
+	float angle1 = 0.0;
+	float angle2 = 0.0;
+	double speed = 0.0;
 };
 Props1::Props1()
 {
-	cuboid1.direction->angle = 2 * M_PI / 2;
-	cuboid1.direction->next->dx = -9;
-	cuboid1.direction->next->dy = 22;
+	cuboid1.direction->angle = M_PI / 2;
+	cuboid1.direction->next->dx = -2;
+	cuboid1.direction->next->dy = 17;
 	cuboid2.direction->angle = M_PI / 2;
-	cuboid2.direction->next->dx = -2;
-	cuboid2.direction->next->dy = 17;
-	cuboid3.direction->angle = M_PI / 2;
-	cuboid3.direction->next->dx = 8;
-	cuboid3.direction->next->dy = 19;
+	cuboid2.direction->next->dx = 8;
+	cuboid2.direction->next->dy = 19;
+	cuboid3.direction->angle = 0 * M_PI / 2;
+	cuboid3.direction->next->dx = 16;
+	cuboid3.direction->next->dy = 13;
 	cuboid4.direction->angle = 0 * M_PI / 2;
-	cuboid4.direction->next->dx = 16;
-	cuboid4.direction->next->dy = 13;
+	cuboid4.direction->next->dx = 19;
+	cuboid4.direction->next->dy = 4;
 	cuboid5.direction->angle = 0 * M_PI / 2;
-	cuboid5.direction->next->dx = 19;
-	cuboid5.direction->next->dy = 4;
-	cuboid6.direction->angle = 0 * M_PI / 2;
+	cuboid5.direction->next->dx = 17;
+	cuboid5.direction->next->dy = -6;
+	cuboid6.direction->angle = 2 * M_PI / 2;
 	cuboid6.direction->next->dx = 17;
-	cuboid6.direction->next->dy = -6;
-	cuboid7.direction->angle = 2 * M_PI / 2;
-	cuboid7.direction->next->dx = 17;
-	cuboid7.direction->next->dy = -12;
-	cuboid8.direction->angle = M_PI / 2;
-	cuboid8.direction->next->dx = 9;
-	cuboid8.direction->next->dy = -19;
-	cuboid9.direction->angle = 0 * M_PI / 2;
-	cuboid9.direction->next->dx = 0;
-	cuboid9.direction->next->dy = -18;
+	cuboid6.direction->next->dy = -12;
+	cuboid7.direction->angle = M_PI / 2;
+	cuboid7.direction->next->dx = 9;
+	cuboid7.direction->next->dy = -19;
+	cuboid8.direction->angle = 0 * M_PI / 2;
+	cuboid8.direction->next->dx = 0;
+	cuboid8.direction->next->dy = -18;
+	cuboid9.direction->angle = M_PI / 2;
+	cuboid9.direction->next->dx = -4;
+	cuboid9.direction->next->dy = -16;
 	cuboid10.direction->angle = M_PI / 2;
-	cuboid10.direction->next->dx = -4;
-	cuboid10.direction->next->dy = -16;
-	cuboid11.direction->angle = M_PI / 2;
-	cuboid11.direction->next->dx = -9;
-	cuboid11.direction->next->dy = -17;
-	cuboid12.direction->angle = 2 * M_PI / 2;
-	cuboid12.direction->next->dx = -14;
-	cuboid12.direction->next->dy = -18;
+	cuboid10.direction->next->dx = -9;
+	cuboid10.direction->next->dy = -17;
+	cuboid11.direction->angle = 2 * M_PI / 2;
+	cuboid11.direction->next->dx = -14;
+	cuboid11.direction->next->dy = -18;
+	cuboid12.direction->angle = 0 * M_PI / 2;
+	cuboid12.direction->next->dx = -16;
+	cuboid12.direction->next->dy = -13;
 	cuboid13.direction->angle = 0 * M_PI / 2;
-	cuboid13.direction->next->dx = -16;
-	cuboid13.direction->next->dy = -13;
-	cuboid14.direction->angle = 0 * M_PI / 2;
-	cuboid14.direction->next->dx = -17;
-	cuboid14.direction->next->dy = -8;
-	cuboid15.direction->angle = 3 * M_PI / 2;
-	cuboid15.direction->next->dx = -22;
-	cuboid15.direction->next->dy = -1;
+	cuboid13.direction->next->dx = -17;
+	cuboid13.direction->next->dy = -8;
+	cuboid14.direction->angle = 3 * M_PI / 2;
+	cuboid14.direction->next->dx = -22;
+	cuboid14.direction->next->dy = -1;
 
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
 	star[2] = new LucidStar();
 	star[3] = new LucidStar();
+
+	for (int i = 0; i < 4; i++)
+	{
+		star[i]->direction->angle = i - angle1;
+		star[i]->direction->next->dx = cosf(i - angle2) * 2;
+		star[i]->direction->next->dy = sinf(i - angle2) * 2;
+		star[i]->direction->next->dz = -1;
+	}
 }
 Props1::~Props1()
 {
@@ -254,12 +280,35 @@ Props1::~Props1()
 	delete star[2];
 	delete star[3];
 }
+void Props1::rearrange(float fdt, float x, float y)
+{
+	if (0 <= x && x < screenWidth && 0 <= y && y < screenHeight && pixelLabel(x, y) != 0)
+	{
+		speed = 1000;
+	}
+	else
+	{
+		speed = speed - fdt * 1000;
+		if (speed < 0)
+		{
+			speed = 0; // no rewind
+		}
+	}
+	angle1 += 0.029 * speed * fdt;
+	angle2 += 0.005 * speed * fdt;
+	for (int i = 0; i < 4; i++)
+	{
+		star[i]->direction->angle = i - angle1;
+		star[i]->direction->next->dx = cosf(i - angle2) * 2;
+		star[i]->direction->next->dy = sinf(i - angle2) * 2;
+		star[i]->direction->next->dz = -1;
+	}
+}
 
 class Props2
 {
 public:
 	Props2();
-	~Props2();
 	Earth earth1;
 	Earth earth2;
 	Earth earth3;
@@ -272,7 +321,6 @@ public:
 	Cuboid243 cuboid7;
 	Cuboid465 cuboid8;
 	Cuboid8E9 cuboid9;
-	Cuboid8E9 cuboid10;
 };
 Props2::Props2()
 {
@@ -309,12 +357,34 @@ Props2::Props2()
 	cuboid9.direction->angle = 1 * M_PI / 2;
 	cuboid9.direction->next->dx = -16;
 	cuboid9.direction->next->dy = 41;
-	cuboid10.direction->angle = 2 * M_PI / 2;
-	cuboid10.direction->next->dx = -9;
-	cuboid10.direction->next->dy = 36;
 }
-Props2::~Props2()
+
+class Props3
 {
+public:
+	Props3();
+	Cuboid465 cuboid1;
+	Cuboid465 cuboid2;
+	Cuboid465 cuboid3;
+	Cuboid8E9 cuboid4;
+};
+Props3::Props3()
+{
+	cuboid1.direction->angle = 1 * M_PI / 2;
+	cuboid1.direction->next->dx = -6;
+	cuboid1.direction->next->dy = 39;
+
+	cuboid2.direction->angle = 2 * M_PI / 2;
+	cuboid2.direction->next->dx = -1;
+	cuboid2.direction->next->dy = 40;
+
+	cuboid3.direction->angle = 3 * M_PI / 2;
+	cuboid3.direction->next->dx = 4;
+	cuboid3.direction->next->dy = 39;
+
+	cuboid4.direction->angle = 2 * M_PI / 2;
+	cuboid4.direction->next->dx = 11;
+	cuboid4.direction->next->dy = 36;
 }
 
 class MecellScene : public Scene
@@ -332,11 +402,7 @@ class DemoScene : public MecellScene
 private:
 	Background sky1;
 	Background sky2;
-	Percipi<Props1> props1;
-	Percipi<Props2> props2;
-	float angle1 = 0.0;
-	float angle2 = 0.0;
-	double speed = 0.0;
+	Digit digit[COUNTER_CAPACITY];
 	int count = 0;
 protected:
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
@@ -347,19 +413,11 @@ public:
 };
 DemoScene::DemoScene(float x, float y, Mecell * mecell) : MecellScene::MecellScene(mecell), lighting(60, 30, 10, 40)
 {
-	for (int i = 0; i < 4; i++)
-	{
-		props1->star[i]->direction->angle = i - angle1;
-		props1->star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		props1->star[i]->direction->next->dy = sinf(i - angle2) * 2;
-		props1->star[i]->direction->next->dz = -1;
-	}
-
 	for (int i = 0; i < COUNTER_CAPACITY; i++)
 	{
-		props1->digit[i].direction->scale = 2;
-		props1->digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / screenWidth;
-		props1->digit[i].direction->next->dy = 0.75;
+		digit[i].direction->scale = 2;
+		digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / screenWidth;
+		digit[i].direction->next->dy = 0.75;
 	}
 
 	prevX = x;
@@ -405,25 +463,19 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 	Scene * next = this;
 
 	float fdt = dt * 0.000001; // us -> s
-	if (0 <= x && x < screenWidth && 0 <= y && y < screenHeight && pixelLabel(x, y) != 0)
+
+	if (x < 0 || screenWidth <= x || y < screenHeight / 2 || screenHeight <= y)
 	{
-		speed = 1000;
-	}
-	else
-	{
-		speed = speed - fdt * 1000;
-		if (speed < 0)
-		{
-			speed = 0; // no rewind
-		}
+		pressed = false;
 	}
 
 	if (pressed)
 	{
 		framing.direction->angle += (x - prevX) * 0.001f;
 
-		float dx = sinf(framing.direction->angle) * (y - prevY) * -0.01f;
-		float dy = cosf(framing.direction->angle) * (y - prevY) * 0.02f;
+		float a = fdt * fminf(y - origY, 128) / 128;
+		float dx = sinf(framing.direction->angle) * a * -10;
+		float dy = cosf(framing.direction->angle) * a * 10;
 		Mecell * dst = mecell->transit(framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy);
 		framing.direction->next->next->dx += dx;
 		framing.direction->next->next->dy += dy;
@@ -433,20 +485,10 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		}
 	}
 
-	angle1 += 0.029 * speed * fdt;
-	angle2 += 0.005 * speed * fdt;
-	for (int i = 0; i < 4; i++)
-	{
-		props1->star[i]->direction->angle = i - angle1;
-		props1->star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		props1->star[i]->direction->next->dy = sinf(i - angle2) * 2;
-		props1->star[i]->direction->next->dz = -1;
-	}
-
 	count++;
 	for (int i = 0, j = count; i < COUNTER_CAPACITY; i++)
 	{
-		props1->digit[i].i = j % 10;
+		digit[i].i = j % 10;
 		j = j / 10;
 	}
 
@@ -458,8 +500,13 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 
 class DemoScene1 : public DemoScene
 {
+private:
+	Percipi<Props0> props0;
+	Percipi<Props1> props1;
+	Percipi<Props2> props2;
 public:
 	DemoScene1(float x, float y, Mecell * mecell);
+	Scene * rearrange(unsigned int dt, float x, float y);
 };
 DemoScene1::DemoScene1(float x, float y, Mecell * mecell) : DemoScene::DemoScene(x, y, mecell)
 {
@@ -468,11 +515,24 @@ DemoScene1::DemoScene1(float x, float y, Mecell * mecell) : DemoScene::DemoScene
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
+Scene * DemoScene1::rearrange(unsigned int dt, float x, float y)
+{
+	Scene * next = DemoScene::rearrange(dt, x, y);
+	float fdt = dt * 0.000001; // us -> s
+	props1->rearrange(fdt, x, y);
+	return next;
+}
 
 class DemoScene2 : public DemoScene
 {
+private:
+	Percipi<Props0> props0;
+	Percipi<Props1> props1;
+	Percipi<Props2> props2;
+	Percipi<Props3> props3;
 public:
 	DemoScene2(float x, float y, Mecell * mecell);
+	Scene * rearrange(unsigned int dt, float x, float y);
 };
 DemoScene2::DemoScene2(float x, float y, Mecell * mecell) : DemoScene::DemoScene(x, y, mecell)
 {
@@ -482,9 +542,41 @@ DemoScene2::DemoScene2(float x, float y, Mecell * mecell) : DemoScene::DemoScene
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
+Scene * DemoScene2::rearrange(unsigned int dt, float x, float y)
+{
+	Scene * next = DemoScene::rearrange(dt, x, y);
+	float fdt = dt * 0.000001; // us -> s
+	props1->rearrange(fdt, x, y);
+	return next;
+}
+
+class DemoScene3 : public DemoScene
+{
+private:
+	Percipi<Props0> props0;
+	Percipi<Props2> props2;
+	Percipi<Props3> props3;
+public:
+	DemoScene3(float x, float y, Mecell * mecell);
+	Scene * rearrange(unsigned int dt, float x, float y);
+};
+DemoScene3::DemoScene3(float x, float y, Mecell * mecell) : DemoScene::DemoScene(x, y, mecell)
+{
+	lighting.direction->dx = -20;
+	lighting.direction->dy = 2;
+	lighting.direction->dz = -15;
+	lighting.direction->next->angle = M_PI / 3;
+	lighting.direction->next->next->angle = M_PI / 4;
+}
+Scene * DemoScene3::rearrange(unsigned int dt, float x, float y)
+{
+	Scene * next = DemoScene::rearrange(dt, x, y);
+	return next;
+}
 
 extern Mecell cell1;
 extern Mecell cell2;
+extern Mecell cell3;
 
 Mecell cell1 = {
 (Plane []) {
@@ -505,8 +597,20 @@ Mecell cell2 = { (Plane []) {
 	{0, 0, 0, 0}
 }, (Mecell * []) {
 	& cell1,
+	& cell3,
 	nullptr
 }, & cue<DemoScene2> };
+Mecell cell3 = {
+(Plane []) {
+	{1, 0, 0, -6},
+	{-1, 0, 0, -14},
+	{0, 1, 0, -36},
+	{0, -1, 0, 30},
+	{0, 0, 0, 0}
+}, (Mecell * []) {
+	& cell2,
+	nullptr
+}, & cue<DemoScene3> };
 
 Scene * arrange(float x, float y)
 {
@@ -519,7 +623,11 @@ Scene * arrange(float x, float y)
 
 void buttonPressed(int pos, float x, float y)
 {
-	pressed = true;
+	if (screenHeight / 2 < y)
+	{
+		pressed = true;
+		origY = y;
+	}
 	prevX = x;
 	prevY = y;
 }
