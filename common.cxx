@@ -4,6 +4,8 @@
 #include <time.h>
 #include <platform.h>
 #include "Basis.h"
+#include "Plane.h"
+#include "Scene.h"
 #include "geometry.h"
 #include "common.h"
 #include "renderer.h"

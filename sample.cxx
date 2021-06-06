@@ -8,7 +8,7 @@
 #include "geometry.h"
 #include "renderer.h"
 #include "Plane.h"
-#include "Mecell.h"
+#include "Scene.h"
 
 #define COUNTER_CAPACITY 6
 
@@ -387,17 +387,7 @@ Props3::Props3()
 	cuboid4.direction->next->dy = 36;
 }
 
-class MecellScene : public Scene
-{
-public:
-	Mecell * mecell;
-	MecellScene(Mecell * mecell);
-};
-MecellScene::MecellScene(Mecell * mecell) : mecell(mecell)
-{
-}
-
-class DemoScene : public MecellScene
+class DemoScene : public Scene
 {
 private:
 	Background sky1;
@@ -407,11 +397,11 @@ private:
 protected:
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
 public:
-	DemoScene(float x, float y, Mecell * mecell);
+	DemoScene(float x, float y, Hollow * hollow);
 	void render();
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene::DemoScene(float x, float y, Mecell * mecell) : MecellScene::MecellScene(mecell), lighting(60, 30, 10, 40)
+DemoScene::DemoScene(float x, float y, Hollow * hollow) : Scene::Scene(hollow), lighting(60, 30, 10, 40)
 {
 	for (int i = 0; i < COUNTER_CAPACITY; i++)
 	{
@@ -476,12 +466,12 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		float a = fdt * fminf(y - origY, 128) / 128;
 		float dx = sinf(framing.direction->angle) * a * -10;
 		float dy = cosf(framing.direction->angle) * a * 10;
-		Mecell * dst = mecell->transit(framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy);
+		Hollow * dst = hollow->transit(framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy);
 		framing.direction->next->next->dx += dx;
 		framing.direction->next->next->dy += dy;
-		if (dst != mecell)
+		if (dst != hollow)
 		{
-			next = (* dst->depction)(x, y, dst);
+			next = (* dst->depiction)(x, y, dst);
 		}
 	}
 
@@ -505,10 +495,10 @@ private:
 	Percipi<Props1> props1;
 	Percipi<Props2> props2;
 public:
-	DemoScene1(float x, float y, Mecell * mecell);
+	DemoScene1(float x, float y, Hollow * hollow);
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene1::DemoScene1(float x, float y, Mecell * mecell) : DemoScene::DemoScene(x, y, mecell)
+DemoScene1::DemoScene1(float x, float y, Hollow * hollow) : DemoScene::DemoScene(x, y, hollow)
 {
 	lighting.direction->dy = 5;
 	lighting.direction->dz = -15;
@@ -531,10 +521,10 @@ private:
 	Percipi<Props2> props2;
 	Percipi<Props3> props3;
 public:
-	DemoScene2(float x, float y, Mecell * mecell);
+	DemoScene2(float x, float y, Hollow * hollow);
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene2::DemoScene2(float x, float y, Mecell * mecell) : DemoScene::DemoScene(x, y, mecell)
+DemoScene2::DemoScene2(float x, float y, Hollow * hollow) : DemoScene::DemoScene(x, y, hollow)
 {
 	lighting.direction->dx = -20;
 	lighting.direction->dy = 2;
@@ -557,10 +547,10 @@ private:
 	Percipi<Props2> props2;
 	Percipi<Props3> props3;
 public:
-	DemoScene3(float x, float y, Mecell * mecell);
+	DemoScene3(float x, float y, Hollow * hollow);
 	Scene * rearrange(unsigned int dt, float x, float y);
 };
-DemoScene3::DemoScene3(float x, float y, Mecell * mecell) : DemoScene::DemoScene(x, y, mecell)
+DemoScene3::DemoScene3(float x, float y, Hollow * hollow) : DemoScene::DemoScene(x, y, hollow)
 {
 	lighting.direction->dx = -20;
 	lighting.direction->dy = 2;
@@ -574,40 +564,40 @@ Scene * DemoScene3::rearrange(unsigned int dt, float x, float y)
 	return next;
 }
 
-extern Mecell cell1;
-extern Mecell cell2;
-extern Mecell cell3;
+extern Hollow cell1;
+extern Hollow cell2;
+extern Hollow cell3;
 
-Mecell cell1 = {
+Hollow cell1 = {
 (Plane []) {
 	{1, 0, 0, -14},
 	{-1, 0, 0, -14},
 	{0, 1, 0, -14},
 	{0, -1, 0, -14},
 	{0, 0, 0, 0}
-}, (Mecell * []) {
+}, (Hollow * []) {
 	& cell2,
 	nullptr
 }, & cue<DemoScene1> };
-Mecell cell2 = { (Plane []) {
+Hollow cell2 = { (Plane []) {
 	{1, 0, 0, 14},
 	{-1, 0, 0, -32},
 	{0, 1, 0, -36},
 	{0, -1, 0, 4},
 	{0, 0, 0, 0}
-}, (Mecell * []) {
+}, (Hollow * []) {
 	& cell1,
 	& cell3,
 	nullptr
 }, & cue<DemoScene2> };
-Mecell cell3 = {
+Hollow cell3 = {
 (Plane []) {
 	{1, 0, 0, -6},
 	{-1, 0, 0, -14},
 	{0, 1, 0, -36},
 	{0, -1, 0, 30},
 	{0, 0, 0, 0}
-}, (Mecell * []) {
+}, (Hollow * []) {
 	& cell2,
 	nullptr
 }, & cue<DemoScene3> };

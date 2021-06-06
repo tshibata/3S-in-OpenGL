@@ -7,11 +7,18 @@
 #include "Basis.h"
 #include "geometry.h"
 #include "Plane.h"
-#include "Mecell.h"
+#include "Scene.h"
 
-Mecell * Mecell::transit(float x, float y, float & dx, float & dy)
+Scene::Scene(Hollow * hollow) : hollow(hollow)
 {
-	Mecell * curr = this;
+}
+Scene::~Scene()
+{
+}
+
+Hollow * Hollow::transit(float x, float y, float & dx, float & dy)
+{
+	Hollow * curr = this;
 	float t = 0;
 	while (true)
 	{
@@ -25,7 +32,7 @@ Mecell * Mecell::transit(float x, float y, float & dx, float & dy)
 			assert(p != nullptr);
 			for (int i = 0;; i++)
 			{
-				Mecell * next = curr->adjacents[i];
+				Hollow * next = curr->adjacents[i];
 
 				if (next == nullptr)
 				{

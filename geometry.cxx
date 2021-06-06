@@ -339,12 +339,3 @@ AbstractPresence * RenderingMode::getFirst()
 	return sentinel.getNext();
 }
 
-
-Scene::Scene()
-{
-}
-
-Scene::~Scene()
-{
-}
-
