@@ -169,7 +169,7 @@ static float origY;
 static float prevX;
 static float prevY;
 
-static PerspectiveProjection<RotY<RotX<Move<Stop>>>> framing(100, 50, 0.5, 50);
+static PerspectiveProjection<RotX<RotZ<Move<Stop>>>> framing(100, 50, 0.5, 50);
 
 
 class Props0
@@ -422,7 +422,7 @@ void DemoScene::render()
 	static Solid2DRenderer solid2DRenderer;
 
 	float sect = M_PI / (atan((framing.width / 2) / framing.far));
-	float turn = framing.direction->angle / (M_PI * 2);
+	float turn = - framing.direction->next->angle / (M_PI * 2);
 	sky1.direction->scale = screenWidth * sect / sky1.getFigure()->texture->width;
 	sky1.direction->next->dx = (turn - floor(turn) - 1) * (2 * sect);
 	sky2.direction->scale = screenWidth * sect / sky2.getFigure()->texture->width;
@@ -461,11 +461,11 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 
 	if (pressed)
 	{
-		framing.direction->angle += (x - prevX) * 0.001f;
+		framing.direction->next->angle += (x - prevX) * -0.001f;
 
-		float a = fdt * fminf(y - origY, 128) / 128;
-		float dx = sinf(framing.direction->angle) * a * -10;
-		float dy = cosf(framing.direction->angle) * a * 10;
+		float a = fdt * fminf(y - origY, screenHeight / 4) / (screenHeight / 4);
+		float dx = sinf(framing.direction->next->angle) * a * 10;
+		float dy = cosf(framing.direction->next->angle) * a * 10;
 		Hollow * dst = hollow->transit(framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy);
 		framing.direction->next->next->dx += dx;
 		framing.direction->next->next->dy += dy;
@@ -606,7 +606,7 @@ Scene * arrange(float x, float y)
 {
 	framing.direction->next->next->dy = -10;
 	framing.direction->next->next->dz = -1.5;
-	framing.direction->next->angle = M_PI / 2;
+	framing.direction->angle = M_PI / 2;
 
 	return new DemoScene1(x, y, & cell1);
 }
