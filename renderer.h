@@ -13,10 +13,13 @@ template <class Head, class... Tail> void setPresence(AbstractPresence * p, Head
 
 template <class... Tail> void present(RenderingMode & mode, Tail... tail)
 {
-	for (AbstractPresence * b = mode.getFirst(); b != nullptr; b = b->getNext())
+	for (AbstractPresence * p = mode.getFirst(); p != nullptr; p = p->getNext())
 	{
-		setPresence(b, std::forward<Tail>(tail)...);
-		glDrawArrays(GL_TRIANGLES, 0, vbSize[b->getFigure()->id] / (8 * sizeof(float)));
+		if (p->visible)
+		{
+			setPresence(p, std::forward<Tail>(tail)...);
+			glDrawArrays(GL_TRIANGLES, 0, vbSize[p->getFigure()->id] / (8 * sizeof(float)));
+		}
 	}
 }
 

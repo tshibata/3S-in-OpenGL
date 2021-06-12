@@ -233,6 +233,7 @@ private:
 	AbstractPresence * next;
 	AbstractPresence();
 public:
+	bool visible = true;
 	unsigned char label = 0;
 	AbstractPresence(RenderingMode & mode);
 	virtual ~AbstractPresence();
