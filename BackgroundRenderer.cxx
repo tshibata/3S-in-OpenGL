@@ -6,6 +6,9 @@
 #include "geometry.h"
 #include "common.h"
 #include "renderer.h"
+#include "BackgroundRenderer.h"
+
+RenderingMode background;
 
 BackgroundRenderer::BackgroundRenderer()
 {

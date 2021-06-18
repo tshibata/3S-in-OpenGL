@@ -6,6 +6,9 @@
 #include "geometry.h"
 #include "common.h"
 #include "renderer.h"
+#include "Solid2DRenderer.h"
+
+RenderingMode solid2D;
 
 Solid2DRenderer::Solid2DRenderer()
 {

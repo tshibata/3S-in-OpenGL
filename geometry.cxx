@@ -5,11 +5,6 @@
 #include "geometry.h"
 #include "files.h"
 
-RenderingMode background;
-RenderingMode solid2D;
-RenderingMode solid3D;
-RenderingMode lucid3D;
-
 void prod(float * a, float * b, float * c)
 {
 	float c0 = a[0] * b[0] +  a[1] * b[4] +  a[2] * b[8] +  a[3] * b[12];

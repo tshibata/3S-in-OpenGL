@@ -252,10 +252,6 @@ public:
 	RenderingMode();
 	AbstractPresence * getFirst();
 };
-extern RenderingMode background;
-extern RenderingMode solid2D;
-extern RenderingMode solid3D;
-extern RenderingMode lucid3D;
 
 template <typename U> class FinitePresence : public AbstractPresence
 {

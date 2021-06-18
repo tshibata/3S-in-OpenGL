@@ -6,6 +6,9 @@
 #include "geometry.h"
 #include "common.h"
 #include "renderer.h"
+#include "LucidRenderer.h"
+
+RenderingMode lucid3D;
 
 LucidRenderer::LucidRenderer()
 {

@@ -9,11 +9,21 @@
 #include "renderer.h"
 #include "Plane.h"
 #include "Scene.h"
+#include "BackgroundRenderer.h"
+#include "ShadowRenderer.h"
+#include "SolidRenderer.h"
+#include "LucidRenderer.h"
+#include "Solid2DRenderer.h"
 
 #define COUNTER_CAPACITY 6
 
 const int screenWidth = 1024;
 const int screenHeight = 512;
+
+extern RenderingMode background;
+extern RenderingMode solid2D;
+extern RenderingMode solid3D;
+extern RenderingMode lucid3D;
 
 static Texture shadowMap(1024, 512);
 static Texture backgroundTexture("../Landscape.png");

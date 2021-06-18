@@ -8,7 +8,6 @@
 #include "Scene.h"
 #include "geometry.h"
 #include "common.h"
-#include "renderer.h"
 #include "files.h"
 
 static GLboolean initShader(GLuint shader, const GLchar * * source)

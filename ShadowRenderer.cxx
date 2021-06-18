@@ -6,6 +6,9 @@
 #include "geometry.h"
 #include "common.h"
 #include "renderer.h"
+#include "ShadowRenderer.h"
+
+extern RenderingMode solid3D;
 
 ShadowRenderer::ShadowRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
 {
