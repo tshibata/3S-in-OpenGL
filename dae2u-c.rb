@@ -125,8 +125,7 @@ collada = Collada.new(doc.root)
 ARGV.each do |name|
 	node = collada.nodesMap[name]
 	geometry = $geometriesMap[node.geometry]
-	path = File.join(File.dirname(src), name + '.u-c.txt')
-	File.open(path, 'w') do |w|
+	File.open(name + '.u-c.txt', 'w') do |w|
 		textureInput = geometry.triangles.inputs['TEXCOORD']
 		normalInput = geometry.triangles.inputs['NORMAL']
 		vertexInput = geometry.triangles.inputs['VERTEX']

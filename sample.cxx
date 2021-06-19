@@ -36,12 +36,12 @@ static Texture lucidTexture("../LucidStar.png");
 static Texture digitTexture("../num8x8.png");
 
 static SurficialFigure backgroundFigure = SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
-static SpacialFigure cuboid243Figure(& cuboid243Texture, "../Cuboid243.u-c.bin");
-static SpacialFigure cuboid465Figure(& cuboid465Texture, "../Cuboid465.u-c.bin");
-static SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "../Cuboid8E9.u-c.bin");
-static SpacialFigure solidFigure(& solidTexture, "../Star.u-c.bin");
-static SpacialFigure lucidFigure(& lucidTexture, "../Star.u-c.bin");
-static SpacialFigure earthFigure(& floorTexture, "../Floor.u-c.bin");
+static SpacialFigure cuboid243Figure(& cuboid243Texture, "Cuboid243.u-c.bin");
+static SpacialFigure cuboid465Figure(& cuboid465Texture, "Cuboid465.u-c.bin");
+static SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "Cuboid8E9.u-c.bin");
+static SpacialFigure solidFigure(& solidTexture, "Star.u-c.bin");
+static SpacialFigure lucidFigure(& lucidTexture, "Star.u-c.bin");
+static SpacialFigure earthFigure(& floorTexture, "Floor.u-c.bin");
 static SurficialFigure numFonts[] = {
 	SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
 	SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
