@@ -9,6 +9,7 @@
 #include "renderer.h"
 #include "Plane.h"
 #include "Scene.h"
+#include "Hollow.h"
 #include "BackgroundRenderer.h"
 #include "ShadowRenderer.h"
 #include "SolidRenderer.h"
@@ -476,7 +477,7 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		float a = fdt * fminf(y - origY, screenHeight / 4) / (screenHeight / 4);
 		float dx = sinf(framing.direction->next->angle) * a * 10;
 		float dy = cosf(framing.direction->next->angle) * a * 10;
-		Hollow * dst = hollow->transit(framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy);
+		Hollow * dst = transit(hollow, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, true);
 		framing.direction->next->next->dx += dx;
 		framing.direction->next->next->dy += dy;
 		if (dst != hollow)
