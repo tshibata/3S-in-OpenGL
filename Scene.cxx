@@ -38,14 +38,13 @@ Hollow * Hollow::transit(float x, float y, float & dx, float & dy)
 				{
 					// no adjacent to go
 					float u = p->distance(x + dx, y + dy, 0);
-					dx -= 1.1f * u * p->a;
-					dy -= 1.1f * u * p->b;
+					dx -= 1.01f * u * p->a;
+					dy -= 1.01f * u * p->b;
 					t = 0;
 					convexLeave(curr->limits, x, y, 0, dx, dy, 0, t);
 					if (t < 1)
 					{
-						dx = 0;
-						dy = 0;
+						return transit(x, y, dx, dy);
 					}
 					return curr;
 				}
