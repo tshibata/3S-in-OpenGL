@@ -205,7 +205,7 @@ class Props1
 public:
 	Props1();
 	~Props1();
-	void rearrange(float dt, float x, float y);
+	void rearrange(float dt);
 	Earth earth;
 	Cuboid465 cuboid1;
 	Cuboid8E9 cuboid2;
@@ -291,8 +291,10 @@ Props1::~Props1()
 	delete star[2];
 	delete star[3];
 }
-void Props1::rearrange(float fdt, float x, float y)
+void Props1::rearrange(float fdt)
 {
+	float x = controllers[0].x;
+	float y = controllers[0].y;
 	if (0 <= x && x < screenWidth && 0 <= y && y < screenHeight && pixelLabel(x, y) != 0)
 	{
 		speed = 1000;
@@ -408,11 +410,11 @@ private:
 protected:
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
 public:
-	DemoScene(float x, float y, Hollow * hollow);
+	DemoScene(Hollow * hollow);
 	void render();
-	Scene * rearrange(unsigned int dt, float x, float y);
+	Hollow * rearrange(unsigned int dt);
 };
-DemoScene::DemoScene(float x, float y, Hollow * hollow) : Scene::Scene(hollow), lighting(60, 30, 10, 40)
+DemoScene::DemoScene(Hollow * hollow) : Scene::Scene(hollow), lighting(60, 30, 10, 40)
 {
 	for (int i = 0; i < COUNTER_CAPACITY; i++)
 	{
@@ -421,8 +423,8 @@ DemoScene::DemoScene(float x, float y, Hollow * hollow) : Scene::Scene(hollow), 
 		digit[i].direction->next->dy = 0.75;
 	}
 
-	prevX = x;
-	prevY = y;
+	prevX = controllers[0].x;
+	prevY = controllers[0].y;
 }
 void DemoScene::render()
 {
@@ -459,9 +461,11 @@ void DemoScene::render()
 
 	solid2DRenderer.process();
 }
-Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
+Hollow * DemoScene::rearrange(unsigned int dt)
 {
-	Scene * next = this;
+	float x = controllers[0].x;
+	float y = controllers[0].y;
+	Hollow * next = hollow;
 
 	float fdt = dt * 0.000001; // us -> s
 
@@ -477,13 +481,9 @@ Scene * DemoScene::rearrange(unsigned int dt, float x, float y)
 		float a = fdt * fminf(y - origY, screenHeight / 4) / (screenHeight / 4);
 		float dx = sinf(framing.direction->next->angle) * a * 10;
 		float dy = cosf(framing.direction->next->angle) * a * 10;
-		Hollow * dst = transit(hollow, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, true);
+		next = transit(hollow, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, true);
 		framing.direction->next->next->dx += dx;
 		framing.direction->next->next->dy += dy;
-		if (dst != hollow)
-		{
-			next = (* dst->depiction)(x, y, dst);
-		}
 	}
 
 	count++;
@@ -506,21 +506,21 @@ private:
 	Percipi<Props1> props1;
 	Percipi<Props2> props2;
 public:
-	DemoScene1(float x, float y, Hollow * hollow);
-	Scene * rearrange(unsigned int dt, float x, float y);
+	DemoScene1(Hollow * hollow);
+	Hollow * rearrange(unsigned int dt);
 };
-DemoScene1::DemoScene1(float x, float y, Hollow * hollow) : DemoScene::DemoScene(x, y, hollow)
+DemoScene1::DemoScene1(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
 	lighting.direction->dy = 5;
 	lighting.direction->dz = -15;
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Scene * DemoScene1::rearrange(unsigned int dt, float x, float y)
+Hollow * DemoScene1::rearrange(unsigned int dt)
 {
-	Scene * next = DemoScene::rearrange(dt, x, y);
+	Hollow * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
-	props1->rearrange(fdt, x, y);
+	props1->rearrange(fdt);
 	return next;
 }
 
@@ -532,10 +532,10 @@ private:
 	Percipi<Props2> props2;
 	Percipi<Props3> props3;
 public:
-	DemoScene2(float x, float y, Hollow * hollow);
-	Scene * rearrange(unsigned int dt, float x, float y);
+	DemoScene2(Hollow * hollow);
+	Hollow * rearrange(unsigned int dt);
 };
-DemoScene2::DemoScene2(float x, float y, Hollow * hollow) : DemoScene::DemoScene(x, y, hollow)
+DemoScene2::DemoScene2(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
 	lighting.direction->dx = -20;
 	lighting.direction->dy = 2;
@@ -543,11 +543,11 @@ DemoScene2::DemoScene2(float x, float y, Hollow * hollow) : DemoScene::DemoScene
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Scene * DemoScene2::rearrange(unsigned int dt, float x, float y)
+Hollow * DemoScene2::rearrange(unsigned int dt)
 {
-	Scene * next = DemoScene::rearrange(dt, x, y);
+	Hollow * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
-	props1->rearrange(fdt, x, y);
+	props1->rearrange(fdt);
 	return next;
 }
 
@@ -558,10 +558,10 @@ private:
 	Percipi<Props2> props2;
 	Percipi<Props3> props3;
 public:
-	DemoScene3(float x, float y, Hollow * hollow);
-	Scene * rearrange(unsigned int dt, float x, float y);
+	DemoScene3(Hollow * hollow);
+	Hollow * rearrange(unsigned int dt);
 };
-DemoScene3::DemoScene3(float x, float y, Hollow * hollow) : DemoScene::DemoScene(x, y, hollow)
+DemoScene3::DemoScene3(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
 	lighting.direction->dx = -20;
 	lighting.direction->dy = 2;
@@ -569,9 +569,9 @@ DemoScene3::DemoScene3(float x, float y, Hollow * hollow) : DemoScene::DemoScene
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Scene * DemoScene3::rearrange(unsigned int dt, float x, float y)
+Hollow * DemoScene3::rearrange(unsigned int dt)
 {
-	Scene * next = DemoScene::rearrange(dt, x, y);
+	Hollow * next = DemoScene::rearrange(dt);
 	return next;
 }
 
@@ -613,32 +613,32 @@ Hollow cell3 = {
 	nullptr
 }, & cue<DemoScene3> };
 
-Scene * arrange(float x, float y)
+Hollow * arrange()
 {
 	framing.direction->next->next->dy = -10;
 	framing.direction->next->next->dz = -1.5;
 	framing.direction->angle = M_PI / 2;
 
-	return new DemoScene1(x, y, & cell1);
+	return & cell1;
 }
 
-void buttonPressed(int pos, float x, float y)
+void buttonPressed(int pos)
 {
-	if (screenHeight / 2 < y)
+	if (screenHeight / 2 < controllers[0].y)
 	{
 		pressed = true;
-		origY = y;
+		origY = controllers[0].y;
 	}
-	prevX = x;
-	prevY = y;
+	prevX = controllers[0].x;
+	prevY = controllers[0].y;
 }
 
-void buttonReleased(int pos, float x, float y)
+void buttonReleased(int pos)
 {
 	pressed = false;
 }
 
-void wheelMoved(float d, float x, float y)
+void wheelMoved(float d)
 {
 	printf("wheelMoved %f\n", d);
 }

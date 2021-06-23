@@ -55,3 +55,8 @@ Hollow * transit(Hollow * curr, float x, float y, float & dx, float & dy, bool d
 	}
 }
 
+Scene * depict(Hollow * hollow)
+{
+	return (* hollow->depiction)(hollow);
+}
+

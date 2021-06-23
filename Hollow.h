@@ -3,11 +3,14 @@ class Hollow
 public:
 	Plane * limits;
 	Hollow * * adjacents;
-	Scene * (* depiction)(float x, float y, Hollow * hollow);
+	Scene * (* depiction)(Hollow * hollow);
 };
 
-template <typename T> Scene * cue(float x, float y, Hollow * hollow)
+template <typename T> Scene * cue(Hollow * hollow)
 {
-	return (Scene *) new T(x, y, hollow);
+	return (Scene *) new T(hollow);
 }
+
+Hollow * transit(Hollow * hollow, float x, float y, float & dx, float & dy, bool deflection);
+
 

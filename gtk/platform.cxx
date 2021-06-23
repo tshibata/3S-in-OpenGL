@@ -4,6 +4,8 @@
 #include <platform.h>
 #include "../common.h"
 
+Controller controllers[1];
+
 static void realize(GtkWidget * widget)
 {
 	printf("realize!\n");
@@ -27,7 +29,7 @@ static void unrealize(GtkWidget * widget)
 	terminate();
 }
 
-static void get_pointer_position(GtkGLArea * area, gint * x, gint * y)
+static void get_pointer_position(GtkGLArea * area, float * x, float * y)
 {
 	GdkDisplay * display = gtk_widget_get_display((GtkWidget *) area);
 	GdkSeat * seat = gdk_display_get_default_seat(display);
@@ -46,10 +48,9 @@ static gboolean render(GtkGLArea * area, GdkGLContext * context)
 		return FALSE;
 	}
 
-	gint x, y;
-	get_pointer_position(area, & x, & y);
+	get_pointer_position(area, & controllers[0].x, & controllers[0].y);
 
-	if (! update(x, y))
+	if (! update())
 	{
 		return FALSE;
 	}
@@ -61,36 +62,34 @@ static gboolean render(GtkGLArea * area, GdkGLContext * context)
 
 static void press(GtkGLArea * area, GdkEventButton * event, void * data)
 {
-	gint x, y;
-	get_pointer_position(area, & x, & y);
+	get_pointer_position(area, & controllers[0].x, & controllers[0].y);
 	switch (event->button)
 	{
 	case 1:
-		buttonPressed(- 1, x, y);
+		buttonPressed(- 1);
 		break;
 	case 2:
-		buttonPressed(0, x, y);
+		buttonPressed(0);
 		break;
 	case 3:
-		buttonPressed(1, x, y);
+		buttonPressed(1);
 		break;
 	}
 }
 
 static void release(GtkGLArea * area, GdkEventButton * event, void * data)
 {
-	gint x, y;
-	get_pointer_position(area, & x, & y);
+	get_pointer_position(area, & controllers[0].x, & controllers[0].y);
 	switch (event->button)
 	{
 	case 1:
-		buttonReleased(- 1, x, y);
+		buttonReleased(- 1);
 		break;
 	case 2:
-		buttonReleased(0, x, y);
+		buttonReleased(0);
 		break;
 	case 3:
-		buttonPressed(1, x, y);
+		buttonPressed(1);
 		break;
 	}
 }
@@ -99,9 +98,8 @@ static void scroll(GtkGLArea * area, GdkEventScroll * event, void * data)
 {
 	if (event->delta_y != 0)
 	{
-		gint x, y;
-		get_pointer_position(area, & x, & y);
-		wheelMoved(- event->delta_y, 0, 0);
+		get_pointer_position(area, & controllers[0].x, & controllers[0].y);
+		wheelMoved(- event->delta_y);
 	}
 }
 

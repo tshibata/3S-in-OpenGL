@@ -157,13 +157,18 @@ void terminate()
 	free(vbSize);
 }
 
-bool update(float x, float y)
+bool update()
 {
 	static Scene * curr = nullptr;
 	if (curr == nullptr)
 	{
 		clock_gettime(CLOCK_MONOTONIC, & t0);
-		curr = arrange(x, y);
+		Hollow * hollow = arrange();
+		if (hollow == nullptr)
+		{
+			return false;
+		}
+		curr = depict(hollow);
 	}
 	else
 	{
@@ -177,15 +182,14 @@ bool update(float x, float y)
 			frame = 0;
 		}
 		t0 = t1;
-		Scene * next = curr->rearrange(dt, x, y);
-		if (next != curr)
+		Hollow * hollow = curr->rearrange(dt);
+		if (hollow == nullptr)
 		{
 			delete curr;
-		}
-		if (next == nullptr)
-		{
 			return false;
 		}
+		Scene * next = depict(hollow);
+		delete curr;
 		curr = next;
 	}
 

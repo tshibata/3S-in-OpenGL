@@ -2,12 +2,12 @@ extern const int screenWidth;
 extern const int screenHeight;
 
 bool initiate();
-bool update(float x, float y);
+bool update();
 void terminate();
 
-void buttonPressed(int pos, float x, float y);
-void buttonReleased(int pos, float x, float y);
-void wheelMoved(float d, float x, float y);
+void buttonPressed(int pos);
+void buttonReleased(int pos);
+void wheelMoved(float d);
 
 GLuint initProgram(const GLchar * * vertSource, const GLchar * * fragSource);
 
