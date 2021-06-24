@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <math.h>
 #include <platform.h>
-#include "Basis.h"
-#include "Percipi.h"
-#include "common.h"
-#include "geometry.h"
-#include "renderer.h"
+#include "sss/Basis.h"
+#include "sss/Percipi.h"
+#include "sss/common.h"
+#include "sss/geometry.h"
+#include "sss/renderer.h"
+#include "sss/Scene.h"
 #include "Plane.h"
-#include "Scene.h"
 #include "Hollow.h"
 #include "BackgroundRenderer.h"
 #include "ShadowRenderer.h"
@@ -27,14 +27,14 @@ extern RenderingMode solid3D;
 extern RenderingMode lucid3D;
 
 static Texture shadowMap(1024, 512);
-static Texture backgroundTexture("../Landscape.png");
-static Texture floorTexture("../Floor.png");
-static Texture cuboid243Texture("../Cuboid243.png");
-static Texture cuboid465Texture("../Cuboid465.png");
-static Texture cuboid8E9Texture("../Cuboid8E9.png");
-static Texture solidTexture("../SolidStar.png");
-static Texture lucidTexture("../LucidStar.png");
-static Texture digitTexture("../num8x8.png");
+static Texture backgroundTexture("Landscape.png");
+static Texture floorTexture("Floor.png");
+static Texture cuboid243Texture("Cuboid243.png");
+static Texture cuboid465Texture("Cuboid465.png");
+static Texture cuboid8E9Texture("Cuboid8E9.png");
+static Texture solidTexture("SolidStar.png");
+static Texture lucidTexture("LucidStar.png");
+static Texture digitTexture("num8x8.png");
 
 static SurficialFigure backgroundFigure = SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
 static SpacialFigure cuboid243Figure(& cuboid243Texture, "Cuboid243.u-c.bin");

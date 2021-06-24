@@ -1,8 +1,8 @@
 #define NDEBUG
 #include <cassert>
 
+#include "sss/Scene.h"
 #include "Plane.h"
-#include "Scene.h"
 #include "Hollow.h"
 
 Hollow * transit(Hollow * curr, float x, float y, float & dx, float & dy, bool deflection)

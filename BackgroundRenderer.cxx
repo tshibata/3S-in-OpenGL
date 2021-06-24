@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <platform.h>
-#include "Basis.h"
-#include "geometry.h"
-#include "common.h"
-#include "renderer.h"
+#include "sss/Basis.h"
+#include "sss/geometry.h"
+#include "sss/common.h"
+#include "sss/renderer.h"
 #include "BackgroundRenderer.h"
 
 RenderingMode background;
