@@ -1,5 +1,5 @@
 #include <utility>
-#include <stdio.h>
+#include <cstdio>
 #include <math.h>
 #include <platform.h>
 #include "sss/Basis.h"
@@ -16,7 +16,8 @@
 #include "LucidRenderer.h"
 #include "Solid2DRenderer.h"
 
-#define COUNTER_CAPACITY 6
+const int COUNTER_CAPACITY = 6;
+const int MISSILE_CAPACITY = 5;
 
 const int screenWidth = 1024;
 const int screenHeight = 512;
@@ -68,6 +69,37 @@ Background::Background() : FinitePresence::FinitePresence(background)
 Figure * Background::getFigure()
 {
 	return & backgroundFigure;
+}
+
+class Missile : public FinitePresence<RotZ<Move<Stop>>>
+{
+public:
+	Hollow * hollow;
+	Missile();
+	virtual Figure * getFigure();
+};
+Missile::Missile() : FinitePresence::FinitePresence(lucid3D)
+{
+	visible = false;
+}
+Figure * Missile::getFigure()
+{
+	return & lucidFigure;
+}
+
+class Foe : public FinitePresence<RotZ<Move<Stop>>>
+{
+public:
+	Hollow * hollow;
+	Foe(Hollow * hollow);
+	virtual Figure * getFigure();
+};
+Foe::Foe(Hollow * hollow) : FinitePresence::FinitePresence(solid3D), hollow(hollow)
+{
+}
+Figure * Foe::getFigure()
+{
+	return & solidFigure;
 }
 
 class Star : public FinitePresence<RotZ<Move<Stop>>>
@@ -175,12 +207,21 @@ public:
 	}
 };
 
-static bool pressed = false;
+static bool pressedHigh = false;
+static bool pressedLow = false;
 static float origY;
 static float prevX;
 static float prevY;
 
 static PerspectiveProjection<RotX<RotZ<Move<Stop>>>> framing(100, 50, 0.5, 50);
+
+static float slip;
+static float yawing = 0.0;
+
+
+extern Hollow cell1;
+extern Hollow cell2;
+extern Hollow cell3;
 
 
 class Props0
@@ -189,9 +230,25 @@ public:
 	Props0();
 	Cuboid8E9 cuboid1;
 	Cuboid8E9 cuboid2;
+	Digit digit[COUNTER_CAPACITY];
+	int count = 0;
+	Missile missiles[MISSILE_CAPACITY];
+	int missileIndex = 0;
+	BackgroundRenderer backgroundRenderer;
+	ShadowRenderer shadowRenderer;
+	SolidRenderer solidRenderer;
+	LucidRenderer lucidRenderer;
+	Solid2DRenderer solid2DRenderer;
 };
-Props0::Props0()
+Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap)
 {
+	for (int i = 0; i < COUNTER_CAPACITY; i++)
+	{
+		digit[i].direction->scale = 2;
+		digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / screenWidth;
+		digit[i].direction->next->dy = 0.75;
+	}
+
 	cuboid1.direction->angle = 2 * M_PI / 2;
 	cuboid1.direction->next->dx = -9;
 	cuboid1.direction->next->dy = 22;
@@ -220,7 +277,6 @@ public:
 	Cuboid465 cuboid11;
 	Cuboid243 cuboid12;
 	Cuboid465 cuboid13;
-	Cuboid8E9 cuboid14;
 	Star * star[4];
 	float angle1 = 0.0;
 	float angle2 = 0.0;
@@ -267,9 +323,6 @@ Props1::Props1()
 	cuboid13.direction->angle = 0 * M_PI / 2;
 	cuboid13.direction->next->dx = -17;
 	cuboid13.direction->next->dy = -8;
-	cuboid14.direction->angle = 3 * M_PI / 2;
-	cuboid14.direction->next->dx = -22;
-	cuboid14.direction->next->dy = -1;
 
 	star[0] = new SolidStar();
 	star[1] = new SolidStar();
@@ -325,15 +378,16 @@ public:
 	Earth earth1;
 	Earth earth2;
 	Earth earth3;
-	Cuboid243 cuboid1;
-	Cuboid465 cuboid2;
+	Cuboid8E9 cuboid1;
+	Cuboid243 cuboid2;
 	Cuboid465 cuboid3;
-	Cuboid8E9 cuboid4;
-	Cuboid465 cuboid5;
-	Cuboid8E9 cuboid6;
-	Cuboid243 cuboid7;
-	Cuboid465 cuboid8;
-	Cuboid8E9 cuboid9;
+	Cuboid465 cuboid4;
+	Cuboid8E9 cuboid5;
+	Cuboid465 cuboid6;
+	Cuboid8E9 cuboid7;
+	Cuboid243 cuboid8;
+	Cuboid465 cuboid9;
+	Cuboid8E9 cuboid10;
 };
 Props2::Props2()
 {
@@ -343,45 +397,52 @@ Props2::Props2()
 	earth2.direction->dy = 30;
 	earth3.direction->dx = -30;
 	earth3.direction->dy = 30;
-	cuboid1.direction->angle = 1 * M_PI / 2;
-	cuboid1.direction->next->dx = -31;
-	cuboid1.direction->next->dy = 2;
-	cuboid2.direction->angle = 0 * M_PI / 2;
-	cuboid2.direction->next->dx = -35;
-	cuboid2.direction->next->dy = 5;
-	cuboid3.direction->angle = 1 * M_PI / 2;
-	cuboid3.direction->next->dx = -36;
-	cuboid3.direction->next->dy = 10;
-	cuboid4.direction->angle = 2 * M_PI / 2;
-	cuboid4.direction->next->dx = -37;
-	cuboid4.direction->next->dy = 19;
+	cuboid1.direction->angle = 3 * M_PI / 2;
+	cuboid1.direction->next->dx = -22;
+	cuboid1.direction->next->dy = -1;
+	cuboid2.direction->angle = 1 * M_PI / 2;
+	cuboid2.direction->next->dx = -31;
+	cuboid2.direction->next->dy = 2;
+	cuboid3.direction->angle = 0 * M_PI / 2;
+	cuboid3.direction->next->dx = -35;
+	cuboid3.direction->next->dy = 5;
+	cuboid4.direction->angle = 1 * M_PI / 2;
+	cuboid4.direction->next->dx = -36;
+	cuboid4.direction->next->dy = 10;
 	cuboid5.direction->angle = 2 * M_PI / 2;
-	cuboid5.direction->next->dx = -35;
-	cuboid5.direction->next->dy = 29;
-	cuboid6.direction->angle = 0 * M_PI / 2;
-	cuboid6.direction->next->dx = -37;
-	cuboid6.direction->next->dy = 39;
-	cuboid7.direction->angle = 1 * M_PI / 2;
-	cuboid7.direction->next->dx = -31;
-	cuboid7.direction->next->dy = 38;
+	cuboid5.direction->next->dx = -37;
+	cuboid5.direction->next->dy = 19;
+	cuboid6.direction->angle = 2 * M_PI / 2;
+	cuboid6.direction->next->dx = -35;
+	cuboid6.direction->next->dy = 29;
+	cuboid7.direction->angle = 0 * M_PI / 2;
+	cuboid7.direction->next->dx = -37;
+	cuboid7.direction->next->dy = 39;
 	cuboid8.direction->angle = 1 * M_PI / 2;
-	cuboid8.direction->next->dx = -26;
-	cuboid8.direction->next->dy = 39;
+	cuboid8.direction->next->dx = -31;
+	cuboid8.direction->next->dy = 38;
 	cuboid9.direction->angle = 1 * M_PI / 2;
-	cuboid9.direction->next->dx = -16;
-	cuboid9.direction->next->dy = 41;
+	cuboid9.direction->next->dx = -26;
+	cuboid9.direction->next->dy = 39;
+	cuboid10.direction->angle = 1 * M_PI / 2;
+	cuboid10.direction->next->dx = -16;
+	cuboid10.direction->next->dy = 41;
 }
 
 class Props3
 {
+private:
+	Percipi<Props0> props0;
 public:
 	Props3();
+	void rearrange(float dt);
 	Cuboid465 cuboid1;
 	Cuboid465 cuboid2;
 	Cuboid465 cuboid3;
 	Cuboid8E9 cuboid4;
+	Foe lazy;
 };
-Props3::Props3()
+Props3::Props3() : lazy(& cell3)
 {
 	cuboid1.direction->angle = 1 * M_PI / 2;
 	cuboid1.direction->next->dx = -6;
@@ -398,15 +459,64 @@ Props3::Props3()
 	cuboid4.direction->angle = 2 * M_PI / 2;
 	cuboid4.direction->next->dx = 11;
 	cuboid4.direction->next->dy = 36;
+
+	lazy.direction->next->dx = 3;
+	lazy.direction->next->dy = 33;
+	lazy.direction->next->dz = -1;
+}
+void Props3::rearrange(float fdt)
+{
+	int x = controllers[0].x;
+	int y = controllers[0].y;
+	if (lazy.visible)
+	{
+		if (yawing == 0)
+		{
+			float dx = framing.direction->next->next->dx - lazy.direction->next->dx;
+			float dy = framing.direction->next->next->dy - lazy.direction->next->dy;
+			float r = sqrt(dx * dx + dy * dy);
+			if (r < 1) // TBD: should have better collision detection?
+			{
+				slip = atan2(dx, dy);
+				yawing = 1.0;
+			}
+			else
+			{
+				Hollow * hollow = transit(lazy.hollow, lazy.direction->next->dx, lazy.direction->next->dy, dx, dy, false);
+				if (hollow != nullptr)
+				{
+					dx = (framing.direction->next->next->dx - lazy.direction->next->dx) * 0.5f / r;
+					dy = (framing.direction->next->next->dy - lazy.direction->next->dy) * 0.5f / r;
+					lazy.hollow = transit(lazy.hollow, lazy.direction->next->dx, lazy.direction->next->dy, dx, dy, false);
+					lazy.direction->next->dx += dx;
+					lazy.direction->next->dy += dy;
+				}
+			}
+		}
+
+		for (int i = 0; i < MISSILE_CAPACITY; i++)
+		{
+			if (props0->missiles[i].visible)
+			{
+				Missile * m = & props0->missiles[i];
+				float dx = m->direction->next->dx - lazy.direction->next->dx;
+				float dy = m->direction->next->dy - lazy.direction->next->dy;
+				if (sqrt(dx * dx + dy * dy) < 1) // TBD: should have better collision detection?
+				{
+					m->visible = false;
+					lazy.visible = false;
+				}
+			}
+		}
+	}
 }
 
 class DemoScene : public Scene
 {
 private:
+	Percipi<Props0> props0;
 	Background sky1;
 	Background sky2;
-	Digit digit[COUNTER_CAPACITY];
-	int count = 0;
 protected:
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
 public:
@@ -416,24 +526,11 @@ public:
 };
 DemoScene::DemoScene(Hollow * hollow) : Scene::Scene(hollow), lighting(60, 30, 10, 40)
 {
-	for (int i = 0; i < COUNTER_CAPACITY; i++)
-	{
-		digit[i].direction->scale = 2;
-		digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / screenWidth;
-		digit[i].direction->next->dy = 0.75;
-	}
-
 	prevX = controllers[0].x;
 	prevY = controllers[0].y;
 }
 void DemoScene::render()
 {
-	static BackgroundRenderer backgroundRenderer;
-	static ShadowRenderer shadowRenderer(shadowMap);
-	static SolidRenderer solidRenderer(shadowMap);
-	static LucidRenderer lucidRenderer;
-	static Solid2DRenderer solid2DRenderer;
-
 	float sect = M_PI / (atan((framing.width / 2) / framing.far));
 	float turn = - framing.direction->next->angle / (M_PI * 2);
 	sky1.direction->scale = screenWidth * sect / sky1.getFigure()->texture->width;
@@ -441,7 +538,7 @@ void DemoScene::render()
 	sky2.direction->scale = screenWidth * sect / sky2.getFigure()->texture->width;
 	sky2.direction->next->dx = (turn - floor(turn)) * (2 * sect);
 
-	backgroundRenderer.process();
+	props0->backgroundRenderer.process();
 
 	Matrix4x4 lightingMatrix;
 	lighting.getMatrix(lightingMatrix.elements);
@@ -449,17 +546,17 @@ void DemoScene::render()
 	Matrix4x4 framingMatrix;
 	framing.getMatrix(framingMatrix.elements);
 
-	shadowRenderer.lightingMatrix = lightingMatrix.elements;
-	shadowRenderer.process();
+	props0->shadowRenderer.lightingMatrix = lightingMatrix.elements;
+	props0->shadowRenderer.process();
 
-	solidRenderer.framingMatrix = framingMatrix.elements;
-	solidRenderer.lightingMatrix = lightingMatrix.elements;
-	solidRenderer.process();
+	props0->solidRenderer.framingMatrix = framingMatrix.elements;
+	props0->solidRenderer.lightingMatrix = lightingMatrix.elements;
+	props0->solidRenderer.process();
 
-	lucidRenderer.framingMatrix = framingMatrix.elements;
-	lucidRenderer.process();
+	props0->lucidRenderer.framingMatrix = framingMatrix.elements;
+	props0->lucidRenderer.process();
 
-	solid2DRenderer.process();
+	props0->solid2DRenderer.process();
 }
 Hollow * DemoScene::rearrange(unsigned int dt)
 {
@@ -469,27 +566,85 @@ Hollow * DemoScene::rearrange(unsigned int dt)
 
 	float fdt = dt * 0.000001; // us -> s
 
-	if (x < 0 || screenWidth <= x || y < screenHeight / 2 || screenHeight <= y)
+	for (int i = 0; i < MISSILE_CAPACITY; i++)
 	{
-		pressed = false;
+		if (props0->missiles[i].visible)
+		{
+			Missile * m = & props0->missiles[i];
+			float dx = sinf(m->direction->angle) * fdt * 10;
+			float dy = cosf(m->direction->angle) * fdt * 10;
+			m->hollow = transit(m->hollow, m->direction->next->dx, m->direction->next->dy, dx, dy, false);
+			m->direction->next->dx += dx;
+			m->direction->next->dy += dy;
+			if (m->hollow == nullptr)
+			{
+				m->visible = false;
+			}
+		}
 	}
 
-	if (pressed)
+	if (yawing == 0)
 	{
-		framing.direction->next->angle += (x - prevX) * -0.001f;
+		if (pressedHigh && prevY < screenHeight / 2 && screenHeight / 2 <= y)
+		{
+			if (! props0->missiles[props0->missileIndex].visible)
+			{
+				float a = atan((framing.width / 2) / framing.far * (x - screenWidth / 2) / (screenWidth / 2));
+				Missile * m = & props0->missiles[props0->missileIndex];
+				m->visible = true;
+				m->hollow = hollow;
+				m->direction->angle = framing.direction->next->angle + a;
+				m->direction->next->dx = framing.direction->next->next->dx;
+				m->direction->next->dy = framing.direction->next->next->dy;
+				m->direction->next->dz = -1.7;
+				props0->missileIndex = (props0->missileIndex + 1) % MISSILE_CAPACITY;
+			}
+		}
 
-		float a = fdt * fminf(y - origY, screenHeight / 4) / (screenHeight / 4);
-		float dx = sinf(framing.direction->next->angle) * a * 10;
-		float dy = cosf(framing.direction->next->angle) * a * 10;
+		if (x < 0 || screenWidth <= x || y < screenHeight / 2 || screenHeight <= y)
+		{
+			pressedLow = false;
+		}
+
+		if (pressedLow
+ && abs(x - prevX) < screenWidth / 4 /* work adound for Surface */
+)
+		{
+			framing.direction->next->angle += (x - prevX) * -0.002f;
+
+			float a = fdt * fminf(y - origY, screenHeight / 4) / (screenHeight / 4);
+			float dx = sinf(framing.direction->next->angle) * a * 10;
+			float dy = cosf(framing.direction->next->angle) * a * 10;
+			// FIXME common process
+			next = transit(hollow, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, true);
+			framing.direction->next->next->dx += dx;
+			framing.direction->next->next->dy += dy;
+		}
+	}
+	else
+	{
+		float dx = cos(slip) * abs(yawing) * fdt * 10;
+		float dy = sin(slip) * abs(yawing) * fdt * 10;
+		// FIXME common process
 		next = transit(hollow, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, true);
 		framing.direction->next->next->dx += dx;
 		framing.direction->next->next->dy += dy;
+
+		framing.direction->next->angle += yawing * fdt * 10;
+		if (yawing < 0)
+		{
+			yawing = fminf(0, yawing + fdt * 0.5);
+		}
+		else
+		{
+			yawing = fmaxf(0, yawing - fdt * 0.5);
+		}
 	}
 
-	count++;
-	for (int i = 0, j = count; i < COUNTER_CAPACITY; i++)
+	props0->count++;
+	for (int i = 0, j = props0->count; i < COUNTER_CAPACITY; i++)
 	{
-		digit[i].i = j % 10;
+		props0->digit[i].i = j % 10;
 		j = j / 10;
 	}
 
@@ -502,7 +657,6 @@ Hollow * DemoScene::rearrange(unsigned int dt)
 class DemoScene1 : public DemoScene
 {
 private:
-	Percipi<Props0> props0;
 	Percipi<Props1> props1;
 	Percipi<Props2> props2;
 public:
@@ -527,7 +681,6 @@ Hollow * DemoScene1::rearrange(unsigned int dt)
 class DemoScene2 : public DemoScene
 {
 private:
-	Percipi<Props0> props0;
 	Percipi<Props1> props1;
 	Percipi<Props2> props2;
 	Percipi<Props3> props3;
@@ -548,13 +701,13 @@ Hollow * DemoScene2::rearrange(unsigned int dt)
 	Hollow * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props1->rearrange(fdt);
+	props3->rearrange(fdt);
 	return next;
 }
 
 class DemoScene3 : public DemoScene
 {
 private:
-	Percipi<Props0> props0;
 	Percipi<Props2> props2;
 	Percipi<Props3> props3;
 public:
@@ -572,12 +725,10 @@ DemoScene3::DemoScene3(Hollow * hollow) : DemoScene::DemoScene(hollow)
 Hollow * DemoScene3::rearrange(unsigned int dt)
 {
 	Hollow * next = DemoScene::rearrange(dt);
+	float fdt = dt * 0.000001; // us -> s
+	props3->rearrange(fdt);
 	return next;
 }
-
-extern Hollow cell1;
-extern Hollow cell2;
-extern Hollow cell3;
 
 Hollow cell1 = {
 (Plane []) {
@@ -624,22 +775,25 @@ Hollow * arrange()
 
 void buttonPressed(int pos)
 {
-	if (screenHeight / 2 < controllers[0].y)
+	if (controllers[0].y < screenHeight / 2)
 	{
-		pressed = true;
+		pressedHigh = true;
+	}
+	if (screenHeight / 2 <= controllers[0].y)
+	{
+		pressedLow = true;
 		origY = controllers[0].y;
 	}
-	prevX = controllers[0].x;
-	prevY = controllers[0].y;
 }
 
 void buttonReleased(int pos)
 {
-	pressed = false;
+	pressedHigh = false;
+	pressedLow = false;
 }
 
 void wheelMoved(float d)
 {
-	printf("wheelMoved %f\n", d);
+	std::printf("wheelMoved %f\n", d);
 }
 
