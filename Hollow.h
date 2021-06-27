@@ -13,4 +13,5 @@ template <typename T> Scene * cue(Hollow * hollow)
 
 Hollow * transit(Hollow * hollow, float x, float y, float & dx, float & dy, bool deflection);
 
+Scene * depict(Hollow * hollow);
 

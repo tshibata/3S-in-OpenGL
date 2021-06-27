@@ -4,7 +4,6 @@
 #include <time.h>
 #include <platform.h>
 #include "Basis.h"
-#include "Scene.h"
 #include "geometry.h"
 #include "common.h"
 #include "files.h"
@@ -162,12 +161,11 @@ bool update()
 	if (curr == nullptr)
 	{
 		clock_gettime(CLOCK_MONOTONIC, & t0);
-		Hollow * hollow = arrange();
-		if (hollow == nullptr)
+		curr = arrange();
+		if (curr == nullptr)
 		{
 			return false;
 		}
-		curr = depict(hollow);
 	}
 	else
 	{
@@ -181,13 +179,11 @@ bool update()
 			frame = 0;
 		}
 		t0 = t1;
-		Hollow * hollow = curr->rearrange(dt);
-		if (hollow == nullptr)
+		Scene * next = curr->rearrange(dt);
+		if (next == nullptr)
 		{
-			delete curr;
 			return false;
 		}
-		Scene * next = depict(hollow);
 		delete curr;
 		curr = next;
 	}
@@ -210,5 +206,13 @@ unsigned char pixelLabel(float x, float y)
 	unsigned char c;
 	glReadPixels(x, screenHeight - y, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, & c);
 	return c;
+}
+
+
+Scene::Scene()
+{
+}
+Scene::~Scene()
+{
 }
 

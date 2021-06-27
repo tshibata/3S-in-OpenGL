@@ -7,7 +7,6 @@
 #include "sss/common.h"
 #include "sss/geometry.h"
 #include "sss/renderer.h"
-#include "sss/Scene.h"
 #include "Plane.h"
 #include "Hollow.h"
 #include "BackgroundRenderer.h"
@@ -518,13 +517,14 @@ private:
 	Background sky1;
 	Background sky2;
 protected:
+	Hollow * hollow;
 	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
 public:
 	DemoScene(Hollow * hollow);
 	void render();
-	Hollow * rearrange(unsigned int dt);
+	Scene * rearrange(unsigned int dt);
 };
-DemoScene::DemoScene(Hollow * hollow) : Scene::Scene(hollow), lighting(60, 30, 10, 40)
+DemoScene::DemoScene(Hollow * hollow) : hollow(hollow), lighting(60, 30, 10, 40)
 {
 	prevX = controllers[0].x;
 	prevY = controllers[0].y;
@@ -558,7 +558,7 @@ void DemoScene::render()
 
 	props0->solid2DRenderer.process();
 }
-Hollow * DemoScene::rearrange(unsigned int dt)
+Scene * DemoScene::rearrange(unsigned int dt)
 {
 	float x = controllers[0].x;
 	float y = controllers[0].y;
@@ -651,7 +651,7 @@ Hollow * DemoScene::rearrange(unsigned int dt)
 	prevX = x;
 	prevY = y;
 
-	return next;
+	return depict(next);
 }
 
 class DemoScene1 : public DemoScene
@@ -661,7 +661,7 @@ private:
 	Percipi<Props2> props2;
 public:
 	DemoScene1(Hollow * hollow);
-	Hollow * rearrange(unsigned int dt);
+	Scene * rearrange(unsigned int dt);
 };
 DemoScene1::DemoScene1(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
@@ -670,9 +670,9 @@ DemoScene1::DemoScene1(Hollow * hollow) : DemoScene::DemoScene(hollow)
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Hollow * DemoScene1::rearrange(unsigned int dt)
+Scene * DemoScene1::rearrange(unsigned int dt)
 {
-	Hollow * next = DemoScene::rearrange(dt);
+	Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props1->rearrange(fdt);
 	return next;
@@ -686,7 +686,7 @@ private:
 	Percipi<Props3> props3;
 public:
 	DemoScene2(Hollow * hollow);
-	Hollow * rearrange(unsigned int dt);
+	Scene * rearrange(unsigned int dt);
 };
 DemoScene2::DemoScene2(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
@@ -696,9 +696,9 @@ DemoScene2::DemoScene2(Hollow * hollow) : DemoScene::DemoScene(hollow)
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Hollow * DemoScene2::rearrange(unsigned int dt)
+Scene * DemoScene2::rearrange(unsigned int dt)
 {
-	Hollow * next = DemoScene::rearrange(dt);
+	Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props1->rearrange(fdt);
 	props3->rearrange(fdt);
@@ -712,7 +712,7 @@ private:
 	Percipi<Props3> props3;
 public:
 	DemoScene3(Hollow * hollow);
-	Hollow * rearrange(unsigned int dt);
+	Scene * rearrange(unsigned int dt);
 };
 DemoScene3::DemoScene3(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
@@ -722,9 +722,9 @@ DemoScene3::DemoScene3(Hollow * hollow) : DemoScene::DemoScene(hollow)
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Hollow * DemoScene3::rearrange(unsigned int dt)
+Scene * DemoScene3::rearrange(unsigned int dt)
 {
-	Hollow * next = DemoScene::rearrange(dt);
+	Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props3->rearrange(fdt);
 	return next;
@@ -764,13 +764,13 @@ Hollow cell3 = {
 	nullptr
 }, & cue<DemoScene3> };
 
-Hollow * arrange()
+Scene * arrange()
 {
 	framing.direction->next->next->dy = -10;
 	framing.direction->next->next->dz = -1.5;
 	framing.direction->angle = M_PI / 2;
 
-	return & cell1;
+	return depict(& cell1);
 }
 
 void buttonPressed(int pos)

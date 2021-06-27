@@ -4,7 +4,7 @@ LDFLAGS = -lpng -lGL -lGLEW -lglfw
 
 include ../../Makefile
 
-$(PROJNAME).exe: platform.o geometry.o common.o files.o Scene.o $(OBJS)
+$(PROJNAME).exe: platform.o geometry.o common.o files.o $(OBJS)
 	${CXX} -o $@ $+ ${CXXFLAGS} ${LDFLAGS}
 
 platform.o: platform.cxx
@@ -17,9 +17,6 @@ common.o: ../common.cxx
 	${CXX} -c -o $@ $< ${CXXFLAGS}
 
 files.o: ../files.cxx
-	${CXX} -c -o $@ $< ${CXXFLAGS}
-
-Scene.o: ../Scene.cxx
 	${CXX} -c -o $@ $< ${CXXFLAGS}
 
 %.o : ../../%.cxx

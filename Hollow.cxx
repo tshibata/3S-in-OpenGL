@@ -1,7 +1,8 @@
 #define NDEBUG
 #include <cassert>
 
-#include "sss/Scene.h"
+#include <platform.h>
+#include "sss/common.h"
 #include "Plane.h"
 #include "Hollow.h"
 
