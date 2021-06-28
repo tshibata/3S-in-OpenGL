@@ -1,6 +1,5 @@
 #include <utility>
 #include <stdlib.h>
-#include <stdio.h>
 #include <platform.h>
 #include "sss/Basis.h"
 #include "sss/geometry.h"
@@ -8,9 +7,9 @@
 #include "sss/renderer.h"
 #include "SolidRenderer.h"
 
-RenderingMode solid3D;
+sss::RenderingMode solid3D;
 
-SolidRenderer::SolidRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
+SolidRenderer::SolidRenderer(sss::Texture & shadowMap) : shadowMap(& shadowMap)
 {
 	const GLchar * vert =
 		R"(#version 330 core
@@ -58,7 +57,7 @@ SolidRenderer::SolidRenderer(Texture & shadowMap) : shadowMap(& shadowMap)
 			gl_FragColor = (color * (i + 0.5) / 1.5);
 		})";
 
-	program = initProgram(& vert, & frag);
+	program = sss::initProgram(& vert, & frag);
 }
 SolidRenderer::~SolidRenderer()
 {
@@ -70,17 +69,17 @@ SolidRenderer::~SolidRenderer()
 void SolidRenderer::process()
 {
 	glUseProgram(program);
-	glBindVertexArray(vao);
+	glBindVertexArray(sss::vao);
 
 	glUniform1i(glGetUniformLocation(program, "shadowMap"), shadowMap->id);
 
 	present(solid3D,
-		StencilOperation(),
-		VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
-		VertexAttrib(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float))),
-		VertexAttrib(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0),
-		UniformMatrix(program, "fmat", framingMatrix),
-		UniformMatrix(program, "lmat", lightingMatrix),
-		UniformTexture(program, "tex"));
+		sss::StencilOperation(),
+		sss::VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
+		sss::VertexAttrib(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float))),
+		sss::VertexAttrib(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0),
+		sss::UniformMatrix(program, "fmat", framingMatrix),
+		sss::UniformMatrix(program, "lmat", lightingMatrix),
+		sss::UniformTexture(program, "tex"));
 }
 

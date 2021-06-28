@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
 #include <epoxy/gl.h>
 
+namespace sss
+{
 
 struct Controller
 {
@@ -10,3 +12,4 @@ struct Controller
 
 extern Controller controllers[1];
 
+}

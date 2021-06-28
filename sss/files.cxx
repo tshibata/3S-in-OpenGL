@@ -1,11 +1,13 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <png.h>
 #include <platform.h>
 #include "files.h"
+
+namespace sss
+{
 
 #define UC_MAGIC 299792
 #define UC_VERSION 1.0
@@ -105,3 +107,4 @@ void readPng(const char * path, unsigned char * * data, int * width, int * heigh
 	fclose(fp);
 }
 
+}

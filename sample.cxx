@@ -18,95 +18,95 @@
 const int COUNTER_CAPACITY = 6;
 const int MISSILE_CAPACITY = 5;
 
-const int screenWidth = 1024;
-const int screenHeight = 512;
+const int sss::screenWidth = 1024;
+const int sss::screenHeight = 512;
 
-extern RenderingMode background;
-extern RenderingMode solid2D;
-extern RenderingMode solid3D;
-extern RenderingMode lucid3D;
+extern sss::RenderingMode background;
+extern sss::RenderingMode solid2D;
+extern sss::RenderingMode solid3D;
+extern sss::RenderingMode lucid3D;
 
-static Texture shadowMap(1024, 512);
-static Texture backgroundTexture("Landscape.png");
-static Texture floorTexture("Floor.png");
-static Texture cuboid243Texture("Cuboid243.png");
-static Texture cuboid465Texture("Cuboid465.png");
-static Texture cuboid8E9Texture("Cuboid8E9.png");
-static Texture solidTexture("SolidStar.png");
-static Texture lucidTexture("LucidStar.png");
-static Texture digitTexture("num8x8.png");
+static sss::Texture shadowMap(1024, 512);
+static sss::Texture backgroundTexture("Landscape.png");
+static sss::Texture floorTexture("Floor.png");
+static sss::Texture cuboid243Texture("Cuboid243.png");
+static sss::Texture cuboid465Texture("Cuboid465.png");
+static sss::Texture cuboid8E9Texture("Cuboid8E9.png");
+static sss::Texture solidTexture("SolidStar.png");
+static sss::Texture lucidTexture("LucidStar.png");
+static sss::Texture digitTexture("num8x8.png");
 
-static SurficialFigure backgroundFigure = SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
-static SpacialFigure cuboid243Figure(& cuboid243Texture, "Cuboid243.u-c.bin");
-static SpacialFigure cuboid465Figure(& cuboid465Texture, "Cuboid465.u-c.bin");
-static SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "Cuboid8E9.u-c.bin");
-static SpacialFigure solidFigure(& solidTexture, "Star.u-c.bin");
-static SpacialFigure lucidFigure(& lucidTexture, "Star.u-c.bin");
-static SpacialFigure earthFigure(& floorTexture, "Floor.u-c.bin");
-static SurficialFigure numFonts[] = {
-	SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 2 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 3 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 4 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 5 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 6 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 7 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 8 * 8, 8, 0, 8, 8, 0),
-	SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
+static sss::SurficialFigure backgroundFigure = sss::SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
+static sss::SpacialFigure cuboid243Figure(& cuboid243Texture, "Cuboid243.u-c.bin");
+static sss::SpacialFigure cuboid465Figure(& cuboid465Texture, "Cuboid465.u-c.bin");
+static sss::SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "Cuboid8E9.u-c.bin");
+static sss::SpacialFigure solidFigure(& solidTexture, "Star.u-c.bin");
+static sss::SpacialFigure lucidFigure(& lucidTexture, "Star.u-c.bin");
+static sss::SpacialFigure earthFigure(& floorTexture, "Floor.u-c.bin");
+static sss::SurficialFigure numFonts[] = {
+	sss::SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 2 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 3 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 4 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 5 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 6 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 7 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 8 * 8, 8, 0, 8, 8, 0),
+	sss::SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
 };
 
-class Background : public FinitePresence<Expand<Move<Stop>>>
+class Background : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
 {
 public:
 	Background();
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 Background::Background() : FinitePresence::FinitePresence(background)
 {
 }
-Figure * Background::getFigure()
+sss::Figure * Background::getFigure()
 {
 	return & backgroundFigure;
 }
 
-class Missile : public FinitePresence<RotZ<Move<Stop>>>
+class Missile : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
 	Hollow * hollow;
 	Missile();
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 Missile::Missile() : FinitePresence::FinitePresence(lucid3D)
 {
 	visible = false;
 }
-Figure * Missile::getFigure()
+sss::Figure * Missile::getFigure()
 {
 	return & lucidFigure;
 }
 
-class Foe : public FinitePresence<RotZ<Move<Stop>>>
+class Foe : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
 	Hollow * hollow;
 	Foe(Hollow * hollow);
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 Foe::Foe(Hollow * hollow) : FinitePresence::FinitePresence(solid3D), hollow(hollow)
 {
 }
-Figure * Foe::getFigure()
+sss::Figure * Foe::getFigure()
 {
 	return & solidFigure;
 }
 
-class Star : public FinitePresence<RotZ<Move<Stop>>>
+class Star : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
-	Star(RenderingMode & mode);
+	Star(sss::RenderingMode & mode);
 };
-Star::Star(RenderingMode & mode) : FinitePresence::FinitePresence(mode)
+Star::Star(sss::RenderingMode & mode) : FinitePresence::FinitePresence(mode)
 {
 }
 
@@ -114,13 +114,13 @@ class SolidStar : public Star
 {
 public:
 	SolidStar();
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 SolidStar::SolidStar() : Star::Star(solid3D)
 {
 	label = 1;
 }
-Figure * SolidStar::getFigure()
+sss::Figure * SolidStar::getFigure()
 {
 	return & solidFigure;
 }
@@ -129,82 +129,86 @@ class LucidStar : public Star
 {
 public:
 	LucidStar();
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 LucidStar::LucidStar() : Star::Star(lucid3D)
 {
 }
-Figure * LucidStar::getFigure()
+sss::Figure * LucidStar::getFigure()
 {
 	return & lucidFigure;
 }
 
-class Earth : public FinitePresence<Move<Stop>>
+class Earth : public sss::FinitePresence<sss::Move<sss::Stop>>
 {
 public:
 	Earth();
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 Earth::Earth() : FinitePresence::FinitePresence(solid3D)
 {
 }
-Figure * Earth::getFigure()
+sss::Figure * Earth::getFigure()
 {
 	return & earthFigure;
 }
 
-class Cuboid243 : public FinitePresence<RotZ<Move<Stop>>>
+class Cuboid243 : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
 	Cuboid243();
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 Cuboid243::Cuboid243() : FinitePresence::FinitePresence(solid3D)
 {
 }
-Figure * Cuboid243::getFigure()
+sss::Figure * Cuboid243::getFigure()
 {
 	return & cuboid243Figure;
 }
 
-class Cuboid465 : public FinitePresence<RotZ<Move<Stop>>>
+class Cuboid465 : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
 	Cuboid465();
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 Cuboid465::Cuboid465() : FinitePresence::FinitePresence(solid3D)
 {
 }
-Figure * Cuboid465::getFigure()
+sss::Figure * Cuboid465::getFigure()
 {
 	return & cuboid465Figure;
 }
 
-class Cuboid8E9 : public FinitePresence<RotZ<Move<Stop>>>
+class Cuboid8E9 : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
 	Cuboid8E9();
-	virtual Figure * getFigure();
+	virtual sss::Figure * getFigure();
 };
 Cuboid8E9::Cuboid8E9() : FinitePresence::FinitePresence(solid3D)
 {
 }
-Figure * Cuboid8E9::getFigure()
+sss::Figure * Cuboid8E9::getFigure()
 {
 	return & cuboid8E9Figure;
 }
 
-class Digit : public FinitePresence<Expand<Move<Stop>>>
+class Digit : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
 {
 public:
 	int i = 0;
-	Digit() : FinitePresence::FinitePresence(solid2D) {}
-	virtual Figure * getFigure()
-	{
-		return & numFonts[i];
-	}
+	Digit();
+	virtual sss::Figure * getFigure();
 };
+Digit::Digit() : FinitePresence::FinitePresence(solid2D)
+{
+}
+sss::Figure * Digit::getFigure()
+{
+	return & numFonts[i];
+}
 
 static bool pressedHigh = false;
 static bool pressedLow = false;
@@ -212,7 +216,7 @@ static float origY;
 static float prevX;
 static float prevY;
 
-static PerspectiveProjection<RotX<RotZ<Move<Stop>>>> framing(100, 50, 0.5, 50);
+static sss::PerspectiveProjection<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>> framing(100, 50, 0.5, 50);
 
 static float slip;
 static float yawing = 0.0;
@@ -244,7 +248,7 @@ Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap)
 	for (int i = 0; i < COUNTER_CAPACITY; i++)
 	{
 		digit[i].direction->scale = 2;
-		digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / screenWidth;
+		digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / sss::screenWidth;
 		digit[i].direction->next->dy = 0.75;
 	}
 
@@ -345,9 +349,9 @@ Props1::~Props1()
 }
 void Props1::rearrange(float fdt)
 {
-	float x = controllers[0].x;
-	float y = controllers[0].y;
-	if (0 <= x && x < screenWidth && 0 <= y && y < screenHeight && pixelLabel(x, y) != 0)
+	float x = sss::controllers[0].x;
+	float y = sss::controllers[0].y;
+	if (0 <= x && x < sss::screenWidth && 0 <= y && y < sss::screenHeight && sss::pixelLabel(x, y) != 0)
 	{
 		speed = 1000;
 	}
@@ -431,7 +435,7 @@ Props2::Props2()
 class Props3
 {
 private:
-	Percipi<Props0> props0;
+	sss::Percipi<Props0> props0;
 public:
 	Props3();
 	void rearrange(float dt);
@@ -465,8 +469,8 @@ Props3::Props3() : lazy(& cell3)
 }
 void Props3::rearrange(float fdt)
 {
-	int x = controllers[0].x;
-	int y = controllers[0].y;
+	int x = sss::controllers[0].x;
+	int y = sss::controllers[0].y;
 	if (lazy.visible)
 	{
 		if (yawing == 0)
@@ -510,40 +514,40 @@ void Props3::rearrange(float fdt)
 	}
 }
 
-class DemoScene : public Scene
+class DemoScene : public sss::Scene
 {
 private:
-	Percipi<Props0> props0;
+	sss::Percipi<Props0> props0;
 	Background sky1;
 	Background sky2;
 protected:
 	Hollow * hollow;
-	ParallelProjection<Move<RotX<RotZ<Stop>>>> lighting;
+	sss::ParallelProjection<sss::Move<sss::RotX<sss::RotZ<sss::Stop>>>> lighting;
 public:
 	DemoScene(Hollow * hollow);
 	void render();
-	Scene * rearrange(unsigned int dt);
+	sss::Scene * rearrange(unsigned int dt);
 };
 DemoScene::DemoScene(Hollow * hollow) : hollow(hollow), lighting(60, 30, 10, 40)
 {
-	prevX = controllers[0].x;
-	prevY = controllers[0].y;
+	prevX = sss::controllers[0].x;
+	prevY = sss::controllers[0].y;
 }
 void DemoScene::render()
 {
 	float sect = M_PI / (atan((framing.width / 2) / framing.far));
 	float turn = - framing.direction->next->angle / (M_PI * 2);
-	sky1.direction->scale = screenWidth * sect / sky1.getFigure()->texture->width;
+	sky1.direction->scale = sss::screenWidth * sect / sky1.getFigure()->texture->width;
 	sky1.direction->next->dx = (turn - floor(turn) - 1) * (2 * sect);
-	sky2.direction->scale = screenWidth * sect / sky2.getFigure()->texture->width;
+	sky2.direction->scale = sss::screenWidth * sect / sky2.getFigure()->texture->width;
 	sky2.direction->next->dx = (turn - floor(turn)) * (2 * sect);
 
 	props0->backgroundRenderer.process();
 
-	Matrix4x4 lightingMatrix;
+	sss::Matrix4x4 lightingMatrix;
 	lighting.getMatrix(lightingMatrix.elements);
 
-	Matrix4x4 framingMatrix;
+	sss::Matrix4x4 framingMatrix;
 	framing.getMatrix(framingMatrix.elements);
 
 	props0->shadowRenderer.lightingMatrix = lightingMatrix.elements;
@@ -558,10 +562,10 @@ void DemoScene::render()
 
 	props0->solid2DRenderer.process();
 }
-Scene * DemoScene::rearrange(unsigned int dt)
+sss::Scene * DemoScene::rearrange(unsigned int dt)
 {
-	float x = controllers[0].x;
-	float y = controllers[0].y;
+	float x = sss::controllers[0].x;
+	float y = sss::controllers[0].y;
 	Hollow * next = hollow;
 
 	float fdt = dt * 0.000001; // us -> s
@@ -585,11 +589,11 @@ Scene * DemoScene::rearrange(unsigned int dt)
 
 	if (yawing == 0)
 	{
-		if (pressedHigh && prevY < screenHeight / 2 && screenHeight / 2 <= y)
+		if (pressedHigh && prevY < sss::screenHeight / 2 && sss::screenHeight / 2 <= y)
 		{
 			if (! props0->missiles[props0->missileIndex].visible)
 			{
-				float a = atan((framing.width / 2) / framing.far * (x - screenWidth / 2) / (screenWidth / 2));
+				float a = atan((framing.width / 2) / framing.far * (x - sss::screenWidth / 2) / (sss::screenWidth / 2));
 				Missile * m = & props0->missiles[props0->missileIndex];
 				m->visible = true;
 				m->hollow = hollow;
@@ -601,18 +605,18 @@ Scene * DemoScene::rearrange(unsigned int dt)
 			}
 		}
 
-		if (x < 0 || screenWidth <= x || y < screenHeight / 2 || screenHeight <= y)
+		if (x < 0 || sss::screenWidth <= x || y < sss::screenHeight / 2 || sss::screenHeight <= y)
 		{
 			pressedLow = false;
 		}
 
 		if (pressedLow
- && abs(x - prevX) < screenWidth / 4 /* work adound for Surface */
+ && abs(x - prevX) < sss::screenWidth / 4 /* work adound for Surface */
 )
 		{
 			framing.direction->next->angle += (x - prevX) * -0.002f;
 
-			float a = fdt * fminf(y - origY, screenHeight / 4) / (screenHeight / 4);
+			float a = fdt * fminf(y - origY, sss::screenHeight / 4) / (sss::screenHeight / 4);
 			float dx = sinf(framing.direction->next->angle) * a * 10;
 			float dy = cosf(framing.direction->next->angle) * a * 10;
 			// FIXME common process
@@ -657,11 +661,11 @@ Scene * DemoScene::rearrange(unsigned int dt)
 class DemoScene1 : public DemoScene
 {
 private:
-	Percipi<Props1> props1;
-	Percipi<Props2> props2;
+	sss::Percipi<Props1> props1;
+	sss::Percipi<Props2> props2;
 public:
 	DemoScene1(Hollow * hollow);
-	Scene * rearrange(unsigned int dt);
+	sss::Scene * rearrange(unsigned int dt);
 };
 DemoScene1::DemoScene1(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
@@ -670,9 +674,9 @@ DemoScene1::DemoScene1(Hollow * hollow) : DemoScene::DemoScene(hollow)
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Scene * DemoScene1::rearrange(unsigned int dt)
+sss::Scene * DemoScene1::rearrange(unsigned int dt)
 {
-	Scene * next = DemoScene::rearrange(dt);
+	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props1->rearrange(fdt);
 	return next;
@@ -681,12 +685,12 @@ Scene * DemoScene1::rearrange(unsigned int dt)
 class DemoScene2 : public DemoScene
 {
 private:
-	Percipi<Props1> props1;
-	Percipi<Props2> props2;
-	Percipi<Props3> props3;
+	sss::Percipi<Props1> props1;
+	sss::Percipi<Props2> props2;
+	sss::Percipi<Props3> props3;
 public:
 	DemoScene2(Hollow * hollow);
-	Scene * rearrange(unsigned int dt);
+	sss::Scene * rearrange(unsigned int dt);
 };
 DemoScene2::DemoScene2(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
@@ -696,9 +700,9 @@ DemoScene2::DemoScene2(Hollow * hollow) : DemoScene::DemoScene(hollow)
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Scene * DemoScene2::rearrange(unsigned int dt)
+sss::Scene * DemoScene2::rearrange(unsigned int dt)
 {
-	Scene * next = DemoScene::rearrange(dt);
+	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props1->rearrange(fdt);
 	props3->rearrange(fdt);
@@ -708,11 +712,11 @@ Scene * DemoScene2::rearrange(unsigned int dt)
 class DemoScene3 : public DemoScene
 {
 private:
-	Percipi<Props2> props2;
-	Percipi<Props3> props3;
+	sss::Percipi<Props2> props2;
+	sss::Percipi<Props3> props3;
 public:
 	DemoScene3(Hollow * hollow);
-	Scene * rearrange(unsigned int dt);
+	sss::Scene * rearrange(unsigned int dt);
 };
 DemoScene3::DemoScene3(Hollow * hollow) : DemoScene::DemoScene(hollow)
 {
@@ -722,9 +726,9 @@ DemoScene3::DemoScene3(Hollow * hollow) : DemoScene::DemoScene(hollow)
 	lighting.direction->next->angle = M_PI / 3;
 	lighting.direction->next->next->angle = M_PI / 4;
 }
-Scene * DemoScene3::rearrange(unsigned int dt)
+sss::Scene * DemoScene3::rearrange(unsigned int dt)
 {
-	Scene * next = DemoScene::rearrange(dt);
+	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props3->rearrange(fdt);
 	return next;
@@ -764,7 +768,7 @@ Hollow cell3 = {
 	nullptr
 }, & cue<DemoScene3> };
 
-Scene * arrange()
+sss::Scene * sss::arrange()
 {
 	framing.direction->next->next->dy = -10;
 	framing.direction->next->next->dz = -1.5;
@@ -773,26 +777,26 @@ Scene * arrange()
 	return depict(& cell1);
 }
 
-void buttonPressed(int pos)
+void sss::buttonPressed(int pos)
 {
-	if (controllers[0].y < screenHeight / 2)
+	if (sss::controllers[0].y < sss::screenHeight / 2)
 	{
 		pressedHigh = true;
 	}
-	if (screenHeight / 2 <= controllers[0].y)
+	if (sss::screenHeight / 2 <= sss::controllers[0].y)
 	{
 		pressedLow = true;
-		origY = controllers[0].y;
+		origY = sss::controllers[0].y;
 	}
 }
 
-void buttonReleased(int pos)
+void sss::buttonReleased(int pos)
 {
 	pressedHigh = false;
 	pressedLow = false;
 }
 
-void wheelMoved(float d)
+void sss::wheelMoved(float d)
 {
 	std::printf("wheelMoved %f\n", d);
 }

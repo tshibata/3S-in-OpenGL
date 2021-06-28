@@ -1,32 +1,32 @@
-#include <stdio.h>
+#include <cstdio>
 #include <stdlib.h>
 #include <math.h>
 #include <platform.h>
 #include "../common.h"
 
-Controller controllers[1];
+sss::Controller sss::controllers[1];
 
 static void realize(GtkWidget * widget)
 {
-	printf("realize!\n");
+	std::printf("realize!\n");
 	gtk_gl_area_make_current(GTK_GL_AREA(widget));
 	if (gtk_gl_area_get_error(GTK_GL_AREA(widget)) != NULL)
 	{
 		return;
 	}
 
-	initiate(); // FIXME it may fail.
+	sss::initiate(); // FIXME it may fail.
 }
 
 static void unrealize(GtkWidget * widget)
 {
-	printf("unrealize!\n");
+	std::printf("unrealize!\n");
 	gtk_gl_area_make_current(GTK_GL_AREA(widget));
 	if (gtk_gl_area_get_error(GTK_GL_AREA(widget)) != NULL)
 	{
 		return;
 	}
-	terminate();
+	sss::terminate();
 }
 
 static void get_pointer_position(GtkGLArea * area, float * x, float * y)
@@ -48,9 +48,9 @@ static gboolean render(GtkGLArea * area, GdkGLContext * context)
 		return FALSE;
 	}
 
-	get_pointer_position(area, & controllers[0].x, & controllers[0].y);
+	get_pointer_position(area, & sss::controllers[0].x, & sss::controllers[0].y);
 
-	if (! update())
+	if (! sss::update())
 	{
 		return FALSE;
 	}
@@ -62,34 +62,34 @@ static gboolean render(GtkGLArea * area, GdkGLContext * context)
 
 static void press(GtkGLArea * area, GdkEventButton * event, void * data)
 {
-	get_pointer_position(area, & controllers[0].x, & controllers[0].y);
+	get_pointer_position(area, & sss::controllers[0].x, & sss::controllers[0].y);
 	switch (event->button)
 	{
 	case 1:
-		buttonPressed(- 1);
+		sss::buttonPressed(- 1);
 		break;
 	case 2:
-		buttonPressed(0);
+		sss::buttonPressed(0);
 		break;
 	case 3:
-		buttonPressed(1);
+		sss::buttonPressed(1);
 		break;
 	}
 }
 
 static void release(GtkGLArea * area, GdkEventButton * event, void * data)
 {
-	get_pointer_position(area, & controllers[0].x, & controllers[0].y);
+	get_pointer_position(area, & sss::controllers[0].x, & sss::controllers[0].y);
 	switch (event->button)
 	{
 	case 1:
-		buttonReleased(- 1);
+		sss::buttonReleased(- 1);
 		break;
 	case 2:
-		buttonReleased(0);
+		sss::buttonReleased(0);
 		break;
 	case 3:
-		buttonPressed(1);
+		sss::buttonPressed(1);
 		break;
 	}
 }
@@ -98,8 +98,8 @@ static void scroll(GtkGLArea * area, GdkEventScroll * event, void * data)
 {
 	if (event->delta_y != 0)
 	{
-		get_pointer_position(area, & controllers[0].x, & controllers[0].y);
-		wheelMoved(- event->delta_y);
+		get_pointer_position(area, & sss::controllers[0].x, & sss::controllers[0].y);
+		sss::wheelMoved(- event->delta_y);
 	}
 }
 
@@ -109,7 +109,7 @@ int main(int argc, char * * argv)
 
 	GtkWidget * window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window), "Shadow, Solid & Screen");
-	gtk_window_set_default_size(GTK_WINDOW(window), screenWidth, screenHeight);
+	gtk_window_set_default_size(GTK_WINDOW(window), sss::screenWidth, sss::screenHeight);
 
 	GtkWidget * area = gtk_gl_area_new();
 	gtk_gl_area_set_required_version(GTK_GL_AREA(area), 3, 3);

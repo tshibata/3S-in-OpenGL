@@ -1,12 +1,15 @@
 #include <utility>
+#include <cstdio>
 #include <stdlib.h>
-#include <stdio.h>
 #include <time.h>
 #include <platform.h>
 #include "Basis.h"
 #include "geometry.h"
 #include "common.h"
 #include "files.h"
+
+namespace sss
+{
 
 static GLboolean initShader(GLuint shader, const GLchar * * source)
 {
@@ -21,7 +24,7 @@ static GLboolean initShader(GLuint shader, const GLchar * * source)
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, & len);
 		buf = (char *) malloc(len + 1);
 		glGetShaderInfoLog(shader, len, NULL, buf);
-		fprintf(stderr, "Compile failed: %s\n", buf);
+		std::fprintf(stderr, "Compile failed: %s\n", buf);
 		free(buf);
 		return GL_FALSE;
 	}
@@ -54,7 +57,7 @@ GLuint initProgram(const GLchar * * vertSource, const GLchar * * fragSource)
 			glGetProgramiv(program, GL_INFO_LOG_LENGTH, & len);
 			buf = (char *) malloc(len + 1);
 			glGetProgramInfoLog(program, len, NULL, buf);
-			fprintf(stderr, "Link failed: %s\n", buf);
+			std::fprintf(stderr, "Link failed: %s\n", buf);
 		}
 
 		glDetachShader(program, vertShader);
@@ -175,7 +178,7 @@ bool update()
 		unsigned int dt = (t1.tv_sec - t0.tv_sec) * 1000000 + t1.tv_nsec / 1000 - t0.tv_nsec / 1000;
 		if (t0.tv_sec < t1.tv_sec)
 		{
-			printf("%d frames/s\n", frame);
+			std::printf("%d frames/s\n", frame);
 			frame = 0;
 		}
 		t0 = t1;
@@ -216,3 +219,4 @@ Scene::~Scene()
 {
 }
 
+}

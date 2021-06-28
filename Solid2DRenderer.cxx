@@ -1,6 +1,5 @@
 #include <utility>
 #include <stdlib.h>
-#include <stdio.h>
 #include <platform.h>
 #include "sss/Basis.h"
 #include "sss/geometry.h"
@@ -8,7 +7,7 @@
 #include "sss/renderer.h"
 #include "Solid2DRenderer.h"
 
-RenderingMode solid2D;
+sss::RenderingMode solid2D;
 
 Solid2DRenderer::Solid2DRenderer()
 {
@@ -36,7 +35,7 @@ Solid2DRenderer::Solid2DRenderer()
 			gl_FragColor = color;
 		})";
 
-	program = initProgram(& vert, & frag);
+	program = sss::initProgram(& vert, & frag);
 }
 Solid2DRenderer::~Solid2DRenderer()
 {
@@ -52,13 +51,13 @@ void Solid2DRenderer::process()
 	glUseProgram(program);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
-	glBindVertexArray(vao);
+	glBindVertexArray(sss::vao);
 
 	present(solid2D,
-		StencilOperation(),
-		DirectUniform(program, "fmat"),
-		UniformTexture(program, "tex"),
-		VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
-		VertexAttrib(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0));
+		sss::StencilOperation(),
+		sss::DirectUniform(program, "fmat"),
+		sss::UniformTexture(program, "tex"),
+		sss::VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
+		sss::VertexAttrib(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0));
 }
 

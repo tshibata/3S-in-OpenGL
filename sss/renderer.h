@@ -1,3 +1,6 @@
+namespace sss
+{
+
 extern GLuint vao;
 extern GLuint * vbo;
 extern GLsizei * vbSize;
@@ -117,3 +120,4 @@ public:
 	}
 };
 
+}

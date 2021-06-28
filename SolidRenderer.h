@@ -5,8 +5,8 @@ private:
 public:
 	float * framingMatrix;
 	float * lightingMatrix;
-	Texture * shadowMap;
-	SolidRenderer(Texture & shadowMap);
+	sss::Texture * shadowMap;
+	SolidRenderer(sss::Texture & shadowMap);
 	~SolidRenderer();
 	void process();
 };

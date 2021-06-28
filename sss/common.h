@@ -1,3 +1,6 @@
+namespace sss
+{
+
 extern const int screenWidth;
 extern const int screenHeight;
 
@@ -23,4 +26,6 @@ public:
 };
 
 Scene * arrange();
+
+}
 

@@ -1,3 +1,6 @@
+namespace sss
+{
+
 template<typename T> class ReferenceCounted
 {
 public:
@@ -150,3 +153,4 @@ public:
 
 template <typename T> using Basis = const ReferenceCounted<T>;
 
+}

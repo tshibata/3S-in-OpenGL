@@ -3,15 +3,15 @@ class Hollow
 public:
 	Plane * limits;
 	Hollow * * adjacents;
-	Scene * (* depiction)(Hollow * hollow);
+	sss::Scene * (* depiction)(Hollow * hollow);
 };
 
-template <typename T> Scene * cue(Hollow * hollow)
+template <typename T> sss::Scene * cue(Hollow * hollow)
 {
-	return (Scene *) new T(hollow);
+	return (sss::Scene *) new T(hollow);
 }
 
 Hollow * transit(Hollow * hollow, float x, float y, float & dx, float & dy, bool deflection);
 
-Scene * depict(Hollow * hollow);
+sss::Scene * depict(Hollow * hollow);
 

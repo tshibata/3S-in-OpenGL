@@ -4,8 +4,8 @@ private:
 	GLuint program;
 public:
 	float * lightingMatrix;
-	Texture * shadowMap;
-	ShadowRenderer(Texture & shadowMap);
+	sss::Texture * shadowMap;
+	ShadowRenderer(sss::Texture & shadowMap);
 	~ShadowRenderer();
 	void process();
 };

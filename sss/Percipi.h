@@ -1,3 +1,6 @@
+namespace sss
+{
+
 template<typename T> T * & percipiInstance()
 {
 	static T * instance = nullptr;
@@ -73,3 +76,4 @@ public:
 	}
 };
 
+}

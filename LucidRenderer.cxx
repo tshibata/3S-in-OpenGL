@@ -1,6 +1,5 @@
 #include <utility>
 #include <stdlib.h>
-#include <stdio.h>
 #include <platform.h>
 #include "sss/Basis.h"
 #include "sss/geometry.h"
@@ -8,7 +7,7 @@
 #include "sss/renderer.h"
 #include "LucidRenderer.h"
 
-RenderingMode lucid3D;
+sss::RenderingMode lucid3D;
 
 LucidRenderer::LucidRenderer()
 {
@@ -37,7 +36,7 @@ LucidRenderer::LucidRenderer()
 			gl_FragColor = vec4(texture(tex, uv1).rgb * a, 1.0);
 		})";
 
-	program = initProgram(& vert, & frag);
+	program = sss::initProgram(& vert, & frag);
 }
 LucidRenderer::~LucidRenderer()
 {
@@ -53,14 +52,14 @@ void LucidRenderer::process()
 	glEnable(GL_BLEND);
 	glDisable(GL_CULL_FACE);
 	glDepthMask(GL_FALSE);
-	glBindVertexArray(vao);
+	glBindVertexArray(sss::vao);
 
 	present(lucid3D,
-		StencilOperation(),
-		VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
-		VertexAttrib(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float))),
-		VertexAttrib(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0),
-		UniformMatrix(program, "fmat", framingMatrix),
-		UniformTexture(program, "tex"));
+		sss::StencilOperation(),
+		sss::VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
+		sss::VertexAttrib(program, 1, "norm", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (5 * sizeof(float))),
+		sss::VertexAttrib(program, 2, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0),
+		sss::UniformMatrix(program, "fmat", framingMatrix),
+		sss::UniformTexture(program, "tex"));
 }
 

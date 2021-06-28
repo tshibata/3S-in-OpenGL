@@ -1,6 +1,5 @@
 #include <utility>
 #include <stdlib.h>
-#include <stdio.h>
 #include <platform.h>
 #include "sss/Basis.h"
 #include "sss/geometry.h"
@@ -8,7 +7,7 @@
 #include "sss/renderer.h"
 #include "BackgroundRenderer.h"
 
-RenderingMode background;
+sss::RenderingMode background;
 
 BackgroundRenderer::BackgroundRenderer()
 {
@@ -31,7 +30,7 @@ BackgroundRenderer::BackgroundRenderer()
 			gl_FragColor = texture(tex, uv1);
 		})";
 
-	program = initProgram(& vert, & frag);
+	program = sss::initProgram(& vert, & frag);
 }
 BackgroundRenderer::~BackgroundRenderer()
 {
@@ -45,12 +44,12 @@ void BackgroundRenderer::process()
 	glDepthMask(GL_FALSE);
 	glUseProgram(program);
 	glDisable(GL_BLEND);
-	glBindVertexArray(vao);
+	glBindVertexArray(sss::vao);
 
 	present(background,
-		DirectUniform(program, "fmat"),
-		UniformTexture(program, "tex"),
-		VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
-		VertexAttrib(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0));
+		sss::DirectUniform(program, "fmat"),
+		sss::UniformTexture(program, "tex"),
+		sss::VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),
+		sss::VertexAttrib(program, 1, "uv0", 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0));
 }
 

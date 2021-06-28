@@ -1,3 +1,6 @@
+namespace sss
+{
+
 void prod(float * a, float * b); // a <- a * b
 void prod(float * a, float * b, float * c); // c <- a * b
 void rotX(float * mat, float a);
@@ -266,3 +269,4 @@ public:
 	}
 };
 
+}
