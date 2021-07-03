@@ -14,9 +14,9 @@ LucidRenderer::LucidRenderer()
 	const GLchar * vert =
 		R"(#version 330 core
 		uniform mat4 fmat;
-		in vec3 xyz0;
-		in vec3 norm;
-		in vec2 uv0;
+		layout (location = 0) in vec3 xyz0;
+		layout (location = 1) in vec3 norm;
+		layout (location = 2) in vec2 uv0;
 		out vec2 uv1;
 		out vec4 fnorm;
 		void main() {

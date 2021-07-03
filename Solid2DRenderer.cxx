@@ -14,8 +14,8 @@ Solid2DRenderer::Solid2DRenderer()
 	const GLchar * vert =
 		R"(#version 330 core
 		uniform mat4 fmat;
-		in vec3 xyz0;
-		in vec2 uv0;
+		layout (location = 0) in vec3 xyz0;
+		layout (location = 1) in vec2 uv0;
 		out vec2 uv1;
 		void main() {
 			gl_Position = fmat * vec4(xyz0, 1.0);

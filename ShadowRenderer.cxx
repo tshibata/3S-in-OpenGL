@@ -14,8 +14,8 @@ ShadowRenderer::ShadowRenderer(sss::Texture & shadowMap) : shadowMap(& shadowMap
 	const GLchar * vert =
 		R"(#version 330 core
 		uniform mat4 lmat;
-		in vec3 xyz0;
-		in vec2 uv0;
+		layout (location = 0) in vec3 xyz0;
+		layout (location = 1) in vec2 uv0;
 		out vec2 uv1;
 		void main() {
 			uv1 = uv0;
