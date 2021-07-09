@@ -1,14 +1,15 @@
 #include <utility>
 #include <cstdio>
-#include <math.h>
+#include <cmath>
+#include <climits>
+#include <cassert>
 #include <platform.h>
 #include "sss/Basis.h"
 #include "sss/Percipi.h"
 #include "sss/common.h"
 #include "sss/geometry.h"
 #include "sss/renderer.h"
-#include "Plane.h"
-#include "Hollow.h"
+#include "navigation.h"
 #include "BackgroundRenderer.h"
 #include "ShadowRenderer.h"
 #include "SolidRenderer.h"
@@ -73,7 +74,7 @@ sss::Figure * Background::getFigure()
 class Missile : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
-	Hollow * hollow;
+	NavCell * cell;
 	Missile();
 	virtual sss::Figure * getFigure();
 };
@@ -89,11 +90,11 @@ sss::Figure * Missile::getFigure()
 class Foe : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
-	Hollow * hollow;
-	Foe(Hollow * hollow);
+	NavCell * cell;
+	Foe(NavCell * cell);
 	virtual sss::Figure * getFigure();
 };
-Foe::Foe(Hollow * hollow) : FinitePresence::FinitePresence(solid3D), hollow(hollow)
+Foe::Foe(NavCell * cell) : FinitePresence::FinitePresence(solid3D), cell(cell)
 {
 }
 sss::Figure * Foe::getFigure()
@@ -220,11 +221,6 @@ static sss::PerspectiveProjection<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>> fr
 
 static float slip;
 static float yawing = 0.0;
-
-
-extern Hollow cell1;
-extern Hollow cell2;
-extern Hollow cell3;
 
 
 class Props0
@@ -445,7 +441,7 @@ public:
 	Cuboid8E9 cuboid4;
 	Foe lazy;
 };
-Props3::Props3() : lazy(& cell3)
+Props3::Props3() : lazy(& cells[8])
 {
 	cuboid1.direction->angle = 1 * M_PI / 2;
 	cuboid1.direction->next->dx = -6;
@@ -483,18 +479,6 @@ void Props3::rearrange(float fdt)
 				slip = atan2(dx, dy);
 				yawing = 1.0;
 			}
-			else
-			{
-				Hollow * hollow = transit(lazy.hollow, lazy.direction->next->dx, lazy.direction->next->dy, dx, dy, false);
-				if (hollow != nullptr)
-				{
-					dx = (framing.direction->next->next->dx - lazy.direction->next->dx) * 0.5f / r;
-					dy = (framing.direction->next->next->dy - lazy.direction->next->dy) * 0.5f / r;
-					lazy.hollow = transit(lazy.hollow, lazy.direction->next->dx, lazy.direction->next->dy, dx, dy, false);
-					lazy.direction->next->dx += dx;
-					lazy.direction->next->dy += dy;
-				}
-			}
 		}
 
 		for (int i = 0; i < MISSILE_CAPACITY; i++)
@@ -521,14 +505,14 @@ private:
 	Background sky1;
 	Background sky2;
 protected:
-	Hollow * hollow;
+	NavCell * cell;
 	sss::ParallelProjection<sss::Move<sss::RotX<sss::RotZ<sss::Stop>>>> lighting;
 public:
-	DemoScene(Hollow * hollow);
+	DemoScene(NavCell * cell);
 	void render();
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene::DemoScene(Hollow * hollow) : hollow(hollow), lighting(60, 30, 10, 40)
+DemoScene::DemoScene(NavCell * cell) : cell(cell), lighting(60, 30, 10, 40)
 {
 	prevX = sss::controllers[0].x;
 	prevY = sss::controllers[0].y;
@@ -566,7 +550,7 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 {
 	float x = sss::controllers[0].x;
 	float y = sss::controllers[0].y;
-	Hollow * next = hollow;
+	NavCell * next = cell;
 
 	float fdt = dt * 0.000001; // us -> s
 
@@ -577,10 +561,8 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 			Missile * m = & props0->missiles[i];
 			float dx = sinf(m->direction->angle) * fdt * 10;
 			float dy = cosf(m->direction->angle) * fdt * 10;
-			m->hollow = transit(m->hollow, m->direction->next->dx, m->direction->next->dy, dx, dy, false);
-			m->direction->next->dx += dx;
-			m->direction->next->dy += dy;
-			if (m->hollow == nullptr)
+			float t = traverse(m->cell, m->direction->next->dx, m->direction->next->dy, dx, dy, NAN);
+			if (t < 1.0)
 			{
 				m->visible = false;
 			}
@@ -596,7 +578,7 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 				float a = atan((framing.width / 2) / framing.far * (x - sss::screenWidth / 2) / (sss::screenWidth / 2));
 				Missile * m = & props0->missiles[props0->missileIndex];
 				m->visible = true;
-				m->hollow = hollow;
+				m->cell = cell;
 				m->direction->angle = framing.direction->next->angle + a;
 				m->direction->next->dx = framing.direction->next->next->dx;
 				m->direction->next->dy = framing.direction->next->next->dy;
@@ -611,7 +593,7 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 		}
 
 		if (pressedLow
- && abs(x - prevX) < sss::screenWidth / 4 /* work adound for Surface */
+ && std::abs(x - prevX) < sss::screenWidth / 4 /* work adound for Surface */
 )
 		{
 			framing.direction->next->angle += (x - prevX) * -0.002f;
@@ -619,20 +601,14 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 			float a = fdt * fminf(y - origY, sss::screenHeight / 4) / (sss::screenHeight / 4);
 			float dx = sinf(framing.direction->next->angle) * a * 10;
 			float dy = cosf(framing.direction->next->angle) * a * 10;
-			// FIXME common process
-			next = transit(hollow, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, true);
-			framing.direction->next->next->dx += dx;
-			framing.direction->next->next->dy += dy;
+			traverse(next, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, 0.1);
 		}
 	}
 	else
 	{
-		float dx = cos(slip) * abs(yawing) * fdt * 10;
-		float dy = sin(slip) * abs(yawing) * fdt * 10;
-		// FIXME common process
-		next = transit(hollow, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, true);
-		framing.direction->next->next->dx += dx;
-		framing.direction->next->next->dy += dy;
+		float dx = cos(slip) * std::abs(yawing) * fdt * 10;
+		float dy = sin(slip) * std::abs(yawing) * fdt * 10;
+		traverse(next, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, 0.1);
 
 		framing.direction->next->angle += yawing * fdt * 10;
 		if (yawing < 0)
@@ -655,7 +631,7 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 	prevX = x;
 	prevY = y;
 
-	return depict(next);
+	return (* next->depiction)(next);
 }
 
 class DemoScene1 : public DemoScene
@@ -664,10 +640,10 @@ private:
 	sss::Percipi<Props1> props1;
 	sss::Percipi<Props2> props2;
 public:
-	DemoScene1(Hollow * hollow);
+	DemoScene1(NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene1::DemoScene1(Hollow * hollow) : DemoScene::DemoScene(hollow)
+DemoScene1::DemoScene1(NavCell * cell) : DemoScene::DemoScene(cell)
 {
 	lighting.direction->dy = 5;
 	lighting.direction->dz = -15;
@@ -689,10 +665,10 @@ private:
 	sss::Percipi<Props2> props2;
 	sss::Percipi<Props3> props3;
 public:
-	DemoScene2(Hollow * hollow);
+	DemoScene2(NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene2::DemoScene2(Hollow * hollow) : DemoScene::DemoScene(hollow)
+DemoScene2::DemoScene2(NavCell * cell) : DemoScene::DemoScene(cell)
 {
 	lighting.direction->dx = -20;
 	lighting.direction->dy = 2;
@@ -715,10 +691,10 @@ private:
 	sss::Percipi<Props2> props2;
 	sss::Percipi<Props3> props3;
 public:
-	DemoScene3(Hollow * hollow);
+	DemoScene3(NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene3::DemoScene3(Hollow * hollow) : DemoScene::DemoScene(hollow)
+DemoScene3::DemoScene3(NavCell * cell) : DemoScene::DemoScene(cell)
 {
 	lighting.direction->dx = -20;
 	lighting.direction->dy = 2;
@@ -734,47 +710,66 @@ sss::Scene * DemoScene3::rearrange(unsigned int dt)
 	return next;
 }
 
-Hollow cell1 = {
-(Plane []) {
-	{1, 0, 0, -14},
-	{-1, 0, 0, -14},
-	{0, 1, 0, -14},
-	{0, -1, 0, -14},
-	{0, 0, 0, 0}
-}, (Hollow * []) {
-	& cell2,
-	nullptr
-}, & cue<DemoScene1> };
-Hollow cell2 = { (Plane []) {
-	{1, 0, 0, 14},
-	{-1, 0, 0, -32},
-	{0, 1, 0, -36},
-	{0, -1, 0, 4},
-	{0, 0, 0, 0}
-}, (Hollow * []) {
-	& cell1,
-	& cell3,
-	nullptr
-}, & cue<DemoScene2> };
-Hollow cell3 = {
-(Plane []) {
-	{1, 0, 0, -6},
-	{-1, 0, 0, -14},
-	{0, 1, 0, -36},
-	{0, -1, 0, 30},
-	{0, 0, 0, 0}
-}, (Hollow * []) {
-	& cell2,
-	nullptr
-}, & cue<DemoScene3> };
+
+NavPoint gatanNE = { 6, 35, -1, -1 };
+NavPoint gatanSE = { 6, 30, -1, +1 };
+NavPoint gatanSW = { -14, 30, -1, +1 };
+
+NavPoint platzNE = { -13, 35, -1, -1 };
+NavPoint platzNW = { -31, 35, +1, -1 };
+NavPoint platzSE = { -13, 4, +1, +1 };
+NavPoint platzSW = { -31, 4, +1, +1 };
+
+NavPoint stortorgetNE = { 13, 13, -1, -1 };
+NavPoint stortorgetNW = { -14, 13, -1, -1 };
+NavPoint stortorgetSE = { 13, -13, -1, +1 };
+NavPoint stortorgetSW = { -13, -13, +1, +1 };
+
+NavCell cells[] =
+{
+	{ & platzSE, & stortorgetNW, & stortorgetSE, & cue<DemoScene1> },
+	{ & stortorgetSW, & platzSE, & stortorgetSE, & cue<DemoScene1> },
+	{ & stortorgetSE, & stortorgetNW, & stortorgetNE, & cue<DemoScene1> },
+	{ & stortorgetNW, & platzSE, & platzSW, & cue<DemoScene2> },
+	{ & platzNW, & stortorgetNW, & platzSW, & cue<DemoScene2> },
+	{ & platzNW, & gatanSW, & stortorgetNW, & cue<DemoScene2> },
+	{ & platzNW, & platzNE, & gatanSW, & cue<DemoScene2> },
+	{ & platzNE, & gatanNE, & gatanSW, & cue<DemoScene3> },
+	{ & gatanNE, & gatanSE, & gatanSW, & cue<DemoScene3> },
+};
+
+int expanse = sizeof(cells) / sizeof(NavCell); // FIXME rename
+
 
 sss::Scene * sss::arrange()
 {
+	// check if the cells are clockwise.
+	for (int i = 0; i < expanse; i++)
+	{
+		float a1 = cells[i].points[0]->y - cells[i].points[1]->y;
+		float b1 = cells[i].points[1]->x - cells[i].points[0]->x;
+
+		float dx2 = cells[i].points[2]->x - cells[i].points[1]->x;
+		float dy2 = cells[i].points[2]->y - cells[i].points[1]->y;
+
+		if  (0 < a1 * dx2 + b1 * dy2)
+		{
+			std::printf("Not clockwise: ");
+			std::printf("(%f, %f) -> ", cells[i].points[0]->x, cells[i].points[0]->y);
+			std::printf("(%f, %f) -> ", cells[i].points[1]->x, cells[i].points[1]->y);
+			std::printf("(%f, %f)\n", cells[i].points[2]->x, cells[i].points[2]->y);
+		}
+
+		clockwise[cells[i].points[0]][cells[i].points[1]] = i;
+		clockwise[cells[i].points[1]][cells[i].points[2]] = i;
+		clockwise[cells[i].points[2]][cells[i].points[0]] = i;
+	}
+
 	framing.direction->next->next->dy = -10;
 	framing.direction->next->next->dz = -1.5;
 	framing.direction->angle = M_PI / 2;
 
-	return depict(& cell1);
+	return (* cells[0].depiction)(& cells[0]);
 }
 
 void sss::buttonPressed(int pos)
