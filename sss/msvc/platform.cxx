@@ -1,7 +1,6 @@
 #include <cstdio>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
 #include <platform.h>
 #include "../common.h"
 
@@ -65,10 +64,8 @@ void click(GLFWwindow * window, int button, int action, int modifier)
 	}
 }
 
-int main(int argc, char * * argv)
+int main()
 {
-	struct timespec t0, t1;
-
 	if (glfwInit() == GL_FALSE) {
 		return 1;
 	}
@@ -95,21 +92,23 @@ int main(int argc, char * * argv)
 	glfwSetScrollCallback(window, scroll);
 	glfwSetMouseButtonCallback(window, click);
 
-	clock_gettime(CLOCK_MONOTONIC, & t0);
-
+	double t0 = 0;
 	while (glfwWindowShouldClose(window) == GL_FALSE) {
 		double x, y;
 		glfwGetCursorPos(window, & x, & y);
 		sss::controllers[0].x = x;
 		sss::controllers[0].y = y;
-		clock_gettime(CLOCK_MONOTONIC, & t1);
-		unsigned int dt = (t1.tv_sec - t0.tv_sec) * 1000000 + t1.tv_nsec / 1000 - t0.tv_nsec / 1000;
+
+		double t1 = glfwGetTime();
+		unsigned int dt = (t1 - t0) * 1000000;
+
 		if (! sss::update(dt))
 		{
 			break;
 		}
 		glfwSwapBuffers(window);
 		glfwWaitEventsTimeout(0.0);
+
 		t0 = t1;
 	}
 	sss::terminate();

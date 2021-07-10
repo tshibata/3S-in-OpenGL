@@ -1,10 +1,13 @@
 #include <cstdio>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include <platform.h>
 #include "../common.h"
 
 sss::Controller sss::controllers[1];
+
+static struct timespec t0, t1;
 
 static void realize(GtkWidget * widget)
 {
@@ -50,12 +53,16 @@ static gboolean render(GtkGLArea * area, GdkGLContext * context)
 
 	get_pointer_position(area, & sss::controllers[0].x, & sss::controllers[0].y);
 
-	if (! sss::update())
+	clock_gettime(CLOCK_MONOTONIC, & t1);
+	unsigned int dt = (t1.tv_sec - t0.tv_sec) * 1000000 + t1.tv_nsec / 1000 - t0.tv_nsec / 1000;
+	if (! sss::update(dt))
 	{
 		return FALSE;
 	}
 
 	gtk_widget_queue_draw(GTK_WIDGET(area));
+
+	t0 = t1;
 
 	return TRUE;
 }
@@ -134,6 +141,8 @@ int main(int argc, char * * argv)
 	g_signal_connect(window, "scroll_event", G_CALLBACK(scroll), NULL);
 
 	gtk_widget_show_all(GTK_WIDGET(window));
+
+	clock_gettime(CLOCK_MONOTONIC, & t0);
 
 	gtk_main();
 

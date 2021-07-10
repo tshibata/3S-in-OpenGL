@@ -5,7 +5,7 @@ extern const int screenWidth;
 extern const int screenHeight;
 
 bool initiate();
-bool update();
+bool update(unsigned int dt);
 void terminate();
 
 void buttonPressed(int pos);

@@ -1,7 +1,6 @@
 #include <utility>
 #include <cstdio>
 #include <stdlib.h>
-#include <time.h>
 #include <platform.h>
 #include "Basis.h"
 #include "geometry.h"
@@ -82,7 +81,7 @@ GLsizei * vbSize;
 GLuint * tex;
 
 static int frame = 0;
-static struct timespec t0;
+static unsigned int us = 0;
 
 bool initiate()
 {
@@ -158,12 +157,11 @@ void terminate()
 	free(vbSize);
 }
 
-bool update()
+bool update(unsigned int dt)
 {
 	static Scene * curr = nullptr;
 	if (curr == nullptr)
 	{
-		clock_gettime(CLOCK_MONOTONIC, & t0);
 		curr = arrange();
 		if (curr == nullptr)
 		{
@@ -173,15 +171,13 @@ bool update()
 	else
 	{
 		frame++;
-		struct timespec t1;
-		clock_gettime(CLOCK_MONOTONIC, & t1);
-		unsigned int dt = (t1.tv_sec - t0.tv_sec) * 1000000 + t1.tv_nsec / 1000 - t0.tv_nsec / 1000;
-		if (t0.tv_sec < t1.tv_sec)
+		us += dt;
+		if (1000000 <= us)
 		{
 			std::printf("%d frames/s\n", frame);
 			frame = 0;
+			us -= 1000000;
 		}
-		t0 = t1;
 		Scene * next = curr->rearrange(dt);
 		if (next == nullptr)
 		{
