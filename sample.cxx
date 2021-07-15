@@ -1,8 +1,9 @@
-#include <utility>
 #include <cstdio>
 #include <cmath>
 #include <climits>
 #include <cassert>
+#include <utility>
+#include <unordered_map>
 #include <platform.h>
 #include "sss/Basis.h"
 #include "sss/Percipi.h"
@@ -211,8 +212,25 @@ sss::Figure * Digit::getFigure()
 	return & numFonts[i];
 }
 
+class Inst : public sss::FinitePresence<sss::Expand<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>>>
+{
+private:
+	sss::Figure * figure;
+public:
+	Inst(sss::Figure * figure);
+	virtual sss::Figure * getFigure();
+};
+Inst::Inst(sss::Figure * figure) : FinitePresence::FinitePresence(lucid3D), figure(figure)
+{
+}
+sss::Figure * Inst::getFigure()
+{
+	return figure;
+}
+
 static bool pressedHigh = false;
 static bool pressedLow = false;
+static int sincePressed = 0;
 static float origY;
 static float prevX;
 static float prevY;
@@ -228,7 +246,6 @@ class Props0
 public:
 	Props0();
 	Cuboid8E9 cuboid1;
-	Cuboid8E9 cuboid2;
 	Digit digit[COUNTER_CAPACITY];
 	int count = 0;
 	Missile missiles[MISSILE_CAPACITY];
@@ -249,11 +266,8 @@ Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap)
 	}
 
 	cuboid1.direction->angle = 2 * M_PI / 2;
-	cuboid1.direction->next->dx = -9;
+	cuboid1.direction->next->dx = -11;
 	cuboid1.direction->next->dy = 22;
-	cuboid2.direction->angle = 1 * M_PI / 2;
-	cuboid2.direction->next->dx = 2;
-	cuboid2.direction->next->dy = 25;
 }
 
 class Props1
@@ -263,7 +277,7 @@ public:
 	~Props1();
 	void rearrange(float dt);
 	Earth earth;
-	Cuboid465 cuboid1;
+	Cuboid8E9 cuboid1;
 	Cuboid8E9 cuboid2;
 	Cuboid243 cuboid3;
 	Cuboid8E9 cuboid4;
@@ -284,10 +298,10 @@ public:
 Props1::Props1()
 {
 	cuboid1.direction->angle = M_PI / 2;
-	cuboid1.direction->next->dx = -2;
-	cuboid1.direction->next->dy = 17;
+	cuboid1.direction->next->dx = 0;
+	cuboid1.direction->next->dy = 19;
 	cuboid2.direction->angle = M_PI / 2;
-	cuboid2.direction->next->dx = 8;
+	cuboid2.direction->next->dx = 14;
 	cuboid2.direction->next->dy = 19;
 	cuboid3.direction->angle = 0 * M_PI / 2;
 	cuboid3.direction->next->dx = 16;
@@ -434,14 +448,20 @@ private:
 	sss::Percipi<Props0> props0;
 public:
 	Props3();
-	void rearrange(float dt);
+	void rearrange(float dt, NavCell * cell);
 	Cuboid465 cuboid1;
 	Cuboid465 cuboid2;
 	Cuboid465 cuboid3;
 	Cuboid8E9 cuboid4;
-	Foe lazy;
+	Cuboid465 cuboid5;
+	Cuboid8E9 cuboid6;
+	Cuboid8E9 cuboid7;
+	Cuboid465 cuboid8;
+	Cuboid465 cuboid9;
+
+	Foe hasty;
 };
-Props3::Props3() : lazy(& cells[8])
+Props3::Props3() : hasty(& cells[8])
 {
 	cuboid1.direction->angle = 1 * M_PI / 2;
 	cuboid1.direction->next->dx = -6;
@@ -456,23 +476,77 @@ Props3::Props3() : lazy(& cells[8])
 	cuboid3.direction->next->dy = 39;
 
 	cuboid4.direction->angle = 2 * M_PI / 2;
-	cuboid4.direction->next->dx = 11;
-	cuboid4.direction->next->dy = 36;
+	cuboid4.direction->next->dx = 17;
+	cuboid4.direction->next->dy = 34;
 
-	lazy.direction->next->dx = 3;
-	lazy.direction->next->dy = 33;
-	lazy.direction->next->dz = -1;
+	cuboid5.direction->angle = 1 * M_PI / 2;
+	cuboid5.direction->next->dx = -4;
+	cuboid5.direction->next->dy = 27;
+
+	cuboid6.direction->angle = 1 * M_PI / 2;
+	cuboid6.direction->next->dx = 6;
+	cuboid6.direction->next->dy = 25;
+
+	cuboid7.direction->angle = 3 * M_PI / 2;
+	cuboid7.direction->next->dx = 10;
+	cuboid7.direction->next->dy = 53;
+
+	cuboid8.direction->angle = 3 * M_PI / 2;
+	cuboid8.direction->next->dx = 4;
+	cuboid8.direction->next->dy = 43;
+
+	cuboid9.direction->angle = 3 * M_PI / 2;
+	cuboid9.direction->next->dx = 16;
+	cuboid9.direction->next->dy = 43;
+
+	hasty.direction->next->dx = 3;
+	hasty.direction->next->dy = 33;
+	hasty.direction->next->dz = -1;
 }
-void Props3::rearrange(float fdt)
+
+void Props3::rearrange(float fdt, NavCell * cell)
 {
 	int x = sss::controllers[0].x;
 	int y = sss::controllers[0].y;
-	if (lazy.visible)
+	if (hasty.visible)
 	{
+		NavPoint end{framing.direction->next->next->dx, framing.direction->next->next->dy, 0, 0};
+		NavPoint * dst;
+		if (traversable(hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, end.x, end.y, 1.0))
+		{
+			// go direct if possible
+			dst = & end;
+		}
+		else
+		{
+			std::unordered_map<NavPoint *, float> d;
+			std::unordered_map<NavPoint *, NavPoint *> r;
+			navigation(d, & r, cell, end, 1.0, 0.5);
+			dst = firstCorner(d, hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, 1.0, 0.5);
+			NavPoint * next = r[dst];
+			if (next != nullptr && traversable(hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, next->x + 1.5 * next->dx, next->y + 1.5 * next->dy, 1.0))
+			{
+				dst = next;
+			}
+		}
+		if (dst != nullptr)
+		{
+			float dx = dst->x + 1.5 * dst->dx - hasty.direction->next->dx;
+			float dy = dst->y + 1.5 * dst->dy - hasty.direction->next->dy;
+			float r = sqrt(dx * dx + dy * dy);
+			if (fdt < r)
+			{
+				dx = dx * fdt / r;
+				dy = dy * fdt / r;
+			}
+			traverse(hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, dx, dy, 1.0, 0.1);
+			hasty.direction->angle = atan2(dx, dy);
+		}
+
 		if (yawing == 0)
 		{
-			float dx = framing.direction->next->next->dx - lazy.direction->next->dx;
-			float dy = framing.direction->next->next->dy - lazy.direction->next->dy;
+			float dx = framing.direction->next->next->dx - hasty.direction->next->dx;
+			float dy = framing.direction->next->next->dy - hasty.direction->next->dy;
 			float r = sqrt(dx * dx + dy * dy);
 			if (r < 1) // TBD: should have better collision detection?
 			{
@@ -486,16 +560,90 @@ void Props3::rearrange(float fdt)
 			if (props0->missiles[i].visible)
 			{
 				Missile * m = & props0->missiles[i];
-				float dx = m->direction->next->dx - lazy.direction->next->dx;
-				float dy = m->direction->next->dy - lazy.direction->next->dy;
+				float dx = m->direction->next->dx - hasty.direction->next->dx;
+				float dy = m->direction->next->dy - hasty.direction->next->dy;
 				if (sqrt(dx * dx + dy * dy) < 1) // TBD: should have better collision detection?
 				{
 					m->visible = false;
-					lazy.visible = false;
+					hasty.visible = false;
 				}
 			}
 		}
 	}
+}
+
+class Props4
+{
+private:
+	Earth earth1;
+	Earth earth2;
+	Earth earth3;
+	Cuboid243 cuboid1;
+	Cuboid243 cuboid2;
+	Cuboid465 cuboid3;
+	Cuboid8E9 cuboid4;
+	Cuboid465 cuboid5;
+	Cuboid465 cuboid6;
+	Cuboid8E9 cuboid7;
+	Cuboid465 cuboid8;
+	Cuboid8E9 cuboid9;
+	Cuboid8E9 cuboid10;
+	Cuboid465 cuboid11;
+public:
+	Props4();
+};
+Props4::Props4()
+{
+	earth1.direction->dx = 0;
+	earth1.direction->dy = 30;
+	earth2.direction->dx = 0;
+	earth2.direction->dy = 60;
+	earth3.direction->dx = 30;
+	earth3.direction->dy = 60;
+
+	cuboid1.direction->angle = 1 * M_PI / 2;
+	cuboid1.direction->next->dx = -1;
+	cuboid1.direction->next->dy = 44;
+
+	cuboid2.direction->angle = 1 * M_PI / 2;
+	cuboid2.direction->next->dx = -5;
+	cuboid2.direction->next->dy = 44;
+
+	cuboid3.direction->angle = 0 * M_PI / 2;
+	cuboid3.direction->next->dx = -7;
+	cuboid3.direction->next->dy = 48;
+
+	cuboid4.direction->angle = 2 * M_PI / 2;
+	cuboid4.direction->next->dx = -9;
+	cuboid4.direction->next->dy = 58;
+
+	cuboid5.direction->angle = 1 * M_PI / 2;
+	cuboid5.direction->next->dx = -3;
+	cuboid5.direction->next->dy = 67;
+
+	cuboid6.direction->angle = 1 * M_PI / 2;
+	cuboid6.direction->next->dx = 3;
+	cuboid6.direction->next->dy = 67;
+
+	cuboid7.direction->angle = 1 * M_PI / 2;
+	cuboid7.direction->next->dx = 13;
+	cuboid7.direction->next->dy = 69;
+
+	cuboid8.direction->angle = 1 * M_PI / 2;
+	cuboid8.direction->next->dx = 23;
+	cuboid8.direction->next->dy = 67;
+
+	cuboid9.direction->angle = 2 * M_PI / 2;
+	cuboid9.direction->next->dx = 29;
+	cuboid9.direction->next->dy = 58;
+
+	cuboid10.direction->angle = 0 * M_PI / 2;
+	cuboid10.direction->next->dx = 29;
+	cuboid10.direction->next->dy = 44;
+
+	cuboid11.direction->angle = 1 * M_PI / 2;
+	cuboid11.direction->next->dx = 22;
+	cuboid11.direction->next->dy = 43;
 }
 
 class DemoScene : public sss::Scene
@@ -561,7 +709,7 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 			Missile * m = & props0->missiles[i];
 			float dx = sinf(m->direction->angle) * fdt * 10;
 			float dy = cosf(m->direction->angle) * fdt * 10;
-			float t = traverse(m->cell, m->direction->next->dx, m->direction->next->dy, dx, dy, NAN);
+			float t = traverse(m->cell, m->direction->next->dx, m->direction->next->dy, dx, dy, 0, NAN);
 			if (t < 1.0)
 			{
 				m->visible = false;
@@ -592,8 +740,9 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 			pressedLow = false;
 		}
 
+		sincePressed++;
 		if (pressedLow
- && std::abs(x - prevX) < sss::screenWidth / 4 /* work adound for Surface */
+ && 1 < sincePressed /* work adound for Surface */
 )
 		{
 			framing.direction->next->angle += (x - prevX) * -0.002f;
@@ -601,14 +750,14 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 			float a = fdt * fminf(y - origY, sss::screenHeight / 4) / (sss::screenHeight / 4);
 			float dx = sinf(framing.direction->next->angle) * a * 10;
 			float dy = cosf(framing.direction->next->angle) * a * 10;
-			traverse(next, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, 0.1);
+			traverse(next, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, 1.0, 0.1);
 		}
 	}
 	else
 	{
 		float dx = cos(slip) * std::abs(yawing) * fdt * 10;
 		float dy = sin(slip) * std::abs(yawing) * fdt * 10;
-		traverse(next, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, 0.1);
+		traverse(next, framing.direction->next->next->dx, framing.direction->next->next->dy, dx, dy, 1.0, 0.1);
 
 		framing.direction->next->angle += yawing * fdt * 10;
 		if (yawing < 0)
@@ -639,6 +788,7 @@ class DemoScene1 : public DemoScene
 private:
 	sss::Percipi<Props1> props1;
 	sss::Percipi<Props2> props2;
+	sss::Percipi<Props3> props3;
 public:
 	DemoScene1(NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
@@ -655,6 +805,7 @@ sss::Scene * DemoScene1::rearrange(unsigned int dt)
 	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props1->rearrange(fdt);
+	props3->rearrange(fdt, cell);
 	return next;
 }
 
@@ -681,7 +832,7 @@ sss::Scene * DemoScene2::rearrange(unsigned int dt)
 	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props1->rearrange(fdt);
-	props3->rearrange(fdt);
+	props3->rearrange(fdt, cell);
 	return next;
 }
 
@@ -690,6 +841,7 @@ class DemoScene3 : public DemoScene
 private:
 	sss::Percipi<Props2> props2;
 	sss::Percipi<Props3> props3;
+	sss::Percipi<Props4> props4;
 public:
 	DemoScene3(NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
@@ -706,24 +858,66 @@ sss::Scene * DemoScene3::rearrange(unsigned int dt)
 {
 	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
-	props3->rearrange(fdt);
+	props3->rearrange(fdt, cell);
 	return next;
 }
 
+class DemoScene4 : public DemoScene
+{
+private:
+	sss::Percipi<Props3> props3;
+	sss::Percipi<Props4> props4;
+public:
+	DemoScene4(NavCell * cell);
+	sss::Scene * rearrange(unsigned int dt);
+};
+DemoScene4::DemoScene4(NavCell * cell) : DemoScene::DemoScene(cell)
+{
+	lighting.direction->dx = -20;
+	lighting.direction->dy = 2;
+	lighting.direction->dz = -15;
+	lighting.direction->next->angle = M_PI / 3;
+	lighting.direction->next->next->angle = M_PI / 4;
+}
+sss::Scene * DemoScene4::rearrange(unsigned int dt)
+{
+	sss::Scene * next = DemoScene::rearrange(dt);
+	float fdt = dt * 0.000001; // us -> s
+	props3->rearrange(fdt, cell);
+	return next;
+}
 
-NavPoint gatanNE = { 6, 35, -1, -1 };
-NavPoint gatanSE = { 6, 30, -1, +1 };
-NavPoint gatanSW = { -14, 30, -1, +1 };
+NavPoint roundaboutNE = { 25, 65, -1, -1 };
+NavPoint roundaboutNW = { -5, 65, +1, -1 };
+NavPoint roundaboutSE = { 25, 45, -1, +1 };
+NavPoint roundaboutSW = { -5, 45, +1, +1 };
 
-NavPoint platzNE = { -13, 35, -1, -1 };
-NavPoint platzNW = { -31, 35, +1, -1 };
-NavPoint platzSE = { -13, 4, +1, +1 };
-NavPoint platzSW = { -31, 4, +1, +1 };
+NavPoint islandNE = { 17, 57, +1, +1 };
+NavPoint islandNW = { 3, 57, -1, +1 };
+NavPoint islandSE = { 17, 49, +1, -1 };
+NavPoint islandSW = { 3, 49, -1, -1 };
 
-NavPoint stortorgetNE = { 13, 13, -1, -1 };
-NavPoint stortorgetNW = { -14, 13, -1, -1 };
-NavPoint stortorgetSE = { 13, -13, -1, +1 };
-NavPoint stortorgetSW = { -13, -13, +1, +1 };
+NavPoint avenueNE = { 13, 45, -1, +1 };
+NavPoint avenueNW = { 7, 45, +1, +1 };
+NavPoint avenueSE = { 13, 39, -1, 0 };
+
+NavPoint avenueSW = { 7, 39, +1, 0 };
+
+NavPoint cornerSE = { 13, 29, -1, +1 };
+NavPoint cornerNW = { 7, 37, +1, -1 };
+
+NavPoint gatanSE = { 5, 29, -1, +1 };
+NavPoint gatanSW = { -15, 29, -1, +1 };
+
+NavPoint platzNE = { -15, 37, -1, -1 };
+NavPoint platzNW = { -33, 37, +1, -1 };
+NavPoint platzSE = { -15, 3, +1, +1 };
+NavPoint platzSW = { -33, 3, +1, +1 };
+
+NavPoint stortorgetNE = { 15, 15, -1, -1 };
+NavPoint stortorgetNW = { -15, 15, -1, -1 };
+NavPoint stortorgetSE = { 15, -15, -1, +1 };
+NavPoint stortorgetSW = { -15, -15, +1, +1 };
 
 NavCell cells[] =
 {
@@ -734,8 +928,26 @@ NavCell cells[] =
 	{ & platzNW, & stortorgetNW, & platzSW, & cue<DemoScene2> },
 	{ & platzNW, & gatanSW, & stortorgetNW, & cue<DemoScene2> },
 	{ & platzNW, & platzNE, & gatanSW, & cue<DemoScene2> },
-	{ & platzNE, & gatanNE, & gatanSW, & cue<DemoScene3> },
-	{ & gatanNE, & gatanSE, & gatanSW, & cue<DemoScene3> },
+	{ & platzNE, & cornerNW, & gatanSW, & cue<DemoScene3> },
+	{ & cornerNW, & gatanSE, & gatanSW, & cue<DemoScene3> },
+
+	{ & cornerNW, & cornerSE, & gatanSE, & cue<DemoScene3> },
+	{ & cornerNW, & avenueSE, & cornerSE, & cue<DemoScene3> },
+
+	{ & cornerNW, & avenueSW, & avenueSE, & cue<DemoScene3> },
+
+	{ & avenueSW, & avenueNW, & avenueSE, & cue<DemoScene4> },
+	{ & avenueNW, & avenueNE, & avenueSE, & cue<DemoScene4> },
+	{ & islandSE, & avenueNE, & avenueNW, & cue<DemoScene4> },
+	{ & islandSW, & islandSE, & avenueNW, & cue<DemoScene4> },
+	{ & islandSW, & avenueNW, & roundaboutSW, & cue<DemoScene4> },
+	{ & roundaboutSW, & roundaboutNW, & islandSW, & cue<DemoScene4> },
+	{ & roundaboutNW, & islandNW, & islandSW, & cue<DemoScene4> },
+	{ & roundaboutNW, & roundaboutNE, & islandNW, & cue<DemoScene4> },
+	{ & roundaboutNE, & islandNE, & islandNW, & cue<DemoScene4> },
+	{ & roundaboutNE, & roundaboutSE, & islandNE, & cue<DemoScene4> },
+	{ & roundaboutSE, & islandSE, & islandNE, & cue<DemoScene4> },
+	{ & islandSE, & roundaboutSE, & avenueNE, & cue<DemoScene4> },
 };
 
 int expanse = sizeof(cells) / sizeof(NavCell); // FIXME rename
@@ -774,6 +986,7 @@ sss::Scene * sss::arrange()
 
 void sss::buttonPressed(int pos)
 {
+	sincePressed = 0;
 	if (sss::controllers[0].y < sss::screenHeight / 2)
 	{
 		pressedHigh = true;

@@ -33,17 +33,16 @@ NavCell * inbound(NavPoint* p1, NavPoint* p2);
 
 float distance(float a, float b, float c, float x, float y);
 
-float distance(NavPoint * p1, NavPoint * p2, float x, float y);
-
 NavPoint* furthest(NavPoint* p1, NavPoint* p2, NavCell * cell);
 
-float leaving(float a, float b, float c, float x, float y, float dx, float dy);
+float traverse(NavCell * & cell, float & x, float & y, float dx, float dy, float size, float res);
 
-float leaving(NavPoint * p1, NavPoint * p2, float x, float y, float dx, float dy);
+float traverse(NavCell * cell, float x, float y, float dx, float dy, float size);
 
-float traverse(NavCell * & cell, float & x, float & y, float dx, float dy, float res);
+bool traversable(NavCell * cell, float x1, float y1, float x2, float y2, float size);
 
-float traverse(NavCell * cell, float x, float y, float dx, float dy);
+float resize(NavCell * & cell, float x, float y, float s0, float s1);
 
-NavCell * transit(NavCell * curr, float x, float y, float & dx, float & dy, bool deflection);
+void navigation(std::unordered_map<NavPoint *, float> & d, std::unordered_map<NavPoint *, NavPoint *> * r, NavCell * cell, NavPoint & end, float size, float heed);
 
+NavPoint * firstCorner(std::unordered_map<NavPoint *, float> & d, NavCell * cell, float x, float y, float size, float heed);
