@@ -43,6 +43,9 @@ static sss::Texture cuboid8E9Texture("Cuboid8E9.png");
 static sss::Texture solidTexture("SolidStar.png");
 static sss::Texture lucidTexture("LucidStar.png");
 static sss::Texture digitTexture("num8x8.png");
+static sss::Texture inst1Texture("Inst1.png");
+static sss::Texture inst2Texture("Inst2.png");
+static sss::Texture inst3Texture("Inst3.png");
 
 static sss::SurficialFigure backgroundFigure = sss::SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
 static sss::SpacialFigure cuboid243Figure(& cuboid243Texture, "Cuboid243.u-c.bin");
@@ -51,6 +54,9 @@ static sss::SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "Cuboid8E9.u-c.bin
 static sss::SpacialFigure solidFigure(& solidTexture, "Star.u-c.bin");
 static sss::SpacialFigure lucidFigure(& lucidTexture, "Star.u-c.bin");
 static sss::SpacialFigure earthFigure(& floorTexture, "Floor.u-c.bin");
+static sss::SpacialFigure inst1Figure(& inst1Texture, "Floor.u-c.bin");
+static sss::SpacialFigure inst2Figure(& inst2Texture, "Floor.u-c.bin");
+static sss::SpacialFigure inst3Figure(& inst3Texture, "Floor.u-c.bin");
 static sss::SurficialFigure numFonts[] = {
 	sss::SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
 	sss::SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
@@ -97,16 +103,52 @@ sss::Figure * Missile::getFigure()
 class Foe : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
 public:
-	NavCell * cell;
-	Foe(NavCell * cell);
+	Foe();
 	virtual sss::Figure * getFigure();
+	bool check(float x, float y, float r, bool damage);
 };
-Foe::Foe(NavCell * cell) : FinitePresence::FinitePresence(solid3D), cell(cell)
+Foe::Foe() : FinitePresence::FinitePresence(solid3D)
 {
 }
 sss::Figure * Foe::getFigure()
 {
 	return & solidFigure;
+}
+bool Foe::check(float x, float y, float r, bool damage)
+{
+	if (visible)
+	{
+		float dx = x - direction->next->dx;
+		float dy = y - direction->next->dy;
+		if (sqrt(dx * dx + dy * dy) < r)
+		{
+			if (damage)
+			{
+				visible = false;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+class Saggy : public Foe
+{
+public:
+	Saggy();
+};
+Saggy::Saggy()
+{
+}
+
+class Hasty : public Foe
+{
+public:
+	NavCell * cell;
+	Hasty(NavCell * cell);
+};
+Hasty::Hasty(NavCell * cell) : cell(cell)
+{
 }
 
 class Star : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
@@ -465,13 +507,39 @@ public:
 	Cuboid465 cuboid8;
 	Cuboid465 cuboid9;
 
+	Inst inst1;
+	Inst inst2;
+	Inst inst3;
+
 	TaskQueue queue;
 	Navigation nav[2];
 	int navCurr;
-	Foe hasty;
+	Saggy saggy;
+	Hasty hasty;
 };
-Props3::Props3() : queue(2), hasty(& cells[8])
+Props3::Props3() : queue(2), inst1(& inst1Figure), inst2(& inst2Figure), inst3(& inst3Figure), hasty(& cells[8])
 {
+	inst1.direction->scale = 0.2;
+	inst1.direction->next->next->angle = M_PI / 2;
+	inst1.direction->next->next->next->dx = 10;
+	inst1.direction->next->next->next->dy = 33;
+	inst1.direction->next->next->next->dz = - 0.1;
+
+	inst2.direction->scale = 0.2;
+	inst2.direction->next->angle = M_PI / 2;
+	inst2.direction->next->next->angle = M_PI / 2;
+	inst2.direction->next->next->next->dx = 12.9;
+	inst2.direction->next->next->next->dy = 33;
+	inst2.direction->next->next->next->dz = - 3;
+	inst2.visible = false;
+
+	inst3.direction->scale = 0.2;
+	inst3.direction->next->angle = M_PI / 2;
+	inst3.direction->next->next->next->dx = 10;
+	inst3.direction->next->next->next->dy = 48.9;
+	inst3.direction->next->next->next->dz = - 3;
+	inst3.visible = false;
+
 	cuboid1.direction->angle = 1 * M_PI / 2;
 	cuboid1.direction->next->dx = -6;
 	cuboid1.direction->next->dy = 39;
@@ -508,6 +576,10 @@ Props3::Props3() : queue(2), hasty(& cells[8])
 	cuboid9.direction->next->dx = 16;
 	cuboid9.direction->next->dy = 43;
 
+	saggy.direction->next->dx = 10;
+	saggy.direction->next->dy = 48;
+	saggy.direction->next->dz = -1.5;
+
 	hasty.direction->next->dx = 3;
 	hasty.direction->next->dy = 33;
 	hasty.direction->next->dz = -1;
@@ -528,7 +600,25 @@ void Props3::rearrange(float fdt, NavCell * cell)
 		queue.push(nav[navCurr]);
 		navCurr = navNext;
 	}
-	
+
+	for (int i = 0; i < MISSILE_CAPACITY; i++)
+	{
+		if (props0->missiles[i].visible)
+		{
+			Missile * m = & props0->missiles[i];
+			if (saggy.check(m->direction->next->dx, m->direction->next->dy, 1, true))
+			{
+				m->visible = false;
+				inst2.visible = false;
+				inst3.visible = false;
+			}
+			else if (hasty.check(m->direction->next->dx, m->direction->next->dy, 1, true))
+			{
+				m->visible = false;
+			}
+		}
+	}
+
 	int x = sss::controllers[0].x;
 	int y = sss::controllers[0].y;
 	if (hasty.visible)
@@ -575,20 +665,6 @@ void Props3::rearrange(float fdt, NavCell * cell)
 			}
 		}
 
-		for (int i = 0; i < MISSILE_CAPACITY; i++)
-		{
-			if (props0->missiles[i].visible)
-			{
-				Missile * m = & props0->missiles[i];
-				float dx = m->direction->next->dx - hasty.direction->next->dx;
-				float dy = m->direction->next->dy - hasty.direction->next->dy;
-				if (sqrt(dx * dx + dy * dy) < 1) // TBD: should have better collision detection?
-				{
-					m->visible = false;
-					hasty.visible = false;
-				}
-			}
-		}
 	}
 }
 
@@ -876,6 +952,12 @@ DemoScene3::DemoScene3(NavCell * cell) : DemoScene::DemoScene(cell)
 }
 sss::Scene * DemoScene3::rearrange(unsigned int dt)
 {
+	props3->inst1.visible = false;
+	if (props3->saggy.visible)
+	{
+		props3->inst2.visible = true;
+		props3->inst3.visible = true;
+	}
 	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
 	props3->rearrange(fdt, cell);
@@ -920,13 +1002,13 @@ NavPoint islandSW = { 3, 49, -1, -1 };
 NavPoint avenueNE = { 13, 45, -1, +1 };
 NavPoint avenueNW = { 7, 45, +1, +1 };
 NavPoint avenueSE = { 13, 39, -1, 0 };
-
 NavPoint avenueSW = { 7, 39, +1, 0 };
 
 NavPoint cornerSE = { 13, 29, -1, +1 };
 NavPoint cornerNW = { 7, 37, +1, -1 };
 
-NavPoint gatanSE = { 5, 29, -1, +1 };
+NavPoint gatanNE = { 5, 37, 0, -1 };
+NavPoint gatanSE = { 5, 29, 0, +1 };
 NavPoint gatanSW = { -15, 29, -1, +1 };
 
 NavPoint platzNE = { -15, 37, -1, -1 };
@@ -948,14 +1030,12 @@ NavCell cells[] =
 	{ & platzNW, & stortorgetNW, & platzSW, & cue<DemoScene2> },
 	{ & platzNW, & gatanSW, & stortorgetNW, & cue<DemoScene2> },
 	{ & platzNW, & platzNE, & gatanSW, & cue<DemoScene2> },
-	{ & platzNE, & cornerNW, & gatanSW, & cue<DemoScene3> },
-	{ & cornerNW, & gatanSE, & gatanSW, & cue<DemoScene3> },
-
+	{ & platzNE, & gatanNE, & gatanSW, & cue<DemoScene2> },
+	{ & gatanNE, & gatanSE, & gatanSW, & cue<DemoScene2> },
+	{ & gatanNE, & cornerNW, & gatanSE, & cue<DemoScene3> },
 	{ & cornerNW, & cornerSE, & gatanSE, & cue<DemoScene3> },
 	{ & cornerNW, & avenueSE, & cornerSE, & cue<DemoScene3> },
-
 	{ & cornerNW, & avenueSW, & avenueSE, & cue<DemoScene3> },
-
 	{ & avenueSW, & avenueNW, & avenueSE, & cue<DemoScene4> },
 	{ & avenueNW, & avenueNE, & avenueSE, & cue<DemoScene4> },
 	{ & islandSE, & avenueNE, & avenueNW, & cue<DemoScene4> },
