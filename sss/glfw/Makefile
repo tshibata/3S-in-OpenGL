@@ -1,6 +1,6 @@
 CXX = clang++
 CXXFLAGS = -O3 -I.
-LDFLAGS = -lpng -lGL -lGLEW -lglfw
+LDFLAGS = -pthread -lpng -lGL -lGLEW -lglfw
 
 include ../../Makefile
 

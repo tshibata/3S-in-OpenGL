@@ -1,6 +1,6 @@
 CXX = clang++
 CXXFLAGS = -O3 -I. `pkg-config --cflags gtk+-3.0 epoxy libpng`
-LDFLAGS = `pkg-config --libs gtk+-3.0 epoxy libpng`
+LDFLAGS = -pthread `pkg-config --libs gtk+-3.0 epoxy libpng`
 
 include ../../Makefile
 

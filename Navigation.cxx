@@ -1,10 +1,15 @@
 #define NDEBUG
 #include <cassert>
 #include <cmath>
+#include <queue>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 #include <platform.h>
 #include "sss/common.h"
-#include "navigation.h"
+#include "Task.h"
+#include "Navigation.h"
 
 std::unordered_map<NavPoint*, std::unordered_map<NavPoint*, int>> clockwise;
 
@@ -423,5 +428,25 @@ NavPoint * firstCorner(std::unordered_map<NavPoint *, float> & d, NavCell * cell
 		}
 	}
 	return dst;
+}
+
+void Navigation::init(NavCell * cell, float x, float y, float size, float heed)
+{
+	done = false;
+	d.clear();
+	r.clear();
+	endCell = cell;
+	endPoint.x = x;
+	endPoint.y = y;
+	endPoint.dx = 0;
+	endPoint.dy = 0;
+	this->size = size;
+	this->heed = heed;
+}
+
+void Navigation::execute()
+{
+	navigation(d, & r, endCell, endPoint, size, heed);
+	done = true;
 }
 

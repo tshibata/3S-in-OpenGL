@@ -4,13 +4,19 @@
 #include <cassert>
 #include <utility>
 #include <unordered_map>
+#include <queue>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+
 #include <platform.h>
 #include "sss/Basis.h"
 #include "sss/Percipi.h"
 #include "sss/common.h"
 #include "sss/geometry.h"
 #include "sss/renderer.h"
-#include "navigation.h"
+#include "Task.h"
+#include "Navigation.h"
 #include "BackgroundRenderer.h"
 #include "ShadowRenderer.h"
 #include "SolidRenderer.h"
@@ -459,9 +465,12 @@ public:
 	Cuboid465 cuboid8;
 	Cuboid465 cuboid9;
 
+	TaskQueue queue;
+	Navigation nav[2];
+	int navCurr;
 	Foe hasty;
 };
-Props3::Props3() : hasty(& cells[8])
+Props3::Props3() : queue(2), hasty(& cells[8])
 {
 	cuboid1.direction->angle = 1 * M_PI / 2;
 	cuboid1.direction->next->dx = -6;
@@ -502,10 +511,24 @@ Props3::Props3() : hasty(& cells[8])
 	hasty.direction->next->dx = 3;
 	hasty.direction->next->dy = 33;
 	hasty.direction->next->dz = -1;
+
+	nav[0].init(& cells[0] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+	nav[0].execute();
+	navCurr = 0;
+	nav[1].init(& cells[0] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+	queue.push(nav[1]);
 }
 
 void Props3::rearrange(float fdt, NavCell * cell)
 {
+	int navNext = (navCurr + 1) % 2;
+	if (nav[navNext].done)
+	{
+		nav[navCurr].init(cell, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+		queue.push(nav[navCurr]);
+		navCurr = navNext;
+	}
+	
 	int x = sss::controllers[0].x;
 	int y = sss::controllers[0].y;
 	if (hasty.visible)
@@ -519,11 +542,8 @@ void Props3::rearrange(float fdt, NavCell * cell)
 		}
 		else
 		{
-			std::unordered_map<NavPoint *, float> d;
-			std::unordered_map<NavPoint *, NavPoint *> r;
-			navigation(d, & r, cell, end, 1.0, 0.5);
-			dst = firstCorner(d, hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, 1.0, 0.5);
-			NavPoint * next = r[dst];
+			dst = firstCorner(nav[navCurr].d, hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, 1.0, 0.5);
+			NavPoint * next = nav[navCurr].r[dst];
 			if (next != nullptr && traversable(hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, next->x + 1.5 * next->dx, next->y + 1.5 * next->dy, 1.0))
 			{
 				dst = next;

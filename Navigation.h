@@ -46,3 +46,18 @@ float resize(NavCell * & cell, float x, float y, float s0, float s1);
 void navigation(std::unordered_map<NavPoint *, float> & d, std::unordered_map<NavPoint *, NavPoint *> * r, NavCell * cell, NavPoint & end, float size, float heed);
 
 NavPoint * firstCorner(std::unordered_map<NavPoint *, float> & d, NavCell * cell, float x, float y, float size, float heed);
+
+class Navigation : public Task
+{
+public:
+	std::unordered_map<NavPoint *, float> d;
+	std::unordered_map<NavPoint *, NavPoint *> r;
+	NavCell * endCell;
+	NavPoint endPoint;
+	float size;
+	float heed;
+	bool done;
+	void init(NavCell * cell, float x, float y, float size, float heed);
+	virtual void execute();
+};
+

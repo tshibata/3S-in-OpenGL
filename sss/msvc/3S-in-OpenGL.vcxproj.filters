@@ -45,7 +45,10 @@
     <ClCompile Include="..\..\SolidRenderer.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\navigation.cxx">
+    <ClCompile Include="..\..\Navigation.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Task.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
