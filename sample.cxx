@@ -84,7 +84,7 @@ sss::Figure * Background::getFigure()
 	return & backgroundFigure;
 }
 
-class Missile : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
+class Missile : public sss::FinitePresence<sss::RotY<sss::RotZ<sss::Move<sss::Stop>>>>
 {
 public:
 	NavCell * cell;
@@ -283,7 +283,7 @@ static float origY;
 static float prevX;
 static float prevY;
 
-static sss::PerspectiveProjection<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>> framing(100, 50, 0.5, 50);
+static sss::PerspectiveProjection<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>> framing(200, 100, 0.5, 100);
 
 static float slip;
 static float yawing = 0.0;
@@ -517,7 +517,7 @@ public:
 	Saggy saggy;
 	Hasty hasty;
 };
-Props3::Props3() : queue(2), inst1(& inst1Figure), inst2(& inst2Figure), inst3(& inst3Figure), hasty(& cells[8])
+Props3::Props3() : queue(2), inst1(& inst1Figure), inst2(& inst2Figure), inst3(& inst3Figure), hasty(& cells[0])
 {
 	inst1.direction->scale = 0.2;
 	inst1.direction->next->next->angle = M_PI / 2;
@@ -580,14 +580,14 @@ Props3::Props3() : queue(2), inst1(& inst1Figure), inst2(& inst2Figure), inst3(&
 	saggy.direction->next->dy = 48;
 	saggy.direction->next->dz = -1.5;
 
-	hasty.direction->next->dx = 3;
-	hasty.direction->next->dy = 33;
+	hasty.direction->next->dx = 0;
+	hasty.direction->next->dy = -10;
 	hasty.direction->next->dz = -1;
 
-	nav[0].init(& cells[0] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+	nav[0].init(& cells[8] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
 	nav[0].execute();
 	navCurr = 0;
-	nav[1].init(& cells[0] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+	nav[1].init(& cells[8] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
 	queue.push(nav[1]);
 }
 
@@ -606,13 +606,13 @@ void Props3::rearrange(float fdt, NavCell * cell)
 		if (props0->missiles[i].visible)
 		{
 			Missile * m = & props0->missiles[i];
-			if (saggy.check(m->direction->next->dx, m->direction->next->dy, 1, true))
+			if (saggy.check(m->direction->next->next->dx, m->direction->next->next->dy, 1, true))
 			{
 				m->visible = false;
 				inst2.visible = false;
 				inst3.visible = false;
 			}
-			else if (hasty.check(m->direction->next->dx, m->direction->next->dy, 1, true))
+			else if (hasty.check(m->direction->next->next->dx, m->direction->next->next->dy, 1, true))
 			{
 				m->visible = false;
 			}
@@ -750,13 +750,13 @@ private:
 	Background sky2;
 protected:
 	NavCell * cell;
-	sss::ParallelProjection<sss::Move<sss::RotX<sss::RotZ<sss::Stop>>>> lighting;
+	sss::ParallelProjection<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>> lighting;
 public:
 	DemoScene(NavCell * cell);
 	void render();
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene::DemoScene(NavCell * cell) : cell(cell), lighting(60, 30, 10, 40)
+DemoScene::DemoScene(NavCell * cell) : cell(cell), lighting(80, 40, 20, 60)
 {
 	prevX = sss::controllers[0].x;
 	prevY = sss::controllers[0].y;
@@ -803,9 +803,10 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 		if (props0->missiles[i].visible)
 		{
 			Missile * m = & props0->missiles[i];
-			float dx = sinf(m->direction->angle) * fdt * 10;
-			float dy = cosf(m->direction->angle) * fdt * 10;
-			float t = traverse(m->cell, m->direction->next->dx, m->direction->next->dy, dx, dy, 0, NAN);
+			m->direction->angle += fdt * 5;
+			float dx = sinf(m->direction->next->angle - M_PI / 2) * fdt * 10;
+			float dy = cosf(m->direction->next->angle - M_PI / 2) * fdt * 10;
+			float t = traverse(m->cell, m->direction->next->next->dx, m->direction->next->next->dy, dx, dy, 0, NAN);
 			if (t < 1.0)
 			{
 				m->visible = false;
@@ -823,10 +824,10 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 				Missile * m = & props0->missiles[props0->missileIndex];
 				m->visible = true;
 				m->cell = cell;
-				m->direction->angle = framing.direction->next->angle + a;
-				m->direction->next->dx = framing.direction->next->next->dx;
-				m->direction->next->dy = framing.direction->next->next->dy;
-				m->direction->next->dz = -1.7;
+				m->direction->next->angle = framing.direction->next->angle + a + M_PI / 2;
+				m->direction->next->next->dx = framing.direction->next->next->dx;
+				m->direction->next->next->dy = framing.direction->next->next->dy;
+				m->direction->next->next->dz = -1.7;
 				props0->missileIndex = (props0->missileIndex + 1) % MISSILE_CAPACITY;
 			}
 		}
@@ -891,10 +892,11 @@ public:
 };
 DemoScene1::DemoScene1(NavCell * cell) : DemoScene::DemoScene(cell)
 {
-	lighting.direction->dy = 5;
-	lighting.direction->dz = -15;
-	lighting.direction->next->angle = M_PI / 3;
-	lighting.direction->next->next->angle = M_PI / 4;
+	lighting.direction->angle = M_PI / 3;
+	lighting.direction->next->angle = M_PI / 4;
+	lighting.direction->next->next->dx = -20;
+	lighting.direction->next->next->dy = -10;
+	lighting.direction->next->next->dz = -15;
 }
 sss::Scene * DemoScene1::rearrange(unsigned int dt)
 {
@@ -917,11 +919,11 @@ public:
 };
 DemoScene2::DemoScene2(NavCell * cell) : DemoScene::DemoScene(cell)
 {
-	lighting.direction->dx = -20;
-	lighting.direction->dy = 2;
-	lighting.direction->dz = -15;
-	lighting.direction->next->angle = M_PI / 3;
-	lighting.direction->next->next->angle = M_PI / 4;
+	lighting.direction->angle = M_PI / 3;
+	lighting.direction->next->angle = M_PI / 4;
+	lighting.direction->next->next->dx = -20;
+	lighting.direction->next->next->dy = 10;
+	lighting.direction->next->next->dz = -15;
 }
 sss::Scene * DemoScene2::rearrange(unsigned int dt)
 {
@@ -944,11 +946,11 @@ public:
 };
 DemoScene3::DemoScene3(NavCell * cell) : DemoScene::DemoScene(cell)
 {
-	lighting.direction->dx = -20;
-	lighting.direction->dy = 2;
-	lighting.direction->dz = -15;
-	lighting.direction->next->angle = M_PI / 3;
-	lighting.direction->next->next->angle = M_PI / 4;
+	lighting.direction->angle = M_PI / 3;
+	lighting.direction->next->angle = M_PI / 4;
+	lighting.direction->next->next->dx = -10;
+	lighting.direction->next->next->dy = 25;
+	lighting.direction->next->next->dz = -15;
 }
 sss::Scene * DemoScene3::rearrange(unsigned int dt)
 {
@@ -975,11 +977,11 @@ public:
 };
 DemoScene4::DemoScene4(NavCell * cell) : DemoScene::DemoScene(cell)
 {
-	lighting.direction->dx = -20;
-	lighting.direction->dy = 2;
-	lighting.direction->dz = -15;
-	lighting.direction->next->angle = M_PI / 3;
-	lighting.direction->next->next->angle = M_PI / 4;
+	lighting.direction->angle = M_PI / 3;
+	lighting.direction->next->angle = M_PI / 4;
+	lighting.direction->next->next->dx = -10;
+	lighting.direction->next->next->dy = 40;
+	lighting.direction->next->next->dz = -15;
 }
 sss::Scene * DemoScene4::rearrange(unsigned int dt)
 {
@@ -1077,11 +1079,13 @@ sss::Scene * sss::arrange()
 		clockwise[cells[i].points[2]][cells[i].points[0]] = i;
 	}
 
-	framing.direction->next->next->dy = -10;
-	framing.direction->next->next->dz = -1.5;
 	framing.direction->angle = M_PI / 2;
+	framing.direction->next->angle = M_PI / 2;
+	framing.direction->next->next->dx = 4;
+	framing.direction->next->next->dy = 33;
+	framing.direction->next->next->dz = -1.5;
 
-	return (* cells[0].depiction)(& cells[0]);
+	return (* cells[8].depiction)(& cells[8]);
 }
 
 void sss::buttonPressed(int pos)
