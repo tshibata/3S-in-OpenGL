@@ -23,7 +23,7 @@
 #include "LucidRenderer.h"
 #include "Solid2DRenderer.h"
 
-const int COUNTER_CAPACITY = 6;
+const int HART_CAPACITY = 3;
 const int MISSILE_CAPACITY = 5;
 
 const int sss::screenWidth = 1024;
@@ -42,7 +42,7 @@ static sss::Texture cuboid465Texture("Cuboid465.png");
 static sss::Texture cuboid8E9Texture("Cuboid8E9.png");
 static sss::Texture solidTexture("SolidStar.png");
 static sss::Texture lucidTexture("LucidStar.png");
-static sss::Texture digitTexture("num8x8.png");
+static sss::Texture hartsTexture("Harts.png");
 static sss::Texture inst1Texture("Inst1.png");
 static sss::Texture inst2Texture("Inst2.png");
 static sss::Texture inst3Texture("Inst3.png");
@@ -57,17 +57,9 @@ static sss::SpacialFigure earthFigure(& floorTexture, "Floor.u-c.bin");
 static sss::SpacialFigure inst1Figure(& inst1Texture, "Floor.u-c.bin");
 static sss::SpacialFigure inst2Figure(& inst2Texture, "Floor.u-c.bin");
 static sss::SpacialFigure inst3Figure(& inst3Texture, "Floor.u-c.bin");
-static sss::SurficialFigure numFonts[] = {
-	sss::SurficialFigure(& digitTexture, 0 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 1 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 2 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 3 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 4 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 5 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 6 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 7 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 8 * 8, 8, 0, 8, 8, 0),
-	sss::SurficialFigure(& digitTexture, 9 * 8, 8, 0, 8, 8, 0),
+static sss::SurficialFigure hartFigures[] = {
+	sss::SurficialFigure(& hartsTexture, 0 * 16, 16, 0, 16, 16, 0),
+	sss::SurficialFigure(& hartsTexture, 1 * 16, 16, 0, 16, 16, 0),
 };
 
 class Background : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
@@ -245,19 +237,19 @@ sss::Figure * Cuboid8E9::getFigure()
 	return & cuboid8E9Figure;
 }
 
-class Digit : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
+class Hart : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
 {
 public:
-	int i = 0;
-	Digit();
+	bool live = true;
+	Hart();
 	virtual sss::Figure * getFigure();
 };
-Digit::Digit() : FinitePresence::FinitePresence(solid2D)
+Hart::Hart() : FinitePresence::FinitePresence(solid2D)
 {
 }
-sss::Figure * Digit::getFigure()
+sss::Figure * Hart::getFigure()
 {
-	return & numFonts[i];
+	return & hartFigures[live ? 0 : 1];
 }
 
 class Inst : public sss::FinitePresence<sss::Expand<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>>>
@@ -287,15 +279,14 @@ static sss::PerspectiveProjection<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>> fr
 
 static float slip;
 static float yawing = 0.0;
-
+static int liveness = HART_CAPACITY;
 
 class Props0
 {
 public:
 	Props0();
 	Cuboid8E9 cuboid1;
-	Digit digit[COUNTER_CAPACITY];
-	int count = 0;
+	Hart harts[HART_CAPACITY];
 	Missile missiles[MISSILE_CAPACITY];
 	int missileIndex = 0;
 	BackgroundRenderer backgroundRenderer;
@@ -306,11 +297,11 @@ public:
 };
 Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap)
 {
-	for (int i = 0; i < COUNTER_CAPACITY; i++)
+	for (int i = 0; i < HART_CAPACITY; i++)
 	{
-		digit[i].direction->scale = 2;
-		digit[i].direction->next->dx = 0.9 + (i * 16) * - 2.0 / sss::screenWidth;
-		digit[i].direction->next->dy = 0.75;
+		harts[i].direction->scale = 2;
+		harts[i].direction->next->dx = - 0.9 + (i * 40) * 2.0 / sss::screenWidth;
+		harts[i].direction->next->dy = 0.75;
 	}
 
 	cuboid1.direction->angle = 2 * M_PI / 2;
@@ -338,10 +329,6 @@ public:
 	Cuboid465 cuboid11;
 	Cuboid243 cuboid12;
 	Cuboid465 cuboid13;
-	Star * star[4];
-	float angle1 = 0.0;
-	float angle2 = 0.0;
-	double speed = 0.0;
 };
 Props1::Props1()
 {
@@ -384,52 +371,12 @@ Props1::Props1()
 	cuboid13.direction->angle = 0 * M_PI / 2;
 	cuboid13.direction->next->dx = -17;
 	cuboid13.direction->next->dy = -8;
-
-	star[0] = new SolidStar();
-	star[1] = new SolidStar();
-	star[2] = new LucidStar();
-	star[3] = new LucidStar();
-
-	for (int i = 0; i < 4; i++)
-	{
-		star[i]->direction->angle = i - angle1;
-		star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		star[i]->direction->next->dy = sinf(i - angle2) * 2;
-		star[i]->direction->next->dz = -1;
-	}
 }
 Props1::~Props1()
 {
-	delete star[0];
-	delete star[1];
-	delete star[2];
-	delete star[3];
 }
 void Props1::rearrange(float fdt)
 {
-	float x = sss::controllers[0].x;
-	float y = sss::controllers[0].y;
-	if (0 <= x && x < sss::screenWidth && 0 <= y && y < sss::screenHeight && sss::pixelLabel(x, y) != 0)
-	{
-		speed = 1000;
-	}
-	else
-	{
-		speed = speed - fdt * 1000;
-		if (speed < 0)
-		{
-			speed = 0; // no rewind
-		}
-	}
-	angle1 += 0.029 * speed * fdt;
-	angle2 += 0.005 * speed * fdt;
-	for (int i = 0; i < 4; i++)
-	{
-		star[i]->direction->angle = i - angle1;
-		star[i]->direction->next->dx = cosf(i - angle2) * 2;
-		star[i]->direction->next->dy = sinf(i - angle2) * 2;
-		star[i]->direction->next->dz = -1;
-	}
 }
 
 class Props2
@@ -662,6 +609,7 @@ void Props3::rearrange(float fdt, NavCell * cell)
 			{
 				slip = atan2(dx, dy);
 				yawing = 1.0;
+				liveness --;
 			}
 		}
 
@@ -867,15 +815,19 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 		}
 	}
 
-	props0->count++;
-	for (int i = 0, j = props0->count; i < COUNTER_CAPACITY; i++)
+	for (int i = 0; i < HART_CAPACITY; i++)
 	{
-		props0->digit[i].i = j % 10;
-		j = j / 10;
+		props0->harts[i].live = (i < liveness);
 	}
 
 	prevX = x;
 	prevY = y;
+
+	if (liveness <= 0 && yawing == 0)
+	{
+		std::printf("Game Over\n");
+		return nullptr;
+	}
 
 	return (* next->depiction)(next);
 }
