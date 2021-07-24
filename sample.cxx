@@ -25,6 +25,7 @@
 
 const int HART_CAPACITY = 3;
 const int MISSILE_CAPACITY = 5;
+const int HASTY_POPULATION = 5;
 
 const int sss::screenWidth = 1024;
 const int sss::screenHeight = 512;
@@ -46,6 +47,7 @@ static sss::Texture hartsTexture("Harts.png");
 static sss::Texture inst1Texture("Inst1.png");
 static sss::Texture inst2Texture("Inst2.png");
 static sss::Texture inst3Texture("Inst3.png");
+static sss::Texture gameOverTexture("GameOver.png");
 
 static sss::SurficialFigure backgroundFigure = sss::SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
 static sss::SpacialFigure cuboid243Figure(& cuboid243Texture, "Cuboid243.u-c.bin");
@@ -61,6 +63,7 @@ static sss::SurficialFigure hartFigures[] = {
 	sss::SurficialFigure(& hartsTexture, 0 * 16, 16, 0, 16, 16, 0),
 	sss::SurficialFigure(& hartsTexture, 1 * 16, 16, 0, 16, 16, 0),
 };
+static sss::SurficialFigure gameOverFigure = sss::SurficialFigure(& gameOverTexture, 128, 32, 128, 32, 128, 32);
 
 class Background : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
 {
@@ -137,11 +140,7 @@ class Hasty : public Foe
 {
 public:
 	NavCell * cell;
-	Hasty(NavCell * cell);
 };
-Hasty::Hasty(NavCell * cell) : cell(cell)
-{
-}
 
 class Star : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
 {
@@ -252,6 +251,20 @@ sss::Figure * Hart::getFigure()
 	return & hartFigures[live ? 0 : 1];
 }
 
+class GameOver : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
+{
+public:
+	GameOver();
+	virtual sss::Figure * getFigure();
+};
+GameOver::GameOver() : FinitePresence::FinitePresence(solid2D)
+{
+}
+sss::Figure * GameOver::getFigure()
+{
+	return & gameOverFigure;
+}
+
 class Inst : public sss::FinitePresence<sss::Expand<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>>>
 {
 private:
@@ -285,8 +298,10 @@ class Props0
 {
 public:
 	Props0();
+	void rearrange(float dt, NavCell * cell);
 	Cuboid8E9 cuboid1;
 	Hart harts[HART_CAPACITY];
+	GameOver gameOver;
 	Missile missiles[MISSILE_CAPACITY];
 	int missileIndex = 0;
 	BackgroundRenderer backgroundRenderer;
@@ -294,9 +309,40 @@ public:
 	SolidRenderer solidRenderer;
 	LucidRenderer lucidRenderer;
 	Solid2DRenderer solid2DRenderer;
+
+	Inst inst1;
+	Inst inst2;
+	Inst inst3;
+
+	TaskQueue queue;
+	Navigation nav[2];
+	int navCurr;
+	Saggy saggy[1];
+	Hasty hasty[HASTY_POPULATION];
 };
-Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap)
+Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap), queue(2), inst1(& inst1Figure), inst2(& inst2Figure), inst3(& inst3Figure)
 {
+	inst1.direction->scale = 0.2;
+	inst1.direction->next->next->angle = M_PI / 2;
+	inst1.direction->next->next->next->dx = 10;
+	inst1.direction->next->next->next->dy = 33;
+	inst1.direction->next->next->next->dz = - 0.1;
+
+	inst2.direction->scale = 0.2;
+	inst2.direction->next->angle = M_PI / 2;
+	inst2.direction->next->next->angle = M_PI / 2;
+	inst2.direction->next->next->next->dx = 12.9;
+	inst2.direction->next->next->next->dy = 33;
+	inst2.direction->next->next->next->dz = - 3;
+	inst2.visible = false;
+
+	inst3.direction->scale = 0.2;
+	inst3.direction->next->angle = M_PI / 2;
+	inst3.direction->next->next->next->dx = 10;
+	inst3.direction->next->next->next->dy = 48.9;
+	inst3.direction->next->next->next->dz = - 3;
+	inst3.visible = false;
+
 	for (int i = 0; i < HART_CAPACITY; i++)
 	{
 		harts[i].direction->scale = 2;
@@ -304,9 +350,129 @@ Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap)
 		harts[i].direction->next->dy = 0.75;
 	}
 
+	gameOver.visible = false;
+
 	cuboid1.direction->angle = 2 * M_PI / 2;
 	cuboid1.direction->next->dx = -11;
 	cuboid1.direction->next->dy = 22;
+
+	saggy[0].direction->next->dx = 10;
+	saggy[0].direction->next->dy = 48;
+	saggy[0].direction->next->dz = -1.5;
+
+	hasty[0].cell = & cells[21];
+	hasty[0].direction->next->dx = 12;
+	hasty[0].direction->next->dy = 60;
+	hasty[0].direction->next->dz = -1;
+	hasty[0].visible = false;
+
+	hasty[1].cell = & cells[1];
+	hasty[1].direction->next->dx = 5;
+	hasty[1].direction->next->dy = 5;
+	hasty[1].direction->next->dz = -1;
+
+	hasty[2].cell = & cells[2];
+	hasty[2].direction->next->dx = -5;
+	hasty[2].direction->next->dy = -5;
+	hasty[2].direction->next->dz = -1;
+
+	hasty[3].cell = & cells[1];
+	hasty[3].direction->next->dx = 10;
+	hasty[3].direction->next->dy = 10;
+	hasty[3].direction->next->dz = -1;
+
+	hasty[4].cell = & cells[2];
+	hasty[4].direction->next->dx = -10;
+	hasty[4].direction->next->dy = -10;
+	hasty[4].direction->next->dz = -1;
+
+	nav[0].init(& cells[8] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+	nav[0].execute();
+	navCurr = 0;
+	nav[1].init(& cells[8] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+	queue.push(nav[1]);
+}
+void Props0::rearrange(float fdt, NavCell * cell)
+{
+	int navNext = (navCurr + 1) % 2;
+	if (nav[navNext].done)
+	{
+		nav[navCurr].init(cell, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+		queue.push(nav[navCurr]);
+		navCurr = navNext;
+	}
+
+	for (int i = 0; i < MISSILE_CAPACITY; i++)
+	{
+		if (missiles[i].visible)
+		{
+			Missile * m = & missiles[i];
+			if (saggy[0].check(m->direction->next->next->dx, m->direction->next->next->dy, 1, true))
+			{
+				m->visible = false;
+				inst2.visible = false;
+				inst3.visible = false;
+			}
+			for (int j = 0; m->visible && j < HASTY_POPULATION; j++)
+			{
+				if (hasty[j].check(m->direction->next->next->dx, m->direction->next->next->dy, 1, true))
+				{
+					m->visible = false;
+				}
+			}
+		}
+	}
+
+	int x = sss::controllers[0].x;
+	int y = sss::controllers[0].y;
+	for (int i = 0; i < HASTY_POPULATION; i++)
+	{
+		if (hasty[i].visible)
+		{
+			NavPoint end{framing.direction->next->next->dx, framing.direction->next->next->dy, 0, 0};
+			NavPoint * dst;
+			if (traversable(hasty[i].cell, hasty[i].direction->next->dx, hasty[i].direction->next->dy, end.x, end.y, 1.0))
+			{
+				// go direct if possible
+				dst = & end;
+			}
+			else
+			{
+				dst = firstCorner(nav[navCurr].d, hasty[i].cell, hasty[i].direction->next->dx, hasty[i].direction->next->dy, 1.0, 0.5);
+				NavPoint * next = nav[navCurr].r[dst];
+				if (next != nullptr && traversable(hasty[i].cell, hasty[i].direction->next->dx, hasty[i].direction->next->dy, next->x + 1.5 * next->dx, next->y + 1.5 * next->dy, 1.0))
+				{
+					dst = next;
+				}
+			}
+			if (dst != nullptr)
+			{
+				float dx = dst->x + 1.5 * dst->dx - hasty[i].direction->next->dx;
+				float dy = dst->y + 1.5 * dst->dy - hasty[i].direction->next->dy;
+				float r = sqrt(dx * dx + dy * dy);
+				if (fdt < r)
+				{
+					dx = dx * fdt / r;
+					dy = dy * fdt / r;
+				}
+				traverse(hasty[i].cell, hasty[i].direction->next->dx, hasty[i].direction->next->dy, dx, dy, 1.0, 0.1);
+				hasty[i].direction->angle = atan2(dx, dy);
+			}
+
+			if (yawing == 0)
+			{
+				float dx = framing.direction->next->next->dx - hasty[i].direction->next->dx;
+				float dy = framing.direction->next->next->dy - hasty[i].direction->next->dy;
+				float r = sqrt(dx * dx + dy * dy);
+				if (r < 1) // TBD: should have better collision detection?
+				{
+					slip = atan2(dx, dy);
+					yawing = 1.0;
+					liveness--;
+				}
+			}
+		}
+	}
 }
 
 class Props1
@@ -381,6 +547,8 @@ void Props1::rearrange(float fdt)
 
 class Props2
 {
+private:
+	sss::Percipi<Props0> props0;
 public:
 	Props2();
 	Earth earth1;
@@ -399,6 +567,39 @@ public:
 };
 Props2::Props2()
 {
+	if (! props0->hasty[1].visible)
+	{
+		props0->hasty[1].cell = & cells[1];
+		props0->hasty[1].direction->next->dx = -5;
+		props0->hasty[1].direction->next->dy = -5;
+		props0->hasty[1].direction->next->dz = -1;
+		props0->hasty[1].visible = true;
+	}
+	if (! props0->hasty[2].visible)
+	{
+		props0->hasty[2].cell = & cells[2];
+		props0->hasty[2].direction->next->dx = 5;
+		props0->hasty[2].direction->next->dy = 5;
+		props0->hasty[2].direction->next->dz = -1;
+		props0->hasty[2].visible = true;
+	}
+	if (! props0->hasty[3].visible)
+	{
+		props0->hasty[3].cell = & cells[1];
+		props0->hasty[3].direction->next->dx = -10;
+		props0->hasty[3].direction->next->dy = -10;
+		props0->hasty[3].direction->next->dz = -1;
+		props0->hasty[3].visible = true;
+	}
+	if (! props0->hasty[4].visible)
+	{
+		props0->hasty[4].cell = & cells[2];
+		props0->hasty[4].direction->next->dx = 10;
+		props0->hasty[4].direction->next->dy = 10;
+		props0->hasty[4].direction->next->dz = -1;
+		props0->hasty[4].visible = true;
+	}
+
 	earth1.direction->dx = -30;
 	earth1.direction->dy = 0;
 	earth2.direction->dx = 0;
@@ -439,11 +640,9 @@ Props2::Props2()
 
 class Props3
 {
-private:
-	sss::Percipi<Props0> props0;
 public:
 	Props3();
-	void rearrange(float dt, NavCell * cell);
+	Earth earth1;
 	Cuboid465 cuboid1;
 	Cuboid465 cuboid2;
 	Cuboid465 cuboid3;
@@ -453,39 +652,11 @@ public:
 	Cuboid8E9 cuboid7;
 	Cuboid465 cuboid8;
 	Cuboid465 cuboid9;
-
-	Inst inst1;
-	Inst inst2;
-	Inst inst3;
-
-	TaskQueue queue;
-	Navigation nav[2];
-	int navCurr;
-	Saggy saggy;
-	Hasty hasty;
 };
-Props3::Props3() : queue(2), inst1(& inst1Figure), inst2(& inst2Figure), inst3(& inst3Figure), hasty(& cells[0])
+Props3::Props3()
 {
-	inst1.direction->scale = 0.2;
-	inst1.direction->next->next->angle = M_PI / 2;
-	inst1.direction->next->next->next->dx = 10;
-	inst1.direction->next->next->next->dy = 33;
-	inst1.direction->next->next->next->dz = - 0.1;
-
-	inst2.direction->scale = 0.2;
-	inst2.direction->next->angle = M_PI / 2;
-	inst2.direction->next->next->angle = M_PI / 2;
-	inst2.direction->next->next->next->dx = 12.9;
-	inst2.direction->next->next->next->dy = 33;
-	inst2.direction->next->next->next->dz = - 3;
-	inst2.visible = false;
-
-	inst3.direction->scale = 0.2;
-	inst3.direction->next->angle = M_PI / 2;
-	inst3.direction->next->next->next->dx = 10;
-	inst3.direction->next->next->next->dy = 48.9;
-	inst3.direction->next->next->next->dz = - 3;
-	inst3.visible = false;
+	earth1.direction->dx = 0;
+	earth1.direction->dy = 60;
 
 	cuboid1.direction->angle = 1 * M_PI / 2;
 	cuboid1.direction->next->dx = -6;
@@ -522,106 +693,14 @@ Props3::Props3() : queue(2), inst1(& inst1Figure), inst2(& inst2Figure), inst3(&
 	cuboid9.direction->angle = 3 * M_PI / 2;
 	cuboid9.direction->next->dx = 16;
 	cuboid9.direction->next->dy = 43;
-
-	saggy.direction->next->dx = 10;
-	saggy.direction->next->dy = 48;
-	saggy.direction->next->dz = -1.5;
-
-	hasty.direction->next->dx = 0;
-	hasty.direction->next->dy = -10;
-	hasty.direction->next->dz = -1;
-
-	nav[0].init(& cells[8] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
-	nav[0].execute();
-	navCurr = 0;
-	nav[1].init(& cells[8] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
-	queue.push(nav[1]);
-}
-
-void Props3::rearrange(float fdt, NavCell * cell)
-{
-	int navNext = (navCurr + 1) % 2;
-	if (nav[navNext].done)
-	{
-		nav[navCurr].init(cell, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
-		queue.push(nav[navCurr]);
-		navCurr = navNext;
-	}
-
-	for (int i = 0; i < MISSILE_CAPACITY; i++)
-	{
-		if (props0->missiles[i].visible)
-		{
-			Missile * m = & props0->missiles[i];
-			if (saggy.check(m->direction->next->next->dx, m->direction->next->next->dy, 1, true))
-			{
-				m->visible = false;
-				inst2.visible = false;
-				inst3.visible = false;
-			}
-			else if (hasty.check(m->direction->next->next->dx, m->direction->next->next->dy, 1, true))
-			{
-				m->visible = false;
-			}
-		}
-	}
-
-	int x = sss::controllers[0].x;
-	int y = sss::controllers[0].y;
-	if (hasty.visible)
-	{
-		NavPoint end{framing.direction->next->next->dx, framing.direction->next->next->dy, 0, 0};
-		NavPoint * dst;
-		if (traversable(hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, end.x, end.y, 1.0))
-		{
-			// go direct if possible
-			dst = & end;
-		}
-		else
-		{
-			dst = firstCorner(nav[navCurr].d, hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, 1.0, 0.5);
-			NavPoint * next = nav[navCurr].r[dst];
-			if (next != nullptr && traversable(hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, next->x + 1.5 * next->dx, next->y + 1.5 * next->dy, 1.0))
-			{
-				dst = next;
-			}
-		}
-		if (dst != nullptr)
-		{
-			float dx = dst->x + 1.5 * dst->dx - hasty.direction->next->dx;
-			float dy = dst->y + 1.5 * dst->dy - hasty.direction->next->dy;
-			float r = sqrt(dx * dx + dy * dy);
-			if (fdt < r)
-			{
-				dx = dx * fdt / r;
-				dy = dy * fdt / r;
-			}
-			traverse(hasty.cell, hasty.direction->next->dx, hasty.direction->next->dy, dx, dy, 1.0, 0.1);
-			hasty.direction->angle = atan2(dx, dy);
-		}
-
-		if (yawing == 0)
-		{
-			float dx = framing.direction->next->next->dx - hasty.direction->next->dx;
-			float dy = framing.direction->next->next->dy - hasty.direction->next->dy;
-			float r = sqrt(dx * dx + dy * dy);
-			if (r < 1) // TBD: should have better collision detection?
-			{
-				slip = atan2(dx, dy);
-				yawing = 1.0;
-				liveness --;
-			}
-		}
-
-	}
 }
 
 class Props4
 {
 private:
+	sss::Percipi<Props0> props0;
 	Earth earth1;
 	Earth earth2;
-	Earth earth3;
 	Cuboid243 cuboid1;
 	Cuboid243 cuboid2;
 	Cuboid465 cuboid3;
@@ -638,12 +717,19 @@ public:
 };
 Props4::Props4()
 {
+	if (! props0->hasty[0].visible)
+	{
+		props0->hasty[0].cell = & cells[21];
+		props0->hasty[0].direction->next->dx = 12;
+		props0->hasty[0].direction->next->dy = 60;
+		props0->hasty[0].direction->next->dz = -1;
+		props0->hasty[0].visible = true;
+	}
+
 	earth1.direction->dx = 0;
 	earth1.direction->dy = 30;
-	earth2.direction->dx = 0;
+	earth2.direction->dx = 30;
 	earth2.direction->dy = 60;
-	earth3.direction->dx = 30;
-	earth3.direction->dy = 60;
 
 	cuboid1.direction->angle = 1 * M_PI / 2;
 	cuboid1.direction->next->dx = -1;
@@ -693,10 +779,10 @@ Props4::Props4()
 class DemoScene : public sss::Scene
 {
 private:
-	sss::Percipi<Props0> props0;
 	Background sky1;
 	Background sky2;
 protected:
+	sss::Percipi<Props0> props0;
 	NavCell * cell;
 	sss::ParallelProjection<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>> lighting;
 public:
@@ -787,8 +873,7 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 
 		sincePressed++;
 		if (pressedLow
- && 1 < sincePressed /* work adound for Surface */
-)
+			&& 1 < sincePressed /* work adound for Surface */)
 		{
 			framing.direction->next->angle += (x - prevX) * -0.002f;
 
@@ -807,11 +892,11 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 		framing.direction->next->angle += yawing * fdt * 10;
 		if (yawing < 0)
 		{
-			yawing = fminf(0, yawing + fdt * 0.5);
+			yawing = fminf(0 < liveness ? 0 : 0.1, yawing + fdt * 0.5);
 		}
 		else
 		{
-			yawing = fmaxf(0, yawing - fdt * 0.5);
+			yawing = fmaxf(0 < liveness ? 0 : 0.1, yawing - fdt * 0.5);
 		}
 	}
 
@@ -820,14 +905,13 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 		props0->harts[i].live = (i < liveness);
 	}
 
+	if (liveness <= 0)
+	{
+		props0->gameOver.visible = true;
+	}
+
 	prevX = x;
 	prevY = y;
-
-	if (liveness <= 0 && yawing == 0)
-	{
-		std::printf("Game Over\n");
-		return nullptr;
-	}
 
 	return (* next->depiction)(next);
 }
@@ -854,8 +938,8 @@ sss::Scene * DemoScene1::rearrange(unsigned int dt)
 {
 	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
+	props0->rearrange(fdt, cell);
 	props1->rearrange(fdt);
-	props3->rearrange(fdt, cell);
 	return next;
 }
 
@@ -881,8 +965,8 @@ sss::Scene * DemoScene2::rearrange(unsigned int dt)
 {
 	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
+	props0->rearrange(fdt, cell);
 	props1->rearrange(fdt);
-	props3->rearrange(fdt, cell);
 	return next;
 }
 
@@ -891,7 +975,6 @@ class DemoScene3 : public DemoScene
 private:
 	sss::Percipi<Props2> props2;
 	sss::Percipi<Props3> props3;
-	sss::Percipi<Props4> props4;
 public:
 	DemoScene3(NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
@@ -906,15 +989,15 @@ DemoScene3::DemoScene3(NavCell * cell) : DemoScene::DemoScene(cell)
 }
 sss::Scene * DemoScene3::rearrange(unsigned int dt)
 {
-	props3->inst1.visible = false;
-	if (props3->saggy.visible)
+	props0->inst1.visible = false;
+	if (props0->saggy[0].visible)
 	{
-		props3->inst2.visible = true;
-		props3->inst3.visible = true;
+		props0->inst2.visible = true;
+		props0->inst3.visible = true;
 	}
 	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
-	props3->rearrange(fdt, cell);
+	props0->rearrange(fdt, cell);
 	return next;
 }
 
@@ -939,7 +1022,7 @@ sss::Scene * DemoScene4::rearrange(unsigned int dt)
 {
 	sss::Scene * next = DemoScene::rearrange(dt);
 	float fdt = dt * 0.000001; // us -> s
-	props3->rearrange(fdt, cell);
+	props0->rearrange(fdt, cell);
 	return next;
 }
 
