@@ -115,7 +115,7 @@ int main(int argc, char * * argv)
 	gtk_init(& argc, & argv);
 
 	GtkWidget * window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(window), "Shadow, Solid & Screen");
+	gtk_window_set_title(GTK_WINDOW(window), sss::screenTitle);
 	gtk_window_set_default_size(GTK_WINDOW(window), sss::screenWidth, sss::screenHeight);
 
 	GtkWidget * area = gtk_gl_area_new();

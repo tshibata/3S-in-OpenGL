@@ -1,7 +1,7 @@
 PROJNAME = sample
 OBJS = sample.o Task.o Navigation.o ShadowRenderer.o SolidRenderer.o LucidRenderer.o Solid2DRenderer.o BackgroundRenderer.o
 DATA = Floor.u-c.bin Star.u-c.bin Cuboid243.u-c.bin Cuboid465.u-c.bin Cuboid8E9.u-c.bin \
-Cuboid243.png Cuboid465.png Cuboid8E9.png Floor.png Landscape.png LucidStar.png num8x8.png Harts.png SolidStar.png Inst1.png Inst2.png Inst3.png GameOver.png
+Cuboid243.png Cuboid465.png Cuboid8E9.png Floor.png Landscape.png LucidStar.png Harts.png SolidStar.png Inst1.png Inst2.png Inst3.png GameOver.png
 
 run: $(PROJNAME).exe $(DATA)
 	./$(PROJNAME).exe

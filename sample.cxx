@@ -29,6 +29,7 @@ const int HASTY_POPULATION = 5;
 
 const int sss::screenWidth = 1024;
 const int sss::screenHeight = 512;
+const char * sss::screenTitle = "Sneak, Scout & Strike";
 
 extern sss::RenderingMode background;
 extern sss::RenderingMode solid2D;

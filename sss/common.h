@@ -3,6 +3,7 @@ namespace sss
 
 extern const int screenWidth;
 extern const int screenHeight;
+extern const char * screenTitle;
 
 bool initiate();
 bool update(unsigned int dt);

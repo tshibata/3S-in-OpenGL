@@ -76,7 +76,7 @@ int main(int argc, char * * argv)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	GLFWwindow * const window(glfwCreateWindow(sss::screenWidth, sss::screenHeight, "Shadow, Solid & Screen", NULL, NULL));
+	GLFWwindow * const window(glfwCreateWindow(sss::screenWidth, sss::screenHeight, sss::screenTitle, NULL, NULL));
 	if (window == NULL){
 		return 2;
 	}
