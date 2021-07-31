@@ -6,8 +6,7 @@
 #include <mutex>
 #include <thread>
 
-#include <platform.h>
-#include "sss/common.h"
+#include "sss/Scene.h"
 #include "Task.h"
 #include "Navigation.h"
 

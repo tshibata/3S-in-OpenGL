@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <platform.h>
 #include "Basis.h"
+#include "Scene.h"
 #include "geometry.h"
 #include "common.h"
 #include "files.h"

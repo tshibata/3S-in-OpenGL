@@ -12,6 +12,7 @@
 #include <platform.h>
 #include "sss/Basis.h"
 #include "sss/Percipi.h"
+#include "sss/Scene.h"
 #include "sss/common.h"
 #include "sss/geometry.h"
 #include "sss/renderer.h"
