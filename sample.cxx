@@ -362,36 +362,36 @@ Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap), queue(2)
 	saggy[0].direction->next->dy = 48;
 	saggy[0].direction->next->dz = -1.5;
 
-	hasty[0].cell = & cells[21];
+	hasty[0].cell = settle(12, 60);
 	hasty[0].direction->next->dx = 12;
 	hasty[0].direction->next->dy = 60;
 	hasty[0].direction->next->dz = -1;
 	hasty[0].visible = false;
 
-	hasty[1].cell = & cells[1];
+	hasty[1].cell = settle(5, 5);
 	hasty[1].direction->next->dx = 5;
 	hasty[1].direction->next->dy = 5;
 	hasty[1].direction->next->dz = -1;
 
-	hasty[2].cell = & cells[2];
+	hasty[2].cell = settle(-5, -5);
 	hasty[2].direction->next->dx = -5;
 	hasty[2].direction->next->dy = -5;
 	hasty[2].direction->next->dz = -1;
 
-	hasty[3].cell = & cells[1];
+	hasty[3].cell = settle(10, 10);
 	hasty[3].direction->next->dx = 10;
 	hasty[3].direction->next->dy = 10;
 	hasty[3].direction->next->dz = -1;
 
-	hasty[4].cell = & cells[2];
+	hasty[4].cell = settle(-10, -10);
 	hasty[4].direction->next->dx = -10;
 	hasty[4].direction->next->dy = -10;
 	hasty[4].direction->next->dz = -1;
 
-	nav[0].init(& cells[8] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+	nav[0].init(settle(4, 33), 4, 33, 1.0, 0.5);
 	nav[0].execute();
 	navCurr = 0;
-	nav[1].init(& cells[8] /* FIXME: it's not cool to have this hard-coded */, framing.direction->next->next->dx, framing.direction->next->next->dy, 1.0, 0.5);
+	nav[1].init(settle(4, 33), 4, 33, 1.0, 0.5);
 	queue.push(nav[1]);
 }
 void Props0::rearrange(float fdt, NavCell * cell)
@@ -1089,7 +1089,7 @@ NavCell cells[] =
 	{ & islandSE, & roundaboutSE, & avenueNE, & cue<DemoScene4> },
 };
 
-int expanse = sizeof(cells) / sizeof(NavCell); // FIXME rename
+int expanse = sizeof(cells) / sizeof(NavCell);
 
 
 sss::Scene * sss::arrange()

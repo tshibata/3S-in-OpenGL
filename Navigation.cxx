@@ -12,6 +12,35 @@
 
 std::unordered_map<NavPoint*, std::unordered_map<NavPoint*, int>> clockwise;
 
+NavCell * settle(float x, float y)
+{
+	for (int i = 0; i < expanse; i++)
+	{
+		NavCell * cell = & cells[i];
+		for (int j = 0;; j++)
+		{
+			if (2 < j)
+			{
+				return cell;
+			}
+			int k = (j + 1) % 3;
+			float x1 = cell->points[j]->x + cell->points[j]->dx;
+			float y1 = cell->points[j]->y + cell->points[j]->dy;
+			float x2 = cell->points[k]->x + cell->points[k]->dx;
+			float y2 = cell->points[k]->y + cell->points[k]->dy;
+			float a = y1 - y2;
+			float b = x2 - x1;
+			float c = x1 * y2 - x2 * y1;
+			float d = distance(a, b, c, x, y);
+			if (0.0 < d)
+			{
+				break;
+			}
+		}
+	}
+	return nullptr;
+}
+
 NavCell * inbound(NavPoint* p1, NavPoint* p2)
 {
 	if (clockwise.find(p1) == clockwise.end())

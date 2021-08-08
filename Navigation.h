@@ -29,6 +29,8 @@ extern int expanse;
 
 extern std::unordered_map<NavPoint*, std::unordered_map<NavPoint*, int>> clockwise;
 
+NavCell * settle(float x, float y);
+
 NavCell * inbound(NavPoint* p1, NavPoint* p2);
 
 float distance(float a, float b, float c, float x, float y);
