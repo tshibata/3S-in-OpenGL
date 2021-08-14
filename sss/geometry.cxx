@@ -101,7 +101,7 @@ void move(float * mat, float x, float y, float z)
 	prod(mat, mat1);
 }
 
-void expand(float * mat, float sx, float sy, float sz)
+void size(float * mat, float sx, float sy, float sz)
 {
 	float mat1[16] = {
 		sx, 0.0f, 0.0f, 0.0f,

@@ -67,7 +67,7 @@ static sss::SurficialFigure hartFigures[] = {
 };
 static sss::SurficialFigure gameOverFigure = sss::SurficialFigure(& gameOverTexture, 128, 32, 128, 32, 128, 32);
 
-class Background : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
+class Background : public sss::FinitePresence<sss::Size<sss::Move<sss::Stop>>>
 {
 public:
 	Background();
@@ -238,7 +238,7 @@ sss::Figure * Cuboid8E9::getFigure()
 	return & cuboid8E9Figure;
 }
 
-class Hart : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
+class Hart : public sss::FinitePresence<sss::Size<sss::Move<sss::Stop>>>
 {
 public:
 	bool live = true;
@@ -253,7 +253,7 @@ sss::Figure * Hart::getFigure()
 	return & hartFigures[live ? 0 : 1];
 }
 
-class GameOver : public sss::FinitePresence<sss::Expand<sss::Move<sss::Stop>>>
+class GameOver : public sss::FinitePresence<sss::Size<sss::Move<sss::Stop>>>
 {
 public:
 	GameOver();
@@ -267,7 +267,7 @@ sss::Figure * GameOver::getFigure()
 	return & gameOverFigure;
 }
 
-class Inst : public sss::FinitePresence<sss::Expand<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>>>
+class Inst : public sss::FinitePresence<sss::Size<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>>>
 {
 private:
 	sss::Figure * figure;

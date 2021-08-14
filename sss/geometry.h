@@ -7,7 +7,7 @@ void rotX(float * mat, float a);
 void rotY(float * mat, float a);
 void rotZ(float * mat, float a);
 void move(float * mat, float x, float y, float z);
-void expand(float * mat, float sx, float sy, float sz);
+void size(float * mat, float sx, float sy, float sz);
 void para(float * mat, float width, float height, float near, float far);
 void pers(float * mat, float width, float height, float near, float far);
 
@@ -123,24 +123,24 @@ public:
 	}
 };
 
-template <typename T> class Expand : public Direction
+template <typename T> class Size : public Direction
 {
-friend Basis<Expand>;
+friend Basis<Size>;
 public:
 	Basis<T> const next;
 	float scale, sx, sy, sz;
-	Expand() : next(new T()), scale(1), sx(1), sy(1), sz(1)
+	Size() : next(new T()), scale(1), sx(1), sy(1), sz(1)
 	{
 	}
 	virtual void getMatrix(float * matrix)
 	{
-		expand(matrix, scale * sx, scale * sy, scale * sz);
+		size(matrix, scale * sx, scale * sy, scale * sz);
 		next->getMatrix(matrix);
 	}
 	virtual void getInvertedMatrix(float * matrix)
 	{
 		next->getInvertedMatrix(matrix);
-		expand(matrix, 1 / (scale * sx), 1 / (scale * sy), 1 / (scale * sz));
+		size(matrix, 1 / (scale * sx), 1 / (scale * sy), 1 / (scale * sz));
 	}
 };
 
