@@ -6,6 +6,9 @@
 
 #include "Task.h"
 
+namespace sssx
+{
+
 Task Task::closing;
 
 void Task::execute()
@@ -71,3 +74,4 @@ void TaskQueue::execute()
 	}
 }
 
+}

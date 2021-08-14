@@ -16,8 +16,8 @@
 #include "sss/common.h"
 #include "sss/geometry.h"
 #include "sss/renderer.h"
-#include "Task.h"
-#include "Navigation.h"
+#include "sssx/Task.h"
+#include "sssx/Navigation.h"
 #include "BackgroundRenderer.h"
 #include "ShadowRenderer.h"
 #include "SolidRenderer.h"
@@ -84,7 +84,7 @@ sss::Figure * Background::getFigure()
 class Missile : public sss::FinitePresence<sss::RotY<sss::RotZ<sss::Move<sss::Stop>>>>
 {
 public:
-	NavCell * cell;
+	sssx::NavCell * cell;
 	Missile();
 	virtual sss::Figure * getFigure();
 };
@@ -141,7 +141,7 @@ Saggy::Saggy()
 class Hasty : public Foe
 {
 public:
-	NavCell * cell;
+	sssx::NavCell * cell;
 };
 
 class Star : public sss::FinitePresence<sss::RotZ<sss::Move<sss::Stop>>>
@@ -300,7 +300,7 @@ class Props0
 {
 public:
 	Props0();
-	void rearrange(float dt, NavCell * cell);
+	void rearrange(float dt, sssx::NavCell * cell);
 	Cuboid8E9 cuboid1;
 	Hart harts[HART_CAPACITY];
 	GameOver gameOver;
@@ -316,8 +316,8 @@ public:
 	Inst inst2;
 	Inst inst3;
 
-	TaskQueue queue;
-	Navigation nav[2];
+	sssx::TaskQueue queue;
+	sssx::Navigation nav[2];
 	int navCurr;
 	Saggy saggy[1];
 	Hasty hasty[HASTY_POPULATION];
@@ -362,39 +362,39 @@ Props0::Props0() : shadowRenderer(shadowMap), solidRenderer(shadowMap), queue(2)
 	saggy[0].direction->next->dy = 48;
 	saggy[0].direction->next->dz = -1.5;
 
-	hasty[0].cell = settle(12, 60);
+	hasty[0].cell = sssx::settle(12, 60);
 	hasty[0].direction->next->dx = 12;
 	hasty[0].direction->next->dy = 60;
 	hasty[0].direction->next->dz = -1;
 	hasty[0].visible = false;
 
-	hasty[1].cell = settle(5, 5);
+	hasty[1].cell = sssx::settle(5, 5);
 	hasty[1].direction->next->dx = 5;
 	hasty[1].direction->next->dy = 5;
 	hasty[1].direction->next->dz = -1;
 
-	hasty[2].cell = settle(-5, -5);
+	hasty[2].cell = sssx::settle(-5, -5);
 	hasty[2].direction->next->dx = -5;
 	hasty[2].direction->next->dy = -5;
 	hasty[2].direction->next->dz = -1;
 
-	hasty[3].cell = settle(10, 10);
+	hasty[3].cell = sssx::settle(10, 10);
 	hasty[3].direction->next->dx = 10;
 	hasty[3].direction->next->dy = 10;
 	hasty[3].direction->next->dz = -1;
 
-	hasty[4].cell = settle(-10, -10);
+	hasty[4].cell = sssx::settle(-10, -10);
 	hasty[4].direction->next->dx = -10;
 	hasty[4].direction->next->dy = -10;
 	hasty[4].direction->next->dz = -1;
 
-	nav[0].init(settle(4, 33), 4, 33, 1.0, 0.5);
+	nav[0].init(sssx::settle(4, 33), 4, 33, 1.0, 0.5);
 	nav[0].execute();
 	navCurr = 0;
-	nav[1].init(settle(4, 33), 4, 33, 1.0, 0.5);
+	nav[1].init(sssx::settle(4, 33), 4, 33, 1.0, 0.5);
 	queue.push(nav[1]);
 }
-void Props0::rearrange(float fdt, NavCell * cell)
+void Props0::rearrange(float fdt, sssx::NavCell * cell)
 {
 	int navNext = (navCurr + 1) % 2;
 	if (nav[navNext].done)
@@ -431,8 +431,8 @@ void Props0::rearrange(float fdt, NavCell * cell)
 	{
 		if (hasty[i].visible)
 		{
-			NavPoint end{framing.direction->next->next->dx, framing.direction->next->next->dy, 0, 0};
-			NavPoint * dst;
+			sssx::NavPoint end{framing.direction->next->next->dx, framing.direction->next->next->dy, 0, 0};
+			sssx::NavPoint * dst;
 			if (traversable(hasty[i].cell, hasty[i].direction->next->dx, hasty[i].direction->next->dy, end.x, end.y, 1.0))
 			{
 				// go direct if possible
@@ -441,7 +441,7 @@ void Props0::rearrange(float fdt, NavCell * cell)
 			else
 			{
 				dst = firstCorner(nav[navCurr].d, hasty[i].cell, hasty[i].direction->next->dx, hasty[i].direction->next->dy, 1.0, 0.5);
-				NavPoint * next = nav[navCurr].r[dst];
+				sssx::NavPoint * next = nav[navCurr].r[dst];
 				if (next != nullptr && traversable(hasty[i].cell, hasty[i].direction->next->dx, hasty[i].direction->next->dy, next->x + 1.5 * next->dx, next->y + 1.5 * next->dy, 1.0))
 				{
 					dst = next;
@@ -571,7 +571,7 @@ Props2::Props2()
 {
 	if (! props0->hasty[1].visible)
 	{
-		props0->hasty[1].cell = & cells[1];
+		props0->hasty[1].cell = & sssx::cells[1];
 		props0->hasty[1].direction->next->dx = -5;
 		props0->hasty[1].direction->next->dy = -5;
 		props0->hasty[1].direction->next->dz = -1;
@@ -579,7 +579,7 @@ Props2::Props2()
 	}
 	if (! props0->hasty[2].visible)
 	{
-		props0->hasty[2].cell = & cells[2];
+		props0->hasty[2].cell = & sssx::cells[2];
 		props0->hasty[2].direction->next->dx = 5;
 		props0->hasty[2].direction->next->dy = 5;
 		props0->hasty[2].direction->next->dz = -1;
@@ -587,7 +587,7 @@ Props2::Props2()
 	}
 	if (! props0->hasty[3].visible)
 	{
-		props0->hasty[3].cell = & cells[1];
+		props0->hasty[3].cell = & sssx::cells[1];
 		props0->hasty[3].direction->next->dx = -10;
 		props0->hasty[3].direction->next->dy = -10;
 		props0->hasty[3].direction->next->dz = -1;
@@ -595,7 +595,7 @@ Props2::Props2()
 	}
 	if (! props0->hasty[4].visible)
 	{
-		props0->hasty[4].cell = & cells[2];
+		props0->hasty[4].cell = & sssx::cells[2];
 		props0->hasty[4].direction->next->dx = 10;
 		props0->hasty[4].direction->next->dy = 10;
 		props0->hasty[4].direction->next->dz = -1;
@@ -721,7 +721,7 @@ Props4::Props4()
 {
 	if (! props0->hasty[0].visible)
 	{
-		props0->hasty[0].cell = & cells[21];
+		props0->hasty[0].cell = & sssx::cells[21];
 		props0->hasty[0].direction->next->dx = 12;
 		props0->hasty[0].direction->next->dy = 60;
 		props0->hasty[0].direction->next->dz = -1;
@@ -785,14 +785,14 @@ private:
 	Background sky2;
 protected:
 	sss::Percipi<Props0> props0;
-	NavCell * cell;
+	sssx::NavCell * cell;
 	sss::ParallelProjection<sss::RotX<sss::RotZ<sss::Move<sss::Stop>>>> lighting;
 public:
-	DemoScene(NavCell * cell);
+	DemoScene(sssx::NavCell * cell);
 	void render();
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene::DemoScene(NavCell * cell) : cell(cell), lighting(80, 40, 20, 60)
+DemoScene::DemoScene(sssx::NavCell * cell) : cell(cell), lighting(80, 40, 20, 60)
 {
 	prevX = sss::controllers[0].x;
 	prevY = sss::controllers[0].y;
@@ -830,7 +830,7 @@ sss::Scene * DemoScene::rearrange(unsigned int dt)
 {
 	float x = sss::controllers[0].x;
 	float y = sss::controllers[0].y;
-	NavCell * next = cell;
+	sssx::NavCell * next = cell;
 
 	float fdt = dt * 0.000001; // us -> s
 
@@ -925,10 +925,10 @@ private:
 	sss::Percipi<Props2> props2;
 	sss::Percipi<Props3> props3;
 public:
-	DemoScene1(NavCell * cell);
+	DemoScene1(sssx::NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene1::DemoScene1(NavCell * cell) : DemoScene::DemoScene(cell)
+DemoScene1::DemoScene1(sssx::NavCell * cell) : DemoScene::DemoScene(cell)
 {
 	lighting.direction->angle = M_PI / 3;
 	lighting.direction->next->angle = M_PI / 4;
@@ -952,10 +952,10 @@ private:
 	sss::Percipi<Props2> props2;
 	sss::Percipi<Props3> props3;
 public:
-	DemoScene2(NavCell * cell);
+	DemoScene2(sssx::NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene2::DemoScene2(NavCell * cell) : DemoScene::DemoScene(cell)
+DemoScene2::DemoScene2(sssx::NavCell * cell) : DemoScene::DemoScene(cell)
 {
 	lighting.direction->angle = M_PI / 3;
 	lighting.direction->next->angle = M_PI / 4;
@@ -978,10 +978,10 @@ private:
 	sss::Percipi<Props2> props2;
 	sss::Percipi<Props3> props3;
 public:
-	DemoScene3(NavCell * cell);
+	DemoScene3(sssx::NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene3::DemoScene3(NavCell * cell) : DemoScene::DemoScene(cell)
+DemoScene3::DemoScene3(sssx::NavCell * cell) : DemoScene::DemoScene(cell)
 {
 	lighting.direction->angle = M_PI / 3;
 	lighting.direction->next->angle = M_PI / 4;
@@ -1009,10 +1009,10 @@ private:
 	sss::Percipi<Props3> props3;
 	sss::Percipi<Props4> props4;
 public:
-	DemoScene4(NavCell * cell);
+	DemoScene4(sssx::NavCell * cell);
 	sss::Scene * rearrange(unsigned int dt);
 };
-DemoScene4::DemoScene4(NavCell * cell) : DemoScene::DemoScene(cell)
+DemoScene4::DemoScene4(sssx::NavCell * cell) : DemoScene::DemoScene(cell)
 {
 	lighting.direction->angle = M_PI / 3;
 	lighting.direction->next->angle = M_PI / 4;
@@ -1028,39 +1028,39 @@ sss::Scene * DemoScene4::rearrange(unsigned int dt)
 	return next;
 }
 
-NavPoint roundaboutNE = { 25, 65, -1, -1 };
-NavPoint roundaboutNW = { -5, 65, +1, -1 };
-NavPoint roundaboutSE = { 25, 45, -1, +1 };
-NavPoint roundaboutSW = { -5, 45, +1, +1 };
+sssx::NavPoint roundaboutNE = { 25, 65, -1, -1 };
+sssx::NavPoint roundaboutNW = { -5, 65, +1, -1 };
+sssx::NavPoint roundaboutSE = { 25, 45, -1, +1 };
+sssx::NavPoint roundaboutSW = { -5, 45, +1, +1 };
 
-NavPoint islandNE = { 17, 57, +1, +1 };
-NavPoint islandNW = { 3, 57, -1, +1 };
-NavPoint islandSE = { 17, 49, +1, -1 };
-NavPoint islandSW = { 3, 49, -1, -1 };
+sssx::NavPoint islandNE = { 17, 57, +1, +1 };
+sssx::NavPoint islandNW = { 3, 57, -1, +1 };
+sssx::NavPoint islandSE = { 17, 49, +1, -1 };
+sssx::NavPoint islandSW = { 3, 49, -1, -1 };
 
-NavPoint avenueNE = { 13, 45, -1, +1 };
-NavPoint avenueNW = { 7, 45, +1, +1 };
-NavPoint avenueSE = { 13, 39, -1, 0 };
-NavPoint avenueSW = { 7, 39, +1, 0 };
+sssx::NavPoint avenueNE = { 13, 45, -1, +1 };
+sssx::NavPoint avenueNW = { 7, 45, +1, +1 };
+sssx::NavPoint avenueSE = { 13, 39, -1, 0 };
+sssx::NavPoint avenueSW = { 7, 39, +1, 0 };
 
-NavPoint cornerSE = { 13, 29, -1, +1 };
-NavPoint cornerNW = { 7, 37, +1, -1 };
+sssx::NavPoint cornerSE = { 13, 29, -1, +1 };
+sssx::NavPoint cornerNW = { 7, 37, +1, -1 };
 
-NavPoint gatanNE = { 5, 37, 0, -1 };
-NavPoint gatanSE = { 5, 29, 0, +1 };
-NavPoint gatanSW = { -15, 29, -1, +1 };
+sssx::NavPoint gatanNE = { 5, 37, 0, -1 };
+sssx::NavPoint gatanSE = { 5, 29, 0, +1 };
+sssx::NavPoint gatanSW = { -15, 29, -1, +1 };
 
-NavPoint platzNE = { -15, 37, -1, -1 };
-NavPoint platzNW = { -33, 37, +1, -1 };
-NavPoint platzSE = { -15, 3, +1, +1 };
-NavPoint platzSW = { -33, 3, +1, +1 };
+sssx::NavPoint platzNE = { -15, 37, -1, -1 };
+sssx::NavPoint platzNW = { -33, 37, +1, -1 };
+sssx::NavPoint platzSE = { -15, 3, +1, +1 };
+sssx::NavPoint platzSW = { -33, 3, +1, +1 };
 
-NavPoint stortorgetNE = { 15, 15, -1, -1 };
-NavPoint stortorgetNW = { -15, 15, -1, -1 };
-NavPoint stortorgetSE = { 15, -15, -1, +1 };
-NavPoint stortorgetSW = { -15, -15, +1, +1 };
+sssx::NavPoint stortorgetNE = { 15, 15, -1, -1 };
+sssx::NavPoint stortorgetNW = { -15, 15, -1, -1 };
+sssx::NavPoint stortorgetSE = { 15, -15, -1, +1 };
+sssx::NavPoint stortorgetSW = { -15, -15, +1, +1 };
 
-NavCell cells[] =
+sssx::NavCell sssx::cells[] =
 {
 	{ & platzSE, & stortorgetNW, & stortorgetSE, & cue<DemoScene1> },
 	{ & stortorgetSW, & platzSE, & stortorgetSE, & cue<DemoScene1> },
@@ -1089,31 +1089,31 @@ NavCell cells[] =
 	{ & islandSE, & roundaboutSE, & avenueNE, & cue<DemoScene4> },
 };
 
-int expanse = sizeof(cells) / sizeof(NavCell);
+int sssx::expanse = sizeof(sssx::cells) / sizeof(sssx::NavCell);
 
 
 sss::Scene * sss::arrange()
 {
 	// check if the cells are clockwise.
-	for (int i = 0; i < expanse; i++)
+	for (int i = 0; i < sssx::expanse; i++)
 	{
-		float a1 = cells[i].points[0]->y - cells[i].points[1]->y;
-		float b1 = cells[i].points[1]->x - cells[i].points[0]->x;
+		float a1 = sssx::cells[i].points[0]->y - sssx::cells[i].points[1]->y;
+		float b1 = sssx::cells[i].points[1]->x - sssx::cells[i].points[0]->x;
 
-		float dx2 = cells[i].points[2]->x - cells[i].points[1]->x;
-		float dy2 = cells[i].points[2]->y - cells[i].points[1]->y;
+		float dx2 = sssx::cells[i].points[2]->x - sssx::cells[i].points[1]->x;
+		float dy2 = sssx::cells[i].points[2]->y - sssx::cells[i].points[1]->y;
 
 		if  (0 < a1 * dx2 + b1 * dy2)
 		{
 			std::printf("Not clockwise: ");
-			std::printf("(%f, %f) -> ", cells[i].points[0]->x, cells[i].points[0]->y);
-			std::printf("(%f, %f) -> ", cells[i].points[1]->x, cells[i].points[1]->y);
-			std::printf("(%f, %f)\n", cells[i].points[2]->x, cells[i].points[2]->y);
+			std::printf("(%f, %f) -> ", sssx::cells[i].points[0]->x, sssx::cells[i].points[0]->y);
+			std::printf("(%f, %f) -> ", sssx::cells[i].points[1]->x, sssx::cells[i].points[1]->y);
+			std::printf("(%f, %f)\n", sssx::cells[i].points[2]->x, sssx::cells[i].points[2]->y);
 		}
 
-		clockwise[cells[i].points[0]][cells[i].points[1]] = i;
-		clockwise[cells[i].points[1]][cells[i].points[2]] = i;
-		clockwise[cells[i].points[2]][cells[i].points[0]] = i;
+		sssx::clockwise[sssx::cells[i].points[0]][sssx::cells[i].points[1]] = i;
+		sssx::clockwise[sssx::cells[i].points[1]][sssx::cells[i].points[2]] = i;
+		sssx::clockwise[sssx::cells[i].points[2]][sssx::cells[i].points[0]] = i;
 	}
 
 	framing.direction->angle = M_PI / 2;
@@ -1122,7 +1122,7 @@ sss::Scene * sss::arrange()
 	framing.direction->next->next->dy = 33;
 	framing.direction->next->next->dz = -1.5;
 
-	return (* cells[8].depiction)(& cells[8]);
+	return (* sssx::cells[8].depiction)(& sssx::cells[8]);
 }
 
 void sss::buttonPressed(int pos)

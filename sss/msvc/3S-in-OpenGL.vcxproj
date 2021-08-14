@@ -153,12 +153,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\BackgroundRenderer.cxx" />
     <ClCompile Include="..\..\LucidRenderer.cxx" />
-    <ClCompile Include="..\..\Navigation.cxx" />
     <ClCompile Include="..\..\sample.cxx" />
     <ClCompile Include="..\..\ShadowRenderer.cxx" />
     <ClCompile Include="..\..\Solid2DRenderer.cxx" />
     <ClCompile Include="..\..\SolidRenderer.cxx" />
-    <ClCompile Include="..\..\Task.cxx" />
+    <ClCompile Include="..\..\sssx\Navigation.cxx" />
+    <ClCompile Include="..\..\sssx\Task.cxx" />
     <ClCompile Include="..\common.cxx" />
     <ClCompile Include="..\files.cxx" />
     <ClCompile Include="..\geometry.cxx" />

@@ -1,4 +1,7 @@
 
+namespace sssx
+{
+
 class Task
 {
 public:
@@ -28,4 +31,6 @@ public:
 	~TaskQueue();
 	void push(Task & task);
 };
+
+}
 

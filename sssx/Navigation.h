@@ -2,6 +2,9 @@
 #include <set>
 #include <map>
 
+namespace sssx
+{
+
 class NavPoint
 {
 public:
@@ -63,3 +66,4 @@ public:
 	virtual void execute();
 };
 
+}

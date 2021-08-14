@@ -6,9 +6,12 @@
 #include <mutex>
 #include <thread>
 
-#include "sss/Scene.h"
+#include "../sss/Scene.h"
 #include "Task.h"
 #include "Navigation.h"
+
+namespace sssx
+{
 
 std::unordered_map<NavPoint*, std::unordered_map<NavPoint*, int>> clockwise;
 
@@ -478,3 +481,4 @@ void Navigation::execute()
 	done = true;
 }
 
+}

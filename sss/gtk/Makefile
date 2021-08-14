@@ -22,6 +22,9 @@ files.o: ../files.cxx
 %.o : ../../%.cxx
 	${CXX} -c -o $@ $< ${CXXFLAGS}
 
+%.o : ../../sssx/%.cxx
+	${CXX} -c -o $@ $< ${CXXFLAGS}
+
 clean:
 	rm -f $(PROJNAME).exe *.o *.u-c.bin *.u-c.txt *.png
 
