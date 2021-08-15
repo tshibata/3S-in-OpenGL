@@ -27,9 +27,6 @@
     <ClCompile Include="..\geometry.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\BackgroundRenderer.cxx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\LucidRenderer.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -49,6 +46,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sssx\Task.cxx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BackdropRenderer.cxx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

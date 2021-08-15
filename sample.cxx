@@ -18,7 +18,7 @@
 #include "sss/renderer.h"
 #include "sssx/Task.h"
 #include "sssx/Navigation.h"
-#include "BackgroundRenderer.h"
+#include "BackdropRenderer.h"
 #include "ShadowRenderer.h"
 #include "SolidRenderer.h"
 #include "LucidRenderer.h"
@@ -32,13 +32,13 @@ const int sss::screenWidth = 1024;
 const int sss::screenHeight = 512;
 const char * sss::screenTitle = "Sneak, Scout & Strike";
 
-extern sss::RenderingMode background;
+extern sss::RenderingMode backdrop;
 extern sss::RenderingMode solid2D;
 extern sss::RenderingMode solid3D;
 extern sss::RenderingMode lucid3D;
 
 static sss::Texture shadowMap(1024, 512);
-static sss::Texture backgroundTexture("Landscape.png");
+static sss::Texture backdropTexture("Landscape.png");
 static sss::Texture floorTexture("Floor.png");
 static sss::Texture cuboid243Texture("Cuboid243.png");
 static sss::Texture cuboid465Texture("Cuboid465.png");
@@ -51,7 +51,7 @@ static sss::Texture inst2Texture("Inst2.png");
 static sss::Texture inst3Texture("Inst3.png");
 static sss::Texture gameOverTexture("GameOver.png");
 
-static sss::SurficialFigure backgroundFigure = sss::SurficialFigure(& backgroundTexture, 512, 64, 512, 64, 512, 64);
+static sss::SurficialFigure backdropFigure = sss::SurficialFigure(& backdropTexture, 512, 64, 512, 64, 512, 64);
 static sss::SpacialFigure cuboid243Figure(& cuboid243Texture, "Cuboid243.u-c.bin");
 static sss::SpacialFigure cuboid465Figure(& cuboid465Texture, "Cuboid465.u-c.bin");
 static sss::SpacialFigure cuboid8E9Figure(& cuboid8E9Texture, "Cuboid8E9.u-c.bin");
@@ -67,18 +67,18 @@ static sss::SurficialFigure hartFigures[] = {
 };
 static sss::SurficialFigure gameOverFigure = sss::SurficialFigure(& gameOverTexture, 128, 32, 128, 32, 128, 32);
 
-class Background : public sss::FinitePresence<sss::Size<sss::Move<sss::Stop>>>
+class Backdrop : public sss::FinitePresence<sss::Size<sss::Move<sss::Stop>>>
 {
 public:
-	Background();
+	Backdrop();
 	virtual sss::Figure * getFigure();
 };
-Background::Background() : FinitePresence::FinitePresence(background)
+Backdrop::Backdrop() : FinitePresence::FinitePresence(backdrop)
 {
 }
-sss::Figure * Background::getFigure()
+sss::Figure * Backdrop::getFigure()
 {
-	return & backgroundFigure;
+	return & backdropFigure;
 }
 
 class Missile : public sss::FinitePresence<sss::RotY<sss::RotZ<sss::Move<sss::Stop>>>>
@@ -306,7 +306,7 @@ public:
 	GameOver gameOver;
 	Missile missiles[MISSILE_CAPACITY];
 	int missileIndex = 0;
-	BackgroundRenderer backgroundRenderer;
+	BackdropRenderer backdropRenderer;
 	ShadowRenderer shadowRenderer;
 	SolidRenderer solidRenderer;
 	LucidRenderer lucidRenderer;
@@ -781,8 +781,8 @@ Props4::Props4()
 class DemoScene : public sss::Scene
 {
 private:
-	Background sky1;
-	Background sky2;
+	Backdrop backdrop1;
+	Backdrop backdrop2;
 protected:
 	sss::Percipi<Props0> props0;
 	sssx::NavCell * cell;
@@ -801,12 +801,12 @@ void DemoScene::render()
 {
 	float sect = M_PI / (atan((framing.width / 2) / framing.far));
 	float turn = - framing.direction->next->angle / (M_PI * 2);
-	sky1.direction->scale = sss::screenWidth * sect / sky1.getFigure()->texture->width;
-	sky1.direction->next->dx = (turn - floor(turn) - 1) * (2 * sect);
-	sky2.direction->scale = sss::screenWidth * sect / sky2.getFigure()->texture->width;
-	sky2.direction->next->dx = (turn - floor(turn)) * (2 * sect);
+	backdrop1.direction->scale = sss::screenWidth * sect / backdrop1.getFigure()->texture->width;
+	backdrop1.direction->next->dx = (turn - floor(turn) - 1) * (2 * sect);
+	backdrop2.direction->scale = sss::screenWidth * sect / backdrop2.getFigure()->texture->width;
+	backdrop2.direction->next->dx = (turn - floor(turn)) * (2 * sect);
 
-	props0->backgroundRenderer.process();
+	props0->backdropRenderer.process();
 
 	sss::Matrix4x4 lightingMatrix;
 	lighting.getMatrix(lightingMatrix.elements);

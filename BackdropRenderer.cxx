@@ -5,11 +5,11 @@
 #include "sss/geometry.h"
 #include "sss/common.h"
 #include "sss/renderer.h"
-#include "BackgroundRenderer.h"
+#include "BackdropRenderer.h"
 
-sss::RenderingMode background;
+sss::RenderingMode backdrop;
 
-BackgroundRenderer::BackgroundRenderer()
+BackdropRenderer::BackdropRenderer()
 {
 	const GLchar * vert =
 		R"(#version 330 core
@@ -32,21 +32,21 @@ BackgroundRenderer::BackgroundRenderer()
 
 	program = sss::initProgram(& vert, & frag);
 }
-BackgroundRenderer::~BackgroundRenderer()
+BackdropRenderer::~BackdropRenderer()
 {
 	if (program != 0)
 	{
 		glDeleteProgram(program);
 	}
 }
-void BackgroundRenderer::process()
+void BackdropRenderer::process()
 {
 	glDepthMask(GL_FALSE);
 	glUseProgram(program);
 	glDisable(GL_BLEND);
 	glBindVertexArray(sss::vao);
 
-	present(background,
+	present(backdrop,
 		sss::DirectUniform(program, "fmat"),
 		sss::UniformTexture(program, "tex"),
 		sss::VertexAttrib(program, 0, "xyz0", 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (2 * sizeof(float))),

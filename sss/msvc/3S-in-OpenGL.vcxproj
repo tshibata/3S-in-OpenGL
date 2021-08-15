@@ -151,7 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\BackgroundRenderer.cxx" />
+    <ClCompile Include="..\..\BackdropRenderer.cxx" />
     <ClCompile Include="..\..\LucidRenderer.cxx" />
     <ClCompile Include="..\..\sample.cxx" />
     <ClCompile Include="..\..\ShadowRenderer.cxx" />
