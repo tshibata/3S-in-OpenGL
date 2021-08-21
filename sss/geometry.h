@@ -22,7 +22,7 @@ class Direction
 {
 friend Basis<Direction>;
 protected:
-	unsigned int refc;
+	std::atomic<int> refc;
 public:
 	Direction();
 	virtual ~Direction();
@@ -148,7 +148,7 @@ class Projection
 {
 friend Basis<Projection>;
 protected:
-	unsigned int refc;
+	std::atomic<int> refc;
 public:
 	float width, height, near, far;
 	Projection(float width, float height, float near, float far);

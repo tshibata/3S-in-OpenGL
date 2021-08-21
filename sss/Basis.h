@@ -1,3 +1,5 @@
+#include <atomic>
+
 namespace sss
 {
 
@@ -10,25 +12,21 @@ private:
 	{
 		if (ptr != nullptr)
 		{
+			int count = ++ ptr->refc;
 #ifdef DEBUG
-			std::cout << ptr->refc << "++" << std::endl;
+			std::cout << "++ " << count << std::endl;
 #endif
-			ptr->refc++;
 		}
 	}
 	inline void cut()
 	{
 		if (ptr != nullptr)
 		{
+			int count = -- ptr->refc;
 #ifdef DEBUG
-			std::cout << ptr->refc << "--" << std::endl;
+			std::cout << "--" << count << std::endl;
 #endif
-			ptr->refc--;
-#ifdef DEBUG
-			if (ptr->refc <= 0)
-#else
-			if (ptr->refc == 0) // refc can be unsigned
-#endif
+			if (count <= 0)
 			{
 				delete ptr;
 				ptr = nullptr;

@@ -1,3 +1,5 @@
+#include <atomic>
+
 namespace sss
 {
 
@@ -7,10 +9,10 @@ template<typename T> T * & percipiInstance()
 	return instance;
 }
 
-template<typename T> int & percipiCounter()
+template<typename T> std::atomic<int> & percipiCounter()
 {
-	static int counter = 0;
-	return counter;
+	static std::atomic<int> refc(0);
+	return refc;
 }
 
 template<typename T> class Percipi
@@ -21,21 +23,21 @@ private:
 	{
 		if (ptr != nullptr)
 		{
+			int count = ++ percipiCounter<T>();
 #ifdef DEBUG
-			std::cout << percipiCounter<T>() << "++" << std::endl;
+			std::cout << "++ " << count << std::endl;
 #endif
-			percipiCounter<T>()++;
 		}
 	}
 	inline void cut()
 	{
 		if (ptr != nullptr)
 		{
+			int count = -- percipiCounter<T>();
 #ifdef DEBUG
-			std::cout << percipiCounter<T>() << "--" << std::endl;
+			std::cout << "--" << count << std::endl;
 #endif
-			percipiCounter<T>()--;
-			if (percipiCounter<T>() <= 0)
+			if (count <= 0)
 			{
 				delete ptr;
 				ptr = nullptr;

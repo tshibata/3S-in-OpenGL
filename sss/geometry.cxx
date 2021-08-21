@@ -171,7 +171,7 @@ void Stop::getInvertedMatrix(float * matrix)
 }
 
 
-Direction::Direction()
+Direction::Direction() : refc(0)
 {
 }
 Direction::~Direction()
@@ -179,7 +179,7 @@ Direction::~Direction()
 }
 
 
-Projection::Projection(float width, float height, float near, float far) : width(width), height(height), near(near), far(far)
+Projection::Projection(float width, float height, float near, float far) : refc(0), width(width), height(height), near(near), far(far)
 {
 }
 
