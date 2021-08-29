@@ -289,14 +289,14 @@ AbstractPresence::AbstractPresence() : mode(nullptr), prev(this), next(this)
 
 AbstractPresence::AbstractPresence(RenderingMode & mode) : prev(mode.sentinel.prev), next(& mode.sentinel), mode(& mode)
 {
-	// FIXME make this thread safe
+	std::lock_guard<std::mutex> lock(this->mode->mutex);
 	next->prev = this;
 	prev->next = this;
 }
 
 AbstractPresence::~AbstractPresence()
 {
-	// FIXME make this thread safe
+	std::lock_guard<std::mutex> lock(this->mode->mutex);
 	next->prev = prev;
 	prev->next = next;
 }

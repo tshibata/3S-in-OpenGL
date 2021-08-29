@@ -1,3 +1,5 @@
+#include <mutex>
+
 namespace sss
 {
 
@@ -252,6 +254,7 @@ friend AbstractPresence;
 private:
 	AbstractPresence sentinel;
 public:
+	std::mutex mutex;
 	RenderingMode();
 	AbstractPresence * getFirst();
 };
